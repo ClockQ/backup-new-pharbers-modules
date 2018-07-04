@@ -24,7 +24,6 @@
         <module>unitTest</module>
         <module>gatling</module>
         <module>client-pattern</module>
-        <!--<module>api-modules</module>-->
     </modules>
 
 </project>
