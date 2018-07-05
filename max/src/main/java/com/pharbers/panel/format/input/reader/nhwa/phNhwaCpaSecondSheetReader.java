@@ -1,9 +1,9 @@
 package com.pharbers.panel.format.input.reader.nhwa;
 
+import com.pharbers.excel.format.input.writable.common.phXlsxCommonWritable;
 import org.apache.hadoop.io.NullWritable;
 import com.pharbers.excel.format.input.writable.phExcelWritable;
 import com.pharbers.excel.format.input.reader.common.PhExcelXLSXCommonReader;
-import com.pharbers.panel.format.input.writable.nhwa.phNhwaCpaSecondSheetWritable;
 
 import java.io.IOException;
 
@@ -16,7 +16,7 @@ public class phNhwaCpaSecondSheetReader extends PhExcelXLSXCommonReader<NullWrit
 
     @Override
     public phExcelWritable getCurrentValue() throws IOException, InterruptedException {
-        phNhwaCpaSecondSheetWritable reVal = new phNhwaCpaSecondSheetWritable();
+        phXlsxCommonWritable reVal = new phXlsxCommonWritable();
         String s = reVal.richWithInputRow(parser.currentIndex(), value);
         reVal.setValues(s);
         return reVal;

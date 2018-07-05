@@ -17,22 +17,22 @@ class resultCheckAction(override val defaultArgs: pActionArgs) extends pActionTr
     override def perform(prMap: pActionArgs): pActionArgs = {
         val maxResult = prMap.asInstanceOf[MapArgs].get("max_result").asInstanceOf[StringArgs].get
         val maxDF = phSparkDriver().csv2RDD(max_path_obj.p_maxPath + maxResult, delimiter)
-        val date: String = maxDF.select("Date").distinct().collect().head.getString(0).toString
+        val date: String = maxDF.select("Date").distinct().collect().head.getInt(0).toString
         val offlineDF = prMap.asInstanceOf[MapArgs].get("offline_result")
                 .asInstanceOf[DFArgs].get
-                .filter(s"Date == '$date'")
-                .withColumnRenamed("类别", "scope")
-                .withColumnRenamed("医院个数", "offlineHospNum")
-                .withColumnRenamed("产品个数", "offlineProductNum")
-                .withColumnRenamed("f_units", "offlineUnits")
-                .withColumnRenamed("f_sales", "offlineSales")
-        val market: String = offlineDF.select("market").distinct().collect().head.getString(0).toString
+                .filter(s"YM == '$date'")
+                .withColumnRenamed("CATEGORY", "scope")
+                .withColumnRenamed("HOSPITAL_COUNT", "offlineHospNum")
+                .withColumnRenamed("PRODUCT_COUNT", "offlineProductNum")
+                .withColumnRenamed("f_units(offline)", "offlineUnits")
+                .withColumnRenamed("f_sales(offline)", "offlineSales")
+        val market: String = offlineDF.select("MKT").distinct().collect().head.getString(0).toString
         //保存max结果
         maxDF.coalesce(1).write
                 .format("csv")
                 .option("header", value = true)
                 .option("delimiter", 31.toChar.toString)
-                .save(s"/mnt/config/result/$market" + "线上max正确结果new")
+                .save(s"/mnt/config/result/$market" + "线上max结果")
 
 
         //比较全国
@@ -84,7 +84,7 @@ class resultCheckAction(override val defaultArgs: pActionArgs) extends pActionTr
                     .groupBy("City")
                     .agg(expr("count(distinct Panel_ID)") as "onlineHospNum", expr("count(distinct Product)") as "onlineProductNum", expr("sum(f_sales)") as "onlineSales", expr("sum(f_units)") as "onlineUnits")
                     .withColumnRenamed("City", "area")
-            val offlineTotalResult = offlineDF.filter(" scope == 'CITYS' ")
+            val offlineTotalResult = offlineDF.filter(" scope == 'CITY' ")
             val totalResult = offlineTotalResult.join(onlineTotalResult, offlineTotalResult("ID") === onlineTotalResult("area"), "full")
             val nomalTotalResult = totalResult.na.drop()
                     .withColumn("hospBoolean", addBooleanCol(totalResult("offlineHospNum"), totalResult("onlineHospNum")))

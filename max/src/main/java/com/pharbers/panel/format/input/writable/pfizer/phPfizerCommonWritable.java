@@ -64,7 +64,7 @@ public class phPfizerCommonWritable extends phExcelWritable {
             }
 
             for (int i = 0; i < tl - rl; i++) {
-                resultLst[rl + i] = " ";
+                resultLst[rl + i] =  " ";
             }
             return mkString(resultLst, delimiter);
         }else{

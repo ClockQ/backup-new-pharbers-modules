@@ -15,9 +15,9 @@ case class startTest() extends readJsonTrait {
 
     val system = ActorSystem("unitTest")
     implicit val t: Timeout = 1200 minutes
-    val path = "/mnt/config/Pfizer线上MAX对比文件/"
-    val companyLst: List[Map[String, String]] = testData.filter(_("company") == "5afa53bded925c05c6f69c54")
-
+    val path = "/mnt/config/线下MAX对比文件/"
+//    val companyLst: List[Map[String, String]] = testData.filter(_("company") == "5afa53bded925c05c6f69c54")
+    val companyLst: List[Map[String, String]] = testData
     def doTest(): List[String] = companyLst.map{ c =>
         val args = Map(
             "company" -> c("company"),
@@ -32,10 +32,7 @@ case class startTest() extends readJsonTrait {
 
         val testHeader: ActorRef = system.actorOf(UnitTestHeader.props())
         val r = testHeader ? UnitTestHeader.testJob(args)
-//        Await.result(r.mapTo[String], t.duration)
         Await.result(r.mapTo[String], t.duration)
-        //val result = Await.result(future, timeout.duration).asInstanceOf[String]
-//        Await.result(r.mapTo[String], t.duration).asInstanceOf[MapArgs].get("result_check").asInstanceOf[DFArgs].get
     }
     
     def writeTotalResult(): StringArgs = {

@@ -31,7 +31,7 @@ class phNhwaPanelConcretJob(override val defaultArgs : pActionArgs) extends pAct
             val full_cpa = fullCPA(cpa, ym)
             val product_match = trimProductMatch(product_match_file)
             val universe = trimUniverse(universe_file, mkt)
-            val markets_product_match = product_match.join(markets_match, markets_match("通用名_原始") === product_match("通用名"))
+            val markets_product_match = product_match.join(markets_match, markets_match("MOLE_NAME") === product_match("通用名"))
             val filted_panel = full_cpa.join(universe, full_cpa("HOSPITAL_CODE") === universe("ID"))
             val panelDF = trimPanel(filted_panel, markets_product_match)
             DFArgs(panelDF)
@@ -41,12 +41,12 @@ class phNhwaPanelConcretJob(override val defaultArgs : pActionArgs) extends pAct
             val filter_month = ym.takeRight(2).toInt.toString
             val primal_cpa = cpa.filter(s"YM like '$ym'")
             val not_arrival_hosp = not_arrival_hosp_file
-                .withColumnRenamed("月份", "month")
+                .withColumnRenamed("MONTH", "month")
                 .filter(s"month like '%$filter_month%'")
-                .withColumnRenamed("医院编码", "ID")
-                .select("ID")
+                .withColumnRenamed("HOSP_ID", "ID")
+                .select( "ID")
             val not_published_hosp = not_published_hosp_file
-                .withColumnRenamed("id", "ID")
+                .withColumnRenamed("HOSP_ID", "ID")
             val miss_hosp = not_arrival_hosp.union(not_published_hosp).distinct()
             val reduced_cpa = primal_cpa.join(miss_hosp, primal_cpa("HOSPITAL_CODE") === miss_hosp("ID"), "left").filter("ID is null").drop("ID")
             val full_hosp_id = full_hosp_file.filter(s"MONTH like $filter_month")
@@ -58,18 +58,15 @@ class phNhwaPanelConcretJob(override val defaultArgs : pActionArgs) extends pAct
 
         def trimProductMatch(product_match_file: DataFrame): DataFrame = {
             product_match_file
-                .withColumnRenamed("药品名称", "NAME")
-                .withColumnRenamed("商品名", "PRODUCT_NAME")
-                .withColumnRenamed("剂型", "APP2_COD")
-                .withColumnRenamed("规格", "PACK_DES")
-                .withColumnRenamed("包装数量", "PACK_NUMBER")
-                .withColumnRenamed("生产企业", "CORP_NAME")
-                .withColumnRenamed("商品名_标准", "s_PRODUCT_NAME")
-                .withColumnRenamed("药品规格_标准", "s_PACK_DES")
-                .withColumnRenamed("剂型_标准", "s_APP2_COD")
-                .withColumnRenamed("生产企业_标准", "s_CORP_NAME")
+                .withColumnRenamed("MOLE_NAME", "NAME")
+                .withColumnRenamed("DOSAGE", "APP2_COD")
+                .withColumnRenamed("PACK_COUNT", "PACK_NUMBER")
+                .withColumnRenamed("STANDARD_PRODUCT_NAME", "s_PRODUCT_NAME")
+                .withColumnRenamed("STANDARD_PACK_DES", "s_PACK_DES")
+                .withColumnRenamed("STANDARD_DOSAGE", "s_APP2_COD")
+                .withColumnRenamed("STANDARD_CORP_NAME", "s_CORP_NAME")
                 .withColumn("min2",
-                    when(col("min1_标准") =!= "", col("min1_标准"))
+                    when(col("MIN_PRODUCT_UNIT_STANDARD") =!= "", col("MIN_PRODUCT_UNIT_STANDARD"))
                             .otherwise(col("s_PRODUCT_NAME") + col("s_APP2_COD") + col("s_PACK_DES") + col("PACK_NUMBER") + col("PACK_NUMBER"))
                 )
                 .selectExpr("concat(PRODUCT_NAME,APP2_COD,PACK_DES,PACK_NUMBER,CORP_NAME) as min1", "min2", "NAME")
@@ -80,11 +77,11 @@ class phNhwaPanelConcretJob(override val defaultArgs : pActionArgs) extends pAct
 
         def trimUniverse(universe_file: DataFrame, mkt: String): DataFrame = {
             import sparkDriver.ss.implicits._
-            universe_file.withColumnRenamed("样本医院编码", "ID")
-                .withColumnRenamed("PHA医院名称", "HOSP_NAME")
-                .withColumnRenamed("PHA ID", "HOSP_ID")
-                .withColumnRenamed("市场", "DOI")
-                .withColumnRenamed("If Panel_All", "SAMPLE")
+            universe_file.withColumnRenamed("HOSP_ID", "ID")
+                .withColumnRenamed("PHA_HOSP_NAME", "HOSP_NAME")
+                .withColumnRenamed("PHA_HOSP_ID", "HOSP_ID")
+                .withColumnRenamed("MARKET", "DOI")
+                .withColumnRenamed("IF_PANEL_ALL", "SAMPLE")
                 .filter("SAMPLE like '1'")
                 .selectExpr("ID", "HOSP_NAME", "HOSP_ID", "DOI", "DOI as DOIE")
                 .filter(s"DOI like '$mkt'")

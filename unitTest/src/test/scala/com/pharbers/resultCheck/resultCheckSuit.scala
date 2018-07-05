@@ -13,14 +13,8 @@ class resultCheckSuit extends FunSuite {
         println(s"开始检查时间" + dateformat.format(new Date()))
         println()
         
-//        val lst = startTest().doTest()
-//        println(lst)
         val totalResult = startTest().writeTotalResult()
         println(totalResult.asInstanceOf[StringArgs].get)
-        
-//        val a = phSparkDriver().csv2RDD("/mnt/config/Cache/ee94268a-858b-4adc-8b97-3c96f35ebabb/universe_file/part-00000")
-//        a.show(false)
-//        println(a.count())
         
         println()
         println(s"结束检查时间" + dateformat.format(new Date()))

@@ -125,7 +125,7 @@ case class phNhwaPanelJob(args: Map[String, String])(implicit _actor: Actor) ext
                 new sequenceJob {
                     override val name: String = "read_markets_match_file_job"
                     override val actions: List[pActionTrait] =
-                        xlsxReadingAction[PhXlsxThirdSheetFormat](markets_match_file, "markets_match_file") ::
+                        xlsxReadingAction[PhExcelXLSXCommonFormat](markets_match_file, "markets_match_file") ::
                                 saveCurrenResultAction(temp_dir + "markets_match_file") ::
                                 csv2DFAction(temp_dir + "markets_match_file") :: Nil
                 } :: Nil
