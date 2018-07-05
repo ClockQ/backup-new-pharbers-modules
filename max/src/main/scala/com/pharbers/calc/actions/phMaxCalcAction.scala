@@ -80,7 +80,7 @@ class phMaxCalcAction(override val defaultArgs: pActionArgs) extends pActionTrai
                     .drop("s_sumSales", "s_sumUnits", "s_westMedicineIncome")
         }
         
-        val resultDF = {
+        val enlargedDF = {
             joinData
                     .join(segmentDF,
                         joinData("SEGMENT") === segmentDF("s_SEGMENT")
@@ -98,8 +98,11 @@ class phMaxCalcAction(override val defaultArgs: pActionArgs) extends pActionTrai
                                     .otherwise($"Factor" * $"avg_Units" * $"westMedicineIncome")
                         ).cast(DoubleType))
                     .drop("s_sumSales", "s_sumUnits", "s_westMedicineIncome")
-                    .withColumn("flag", when($"f_units" === 0 and $"f_sales" === 0, 0).otherwise(1))
-                    .filter($"flag" === 1)
+                    .withColumn("flag",
+                        when($"IS_PANEL_HOSP" === 1, 1).otherwise(
+                            when($"f_units" === 0 and $"f_sales" === 0, 0).otherwise(1)
+                        ))
+                    .filter($"flag" === 1 && $"IS_PANEL_HOSP" === 0)
                     .withColumnRenamed("PHA_ID", "Panel_ID")
                     .withColumn("Date", 'YM.cast(IntegerType))
                     .withColumnRenamed("Prefecture", "City")
@@ -107,7 +110,17 @@ class phMaxCalcAction(override val defaultArgs: pActionArgs) extends pActionTrai
                     .selectExpr("Date", "Province", "City", "Panel_ID", "Product", "Factor", "f_sales", "f_units", "MARKET")
         }
         
-        DFArgs(resultDF)
+        val backfillDF = {
+            panelDF.join(universeDF, panelDF("Hosp_ID") === universeDF("PHA_ID"))
+                    .withColumn("Date", 'YM.cast(IntegerType))
+                    .withColumnRenamed("Prefecture", "City")
+                    .withColumnRenamed("PHA_ID", "Panel_ID")
+                    .withColumnRenamed("min1", "Product")
+                    .withColumnRenamed("Sales", "f_sales")
+                    .withColumnRenamed("Units", "f_units")
+                    .selectExpr("Date", "Province", "City", "Panel_ID", "Product", "Factor", "f_sales", "f_units", "MARKET")
+        }
+        
+        DFArgs(backfillDF.union(enlargedDF))
     }
-    
 }

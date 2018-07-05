@@ -61,7 +61,7 @@ class phMaxCalcActionForDVP(override val defaultArgs: pActionArgs) extends pActi
                 .withColumnRenamed("sum(f_sales)", "f_sales")
                 .withColumnRenamed("sum(f_units)", "f_units")
                 .withColumnRenamed("Prod_Name", "Product")
-                .select("Province", "City", "Date", "Product", "coef", "Sales", "Units", "f_sales", "f_units")
+                .select("Province", "City", "Date", "Product", "coef", "Sales", "Units", "f_sales", "f_units", "MARKET")
         }
 
         DFArgs(max_result)
