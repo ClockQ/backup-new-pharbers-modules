@@ -28,10 +28,13 @@ class phMaxInfo2RedisAction(override val defaultArgs: pActionArgs) extends pActi
 
         val singleJobKey = Base64.getEncoder.encodeToString((company +"#"+ ym +"#"+ mkt).getBytes())
 
+        //TODO: md5 to Base64
         val max_sales_city_lst_key = Sercurity.md5Hash(company + ym + mkt + "max_sales_city_lst_key")
         val max_sales_prov_lst_key = Sercurity.md5Hash(company + ym + mkt + "max_sales_prov_lst_key")
+        val max_sales_prod_lst_key = singleJobKey + "_PRODUCT_SALES"
         val company_sales_city_lst_key = Sercurity.md5Hash(company + ym + mkt + "company_sales_city_lst_key")
         val company_sales_prov_lst_key = Sercurity.md5Hash(company + ym + mkt + "company_sales_prov_lst_key")
+        val company_sales_prod_lst_key = singleJobKey + "_PRODUCT_COMPANY_SALES"
 
         rd.delete(
             max_sales_city_lst_key,
@@ -50,6 +53,8 @@ class phMaxInfo2RedisAction(override val defaultArgs: pActionArgs) extends pActi
             .collect().map(x => x.toString())
         val max_sales_prov_lst = maxDF.groupBy("Province").agg(Map("f_sales" -> "sum")).sort("sum(f_sales)")
             .collect().map(x => x.toString())
+        val max_sales_prod_lst = maxDF.groupBy("Product").agg(Map("f_sales" -> "sum")).sort("sum(f_sales)")
+            .collect().map(x => x.toString())
 
         val max_company_sales = if (maxDF_filter_company.count() == 0) 0.0
                                 else maxDF_filter_company.agg(Map("f_sales" -> "sum")).take(1)(0).toString().split('[').last.split(']').head.toDouble
@@ -57,6 +62,8 @@ class phMaxInfo2RedisAction(override val defaultArgs: pActionArgs) extends pActi
         val company_sales_city_lst = maxDF_filter_company.groupBy("City").agg(Map("f_sales" -> "sum")).sort("sum(f_sales)")
             .collect().map(x => x.toString())
         val company_sales_prov_lst = maxDF_filter_company.groupBy("Province").agg(Map("f_sales" -> "sum")).sort("sum(f_sales)")
+            .collect().map(x => x.toString())
+        val company_sales_prod_lst = maxDF_filter_company.groupBy("Product").agg(Map("f_sales" -> "sum")).sort("sum(f_sales)")
             .collect().map(x => x.toString())
 
         maxDF.groupBy("Date", "Province", "City", "MARKET", "Product")
@@ -74,13 +81,17 @@ class phMaxInfo2RedisAction(override val defaultArgs: pActionArgs) extends pActi
         rd.addMap(singleJobKey, "max_company_sales", max_company_sales)
         rd.addListLeft(max_sales_city_lst_key, max_sales_city_lst:_*)
         rd.addListLeft(max_sales_prov_lst_key, max_sales_prov_lst:_*)
+        rd.addListLeft(max_sales_prod_lst_key, max_sales_prod_lst:_*)
         rd.addListLeft(company_sales_city_lst_key, company_sales_city_lst:_*)
         rd.addListLeft(company_sales_prov_lst_key, company_sales_prov_lst:_*)
+        rd.addListLeft(company_sales_prod_lst_key, company_sales_prod_lst:_*)
 
         rd.expire(max_sales_city_lst_key, 60*60*24)
         rd.expire(max_sales_prov_lst_key, 60*60*24)
+        rd.expire(max_sales_prod_lst_key, 60*60*24)
         rd.expire(company_sales_city_lst_key, 60*60*24)
         rd.expire(company_sales_prov_lst_key, 60*60*24)
+        rd.expire(company_sales_prod_lst_key, 60*60*24)
 
         StringArgs(singleJobKey)
     }

@@ -5,6 +5,8 @@ import play.api.libs.json.Json.toJson
 import play.api.libs.json.{JsNumber, JsString, JsValue}
 import com.pharbers.builder.phMarketTable.MongoDBPool._
 
+import scala.collection.mutable
+
 /**
   * Created by jeorch on 18-5-16.
   */
@@ -23,11 +25,18 @@ trait phMaxSearchTrait {
         }).toList
     }
 
+    def getLastSeveralYearYM(severalCount: Int, yearMonth: String): List[String] = {
+        val severalMonth = severalCount * 12 + yearMonth.takeRight(2).toInt
+        (yearMonth :: getLastSeveralMonthYM(severalMonth, yearMonth)).reverse
+    }
+
     def getLastYearYM(yearMonth: String): String = (yearMonth.toInt - 100).toString
 
     def getFormatSales(originValue: Double): String = f"${originValue/1.0E6}%.2f"
 
     def getFormatShare(originValue: Double): Double = f"$originValue%.4f".toDouble
+
+    def getAllCollections : mutable.Set[String] = MongoPool.queryDBInstance("data").get.getOneDBAllCollectionNames
 
     def getHistorySalesByRange(range: String, tempSingleJobKey: String) : Double = {
         val db = MongoPool.queryDBInstance("aggregation").get

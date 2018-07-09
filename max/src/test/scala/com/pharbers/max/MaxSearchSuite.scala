@@ -2,7 +2,7 @@ package com.pharbers.max
 
 import com.pharbers.builder.SearchFacade
 import com.pharbers.pactions.actionbase._
-import com.pharbers.search.{phHistorySearchJob, phMaxResultInfo, phPanelResultInfo}
+import com.pharbers.search.{phHistorySearchJob, phMaxDashboard, phMaxResultInfo, phPanelResultInfo}
 import org.scalatest.FunSuite
 import play.api.libs.json.JsValue
 import play.api.libs.json.Json.toJson
@@ -12,11 +12,11 @@ import play.api.libs.json.Json.toJson
   */
 class MaxSearchSuite extends FunSuite {
 
-    val company: String = "5b028f95ed925c2c705b85ba"
-    val user: String = "5b028feced925c2c705b85bb"
-    val jobId: String = "20180623test001"
-    val ym = "201804"
-    val mkt = "INF"
+    val company: String = "5afa53bded925c05c6f69c54"
+    val user: String = "5afaa333ed925c30f8c066d1"
+    val jobId: String = "20180709test001"
+    val ym = "201703"
+    val mkt = "麻醉市场"
 
     test("history search"){
 
@@ -100,6 +100,30 @@ class MaxSearchSuite extends FunSuite {
 
         val search = new SearchFacade
         println(search.exportData(condition)._1.get.get("export_file_name").get)
+    }
+
+    test("max dashboard"){
+        val dashboard = phMaxDashboard(company, ym)
+//        val severalYMlist = dashboard.getLastSeveralYearYM(2, ym)
+//        severalYMlist.foreach(println)
+        val currCompanySales = dashboard.getCurrMonthSales
+        val currFullYearCompanySales = dashboard.getCurrFullYearSales
+        val currCurrYearSalesAvg = dashboard.getCurrYearSalesAvg
+        val yoy = dashboard.getYearOnYear
+        val mom = dashboard.getMonthOnMonth
+        val lstMonthSales = dashboard.getListMonthSales
+        val fastestGrowingMkt = dashboard.getFastestGrowingMkt
+        val fastestGrowingProd = dashboard.getFastestGrowingProd
+        val fastestDeclineProd = dashboard.getFastestDeclineProd
+        println("currCompanySales\t" + currCompanySales)
+        println("currFullYearCompanySales\t" + currFullYearCompanySales)
+        println("currCurrYearSalesAvg\t" + currCurrYearSalesAvg)
+        println("yoy\t" + yoy)
+        println("mom\t" + mom)
+        println("lstMonthSales\t" + lstMonthSales)
+        println("fastestGrowingMkt\t" + fastestGrowingMkt)
+        println("fastestGrowingProd\t" + fastestGrowingProd)
+        println("fastestDeclineProd\t" + fastestDeclineProd)
     }
 
 }

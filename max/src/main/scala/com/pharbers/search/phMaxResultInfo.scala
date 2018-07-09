@@ -41,8 +41,14 @@ case class phMaxResultInfo(company: String, ym:String, mkt: String) extends phMa
     def getLastSeveralMonthResultSalesLst(severalCount: Int): List[Map[String, JsValue]] = {
         val tmpLst = getLastSeveralMonthYM(severalCount, ym).map(singleYM => {
             val tempSingleJobKey = Base64.getEncoder.encodeToString((company + "#" + singleYM + "#" + mkt).getBytes())
-            val tempMaxSales = getHistorySalesByRange("NATION_SALES", tempSingleJobKey)
-            val tempCompanySales = getHistorySalesByRange("NATION_COMPANY_SALES", tempSingleJobKey)
+            val tempMaxSales = rd.getMapValue(tempSingleJobKey, "max_sales") match {
+                case x => x.toDouble
+                case null => getHistorySalesByRange("NATION_SALES", tempSingleJobKey)
+            }
+            val tempCompanySales = rd.getMapValue(singleJobKey, "max_company_sales") match {
+                case x => x.toDouble
+                case null => getHistorySalesByRange("NATION_COMPANY_SALES", tempSingleJobKey)
+            }
             val tempPercentage = tempMaxSales match {
                 case 0.0 => 0.0
                 case _ => tempCompanySales / tempMaxSales
