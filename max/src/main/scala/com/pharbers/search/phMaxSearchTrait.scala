@@ -6,11 +6,14 @@ import play.api.libs.json.{JsNumber, JsString, JsValue}
 import com.pharbers.builder.phMarketTable.MongoDBPool._
 
 import scala.collection.mutable
+import scala.util.matching.Regex
 
 /**
   * Created by jeorch on 18-5-16.
   */
 trait phMaxSearchTrait {
+
+    val pattern = new Regex("[a-zA-Z0-9]")
 
     def getLastMonthYM(yearMonth: String): String = yearMonth.takeRight(2) match {
         case "01" => (yearMonth.take(4).toInt - 1) + "12"
@@ -35,6 +38,10 @@ trait phMaxSearchTrait {
     def getFormatSales(originValue: Double): String = f"${originValue/1.0E6}%.2f"
 
     def getFormatShare(originValue: Double): Double = f"$originValue%.4f".toDouble
+
+    def getFormatProdFromMin1(min1: String): String = (pattern split min1).head
+
+    def getFormatCorpFromMin1(min1: String): String = (pattern split min1).last
 
     def getAllCollections : mutable.Set[String] = MongoPool.queryDBInstance("data").get.getOneDBAllCollectionNames
 

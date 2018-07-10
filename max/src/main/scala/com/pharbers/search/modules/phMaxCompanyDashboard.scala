@@ -1,8 +1,7 @@
 package com.pharbers.search.modules
 
 import java.text.SimpleDateFormat
-import java.util
-import java.util.{Base64, Date}
+import java.util.Date
 
 import com.pharbers.driver.PhRedisDriver
 import com.pharbers.search.phMaxSearchTrait
@@ -26,6 +25,7 @@ trait phMaxCompanyDashboard extends phMaxSearchTrait with phMaxDashboardCommon {
     val dashboardYM: String = dashboardYear + dashboardMonth
 
     val lastMonthYM: String = getLastMonthYM(ym)
+    val lastSeasonYM: String = getLastSeveralMonthYM(4, ym).last
     val lastYearYM: String = getLastYearYM(ym)
 
     val rd = new PhRedisDriver()
@@ -37,26 +37,93 @@ trait phMaxCompanyDashboard extends phMaxSearchTrait with phMaxDashboardCommon {
         case s => s.foreach(allCollections.add); allCollections.toSet
     }
 
-    def getCurrMonthSales: Double = getSalesByYM(ym)
+    def getCurrMonthCompanySales: Double = getCompanySalesByYM(ym)
 
-    def getListMonthSales: List[Map[String, Any]] = (dashboardYM :: getLastSeveralMonthYM(dashboardMonth.toInt, dashboardYM)).map(x => Map("ym" -> x, "sales" -> getSalesByYM(x)))
+    def getListMonthCompanySales: List[Map[String, Any]] = (dashboardYM :: getLastSeveralMonthYM(dashboardMonth.toInt, dashboardYM)).map(x => Map("ym" -> x, "sales" -> getCompanySalesByYM(x)))
 
-    def getCurrFullYearSales: Double = getSalesByYM(dashboardYear)
+    def getCurrFullYearSales: Double = getCompanySalesByYM(dashboardYear)
 
-    def getCurrYearSalesAvg: Double = getSalesByYM(dashboardYear)/dashboardMonth.toInt
+    def getCurrYearSalesAvg: Double = getCompanySalesByYM(dashboardYear)/dashboardMonth.toInt
 
-    def getYearOnYear: Double = getShareByYM(lastYearYM)
+    def getYearOnYear: Double = getGrowthByYM(lastYearYM)
 
-    def getMonthOnMonth: Double = getShareByYM(lastMonthYM)
+    def getMonthOnMonth: Double = getGrowthByYM(lastMonthYM)
 
-    def getShareByYM(yearMonth: String): Double =  filterJobKeySet(totalSingleJobKeySet, yearMonth, company) match {
+    def getMktCurrSalesGrowth: List[Map[String, String]] = getMktSalesMapByYM(ym).map(x => {
+        Map("market" -> x("market").toString, "sales" -> x("sales").toString, "growth" -> (x("sales").toString.toDouble - getMktSalesMapByYM(lastMonthYM).find(y => y("market")==x("market")).get("sales").toString.toDouble).toString)
+    })
+
+    private val mktCurrSalesGrowthMap = getMktCurrSalesGrowth
+
+    def getCompanyProdCurrSalesGrowth: List[Map[String, String]] = getCompanyProdSalesMapByYM(ym).map(x => {
+        val mktSales = mktCurrSalesGrowthMap.find(m => m("market") == x("market")).get("sales")
+        val mktGrowth = mktCurrSalesGrowthMap.find(m => m("market") == x("market")).get("growth")
+        val prodLastMonthSales = getCompanyProdSalesMapByYM(lastMonthYM).find(y => y("market")==x("market") && y("product")==x("product")).getOrElse(Map("sales" -> "0.0"))("sales").toDouble
+        val prodLastSeasonSales = getCompanyProdSalesMapByYM(lastSeasonYM).find(y => y("market")==x("market") && y("product")==x("product")).getOrElse(Map("sales" -> "0.0"))("sales").toDouble
+        val prodLastYearSales = getCompanyProdSalesMapByYM(lastYearYM).find(y => y("market")==x("market") && y("product")==x("product")).getOrElse(Map("sales" -> "0.0"))("sales").toDouble
+        val prodGrowth = ((x("sales").toDouble - prodLastMonthSales)/prodLastMonthSales).toString
+        val EV = prodGrowth.toDouble/mktGrowth.toDouble * 100
+        val companyProdShare = x("sales").toDouble/mktSales.toDouble
+        val companyProdShareGrowth = (prodGrowth.toDouble + 1)/(mktGrowth.toDouble + 1) - 1
+        val contribution = x("sales").toDouble/getCurrMonthCompanySales
+        val lastMonthContribution = prodLastMonthSales/getCompanySalesByYM(lastMonthYM)
+        val lastSeasonContribution = prodLastSeasonSales/getCompanySalesByYM(lastSeasonYM)
+        val lastYearContribution = prodLastYearSales/getCompanySalesByYM(lastYearYM)
+        Map(
+            "product" -> getFormatProdFromMin1(x("product")),
+//            "product" -> x("product"),
+            "market" -> x("market"),
+            "marketSales" -> mktSales,
+            "marketGrowth" -> mktGrowth,
+            "sales" -> x("sales"),
+            "productGrowth" -> prodGrowth,
+            "EV" -> EV.toString,
+            "companyProdShare" -> companyProdShare.toString,
+            "companyProdShareGrowth" -> companyProdShareGrowth.toString,
+            "contribution" -> contribution.toString,
+            "lastMonthContribution" -> lastMonthContribution.toString,
+            "lastSeasonContribution" -> lastSeasonContribution.toString,
+            "lastYearContribution" -> lastYearContribution.toString
+        )
+    })
+
+    private val companyProdCurrSalesGrowthMap = getCompanyProdCurrSalesGrowth
+
+    def getFastestGrowingMkt: String = mktCurrSalesGrowthMap.maxBy(x => x("growth").toString.toDouble) match {
+        case m if m("growth").toString.toDouble < 0 => "无"
+        case m => m("market").toString
+    }
+
+    def getFastestSaleGrowingProd: String = companyProdCurrSalesGrowthMap.maxBy(x => x("productGrowth").toString.toDouble) match {
+        case m if m("productGrowth").toString.toDouble < 0 => "无"
+        case m => m("product").toString
+    }
+
+    def getFastestSaleDeclineProd: String = companyProdCurrSalesGrowthMap.minBy(x => x("productGrowth").toString.toDouble) match {
+        case m if m("productGrowth").toString.toDouble > 0 => "无"
+        case m => m("product").toString
+    }
+
+    def getFastestShareGrowingProd: String = companyProdCurrSalesGrowthMap.maxBy(x => x("companyProdShareGrowth").toString.toDouble) match {
+        case m if m("companyProdShareGrowth").toString.toDouble < 0 => "无"
+        case m => m("product").toString
+    }
+
+    def getFastestShareDeclineProd: String = companyProdCurrSalesGrowthMap.minBy(x => x("companyProdShareGrowth").toString.toDouble) match {
+        case m if m("companyProdShareGrowth").toString.toDouble > 0 => "无"
+        case m => m("product").toString
+    }
+
+    //TO BE DISSOCIATION
+
+    def getGrowthByYM(yearMonth: String): Double =  filterJobKeySet(totalSingleJobKeySet, yearMonth, company) match {
         case Nil => 0.0
         case lst =>
             val lastPeriodCompanySales = getLstKeySales(lst.map(x => x._4), "NATION_COMPANY_SALES").sum
-            (getCurrMonthSales - lastPeriodCompanySales)/lastPeriodCompanySales
+            (getCurrMonthCompanySales - lastPeriodCompanySales)/lastPeriodCompanySales
     }
 
-    def getSalesByYM(yearMonth: String): Double = filterJobKeySet(todaySingleJobKeySet, yearMonth, company) match {
+    def getCompanySalesByYM(yearMonth: String): Double = filterJobKeySet(todaySingleJobKeySet, yearMonth, company) match {
         case Nil => getLstKeySales(filterJobKeySet(totalSingleJobKeySet, yearMonth, company).map(x => x._4), "NATION_COMPANY_SALES").sum
         case lst => lst.map(x => {
             rd.getMapValue(x._4, "max_company_sales").toDouble
@@ -64,14 +131,14 @@ trait phMaxCompanyDashboard extends phMaxSearchTrait with phMaxDashboardCommon {
     }
 
     def getMktSalesMapByYM(yearMonth: String): List[Map[String, String]] = filterJobKeySet(todaySingleJobKeySet, yearMonth, company) match {
-        case Nil => getLstKeySalesMap(filterJobKeySet(totalSingleJobKeySet, yearMonth, company).map(x => x._4), "NATION_COMPANY_SALES")
+        case Nil => getLstKeySalesMap(filterJobKeySet(totalSingleJobKeySet, yearMonth, company).map(x => x._4), "NATION_SALES")
         case lst => lst.map(x => {
-            Map("market" -> x._3, "sales" -> rd.getMapValue(x._4, "max_company_sales"))
+            Map("market" -> x._3, "sales" -> rd.getMapValue(x._4, "max_sales"))
         })
     }
 
-    def getProdSalesMapByYM(yearMonth: String): List[Map[String, String]] = filterJobKeySet(todaySingleJobKeySet, yearMonth, company) match {
-        case Nil => getLstProductSalesMap(filterJobKeySet(totalSingleJobKeySet, yearMonth, company).map(x => x._4), "PRODUCT_SALES")
+    def getCompanyProdSalesMapByYM(yearMonth: String): List[Map[String, String]] = filterJobKeySet(todaySingleJobKeySet, yearMonth, company) match {
+        case Nil => getLstProductSalesMap(filterJobKeySet(totalSingleJobKeySet, yearMonth, company).map(x => x._4), "PRODUCT_COMPANY_SALES")
         case lst => lst.flatMap(x => {
             rd.getListAllValue(x._4 + "_PRODUCT_COMPANY_SALES").map({y =>
                 val temp = y.replace("[","").replace("]","").split(",")
@@ -80,29 +147,6 @@ trait phMaxCompanyDashboard extends phMaxSearchTrait with phMaxDashboardCommon {
         })
     }
 
-    def getMktCurrSalesGrowth: List[Map[String, String]] = getMktSalesMapByYM(ym).map(x => {
-        Map("market" -> x("market").toString, "sales" -> x("sales").toString, "growth" -> (x("sales").toString.toDouble - getMktSalesMapByYM(lastMonthYM).find(y => y("market")==x("market")).get("sales").toString.toDouble).toString)
-    })
 
-    def getProdCurrSalesGrowth: List[Map[String, String]] = getProdSalesMapByYM(ym).map(x => {
-        Map("market" -> x("market").toString, "product" -> x("product").toString, "sales" -> x("sales").toString, "growth" -> (x("sales").toString.toDouble - getProdSalesMapByYM(lastMonthYM).find(y => y("market")==x("market") && y("product")==x("product")).getOrElse(Map("sales" -> 0.0))("sales").toString.toDouble).toString)
-    })
-
-    def getFastestGrowingMkt: String = getMktCurrSalesGrowth.maxBy(x => x("growth").toString.toDouble) match {
-        case m if m("growth").toString.toDouble < 0 => "无"
-        case m => m("market").toString
-    }
-
-    def getFastestGrowingProd: String = getProdCurrSalesGrowth.maxBy(x => x("growth").toString.toDouble) match {
-        case m if m("growth").toString.toDouble < 0 => "无"
-        case m => m("product").toString
-    }
-
-    def getFastestDeclineProd: String = getProdCurrSalesGrowth.minBy(x => x("growth").toString.toDouble) match {
-        case m if m("growth").toString.toDouble > 0 => "无"
-        case m => m("product").toString
-    }
-
-    //TO BE CONTINUED
 
 }
