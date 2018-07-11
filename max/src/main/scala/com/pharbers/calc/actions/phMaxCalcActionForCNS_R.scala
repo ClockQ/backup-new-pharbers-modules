@@ -35,7 +35,7 @@ class phMaxCalcActionForCNS_R(override val defaultArgs: pActionArgs) extends pAc
                     .withColumnRenamed("If Panel_All", "IS_PANEL_HOSP")
                     .withColumnRenamed("If Panel_To Use", "NEED_MAX_HOSP")
                     .withColumnRenamed("Segment", "SEGMENT")
-                    .withColumnRenamed("西药收入", "westMedicineIncome")
+                    .withColumnRenamed("WEST_MEDICINE_INCOME", "westMedicineIncome")
                     .selectExpr("PHA_ID", "Factor1", "Factor2", "IS_PANEL_HOSP", "NEED_MAX_HOSP", "SEGMENT", "Province", "Prefecture", "westMedicineIncome")
         }
         

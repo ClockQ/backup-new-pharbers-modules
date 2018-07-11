@@ -13,7 +13,6 @@ class phMaxCalcAction(override val defaultArgs: pActionArgs) extends pActionTrai
     override val name: String = "max_calc_action"
     
     lazy val sparkDriver: phSparkDriver = phSparkDriver()
-    
     import sparkDriver.ss.implicits._
     
     override def perform(pr: pActionArgs): pActionArgs = {
@@ -89,12 +88,12 @@ class phMaxCalcAction(override val defaultArgs: pActionArgs) extends pActionTrai
                     .drop("s_SEGMENT", "s_min1", "s_YM")
                     .withColumn("f_sales",
                         when($"IS_PANEL_HOSP" === 1, $"sumSales").otherwise(
-                            when($"avg_Sales" < 0.0 or $"avg_Units" < 0.0, 0.0)
+                            when($"avg_Sales" <= 0.0 or $"avg_Units" <= 0.0, 0.0)
                                     .otherwise($"Factor" * $"avg_Sales" * $"westMedicineIncome")
                         ).cast(DoubleType))
                     .withColumn("f_units",
                         when($"IS_PANEL_HOSP" === 1, $"sumUnits").otherwise(
-                            when($"avg_Sales" < 0.0 or $"avg_Units" < 0.0, 0.0)
+                            when($"avg_Sales" <= 0.0 or $"avg_Units" <= 0.0, 0.0)
                                     .otherwise($"Factor" * $"avg_Units" * $"westMedicineIncome")
                         ).cast(DoubleType))
                     .drop("s_sumSales", "s_sumUnits", "s_westMedicineIncome")

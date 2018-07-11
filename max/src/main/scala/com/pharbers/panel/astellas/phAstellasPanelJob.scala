@@ -30,6 +30,7 @@ case class phAstellasPanelJob(args: Map[String, String])(implicit _actor: Actor)
     val hospital_file: String = match_dir + args("hospital_file")
     val cpa_file: String = source_dir + args("cpa")
     val gyc_file: String = source_dir + args("gycx")
+    val hosp_ID_file: String = match_dir + args("hosp_ID")
 
     lazy val ym: String = args("ym")
     lazy val mkt: String = args("mkt")
@@ -65,24 +66,19 @@ case class phAstellasPanelJob(args: Map[String, String])(implicit _actor: Actor)
                 new sequenceJob {
                     override val name: String = "read_markets_match_file_job"
                     override val actions: List[pActionTrait] =
-                        xlsxReadingAction[phAstellasMarketsMatchFormat](markets_match_file, "markets_match_file") ::
+                        xlsxReadingAction[PhExcelXLSXCommonFormat](markets_match_file, "markets_match_file") ::
                                 saveCurrenResultAction(temp_dir + "markets_match_file") ::
                                 csv2DFAction(temp_dir + "markets_match_file") :: Nil
                 } :: Nil
     }
-
-    //3. read universe_file文件
-    val load_universe_file: choiceJob = new choiceJob {
-        override val name = "universe_file"
-        val actions: List[pActionTrait] = existenceRdd("universe_file") ::
-                csv2DFAction(temp_dir + "universe_file") ::
-                new sequenceJob {
-                    override val name: String = "read_universe_file_job"
-                    override val actions: List[pActionTrait] =
-                        xlsxReadingAction[PhExcelXLSXCommonFormat](universe_file, "universe_file") ::
-                                saveCurrenResultAction(temp_dir + "universe_file") ::
-                                csv2DFAction(temp_dir + "universe_file") :: Nil
-                } :: Nil
+    
+    //3. read If_panel_all文件
+    val load_hosp_ID: sequenceJob = new sequenceJob {
+        override val name: String = "hosp_ID"
+        override val actions: List[pActionTrait] =
+            xlsxReadingAction[PhExcelXLSXCommonFormat](hosp_ID_file, "hosp_ID") ::
+                    saveCurrenResultAction(temp_dir + "hosp_ID") ::
+                    csv2DFAction(temp_dir + "hosp_ID") :: Nil
     }
 
     //4. read hospital_file文件
@@ -139,6 +135,7 @@ case class phAstellasPanelJob(args: Map[String, String])(implicit _actor: Actor)
             case "痛风市场" => "Gout"
             case "卫喜康市场" => "Vesicare"
             case "Grafalon市场" => "Grafalon"
+            case "前列腺癌市场" => "前列腺癌"
         }
     }
 
@@ -149,7 +146,7 @@ case class phAstellasPanelJob(args: Map[String, String])(implicit _actor: Actor)
             addListenerAction(listener.MaxSparkListener(11, 20, "load_markets_match_file")) ::
             load_markets_match_file ::
             addListenerAction(listener.MaxSparkListener(21, 30, "load_universe_file")) ::
-            load_universe_file ::
+            load_hosp_ID ::
             addListenerAction(listener.MaxSparkListener(31, 40, "load_hospital_file")) ::
             load_hospital_file ::
             addListenerAction(listener.MaxSparkListener(41, 50, "load_cpa")) ::

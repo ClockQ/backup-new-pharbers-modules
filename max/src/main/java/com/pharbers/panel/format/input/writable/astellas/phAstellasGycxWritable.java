@@ -6,22 +6,10 @@ public class phAstellasGycxWritable extends phAstellasCommonWritable {
 
     public phAstellasGycxWritable() {
         titleMap = new HashMap<String, String>() {{
-            put("省份", "PROVINCES");
-            put("城市", "CITY");
-            put("年月", "YM");
-            put("医院", "HOSPITAL_CODE");
-            put("医院名称", "HOSPITAL_NAME");
-            put("ATC编码", "ATC_CODE");
-            put("药品名称", "MOLE_NAME");
-            put("商品名", "PRODUCT_NAME");
-            put("包装", "PACKAGE");
-            put("包装数量", "PACK_NUMBER");
-            put("规格", "PACK_DES");
-            put("金额(元)", "VALUE");
-            put("数量(支/片)", "STANDARD_UNIT");
-            put("剂型", "APP2_COD");
-            put("途径", "APP1_COD");
-            put("企业名称", "CORP_NAME");
+            put("HOSP_ID", "HOSPITAL_CODE");
+            put("HOSP_NAME", "HOSPITAL_NAME");
+            put("DOSAGE", "APP2_COD");
+            put("DELIVERY_WAY", "APP1_COD");
         }};
     }
 

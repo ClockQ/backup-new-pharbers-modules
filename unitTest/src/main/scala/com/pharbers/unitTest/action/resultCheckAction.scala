@@ -14,19 +14,35 @@ class resultCheckAction(override val defaultArgs: pActionArgs) extends pActionTr
     override val name: String = "result_check"
     val delimiter: String = 31.toChar.toString
     
+    lazy val sparkDriver: phSparkDriver = phSparkDriver()
+    import sparkDriver.ss.implicits._
+    
     override def perform(prMap: pActionArgs): pActionArgs = {
         val maxResult = prMap.asInstanceOf[MapArgs].get("max_result").asInstanceOf[StringArgs].get
         val maxDF = phSparkDriver().csv2RDD(max_path_obj.p_maxPath + maxResult, delimiter)
         val date: String = maxDF.select("Date").distinct().collect().head.getInt(0).toString
+        val mkt: String = maxDF.select("MARKET").distinct().collect().head.getString(0).toString
+        val market = mkt match {
+            case "阿洛刻市场" => "Allelock"
+            case "米开民市场" => "Mycamine"
+            case "普乐可复市场" => "Prograf"
+            case "佩尔市场" => "Perdipine"
+            case "哈乐市场" => "Harnal"
+            case "痛风市场" => "Gout"
+            case "卫喜康市场" => "Vesicare"
+            case "Grafalon市场" => "Grafalon"
+            case "前列腺癌市场" => "前列腺癌"
+            case _ => mkt
+        }
         val offlineDF = prMap.asInstanceOf[MapArgs].get("offline_result")
                 .asInstanceOf[DFArgs].get
-                .filter(s"YM == '$date'")
+                .filter($"YM" === date && $"MKT" === market)
                 .withColumnRenamed("CATEGORY", "scope")
                 .withColumnRenamed("HOSPITAL_COUNT", "offlineHospNum")
                 .withColumnRenamed("PRODUCT_COUNT", "offlineProductNum")
                 .withColumnRenamed("f_units(offline)", "offlineUnits")
                 .withColumnRenamed("f_sales(offline)", "offlineSales")
-        val market: String = offlineDF.select("MKT").distinct().collect().head.getString(0).toString
+        
         //保存max结果
         maxDF.coalesce(1).write
                 .format("csv")

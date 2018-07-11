@@ -24,7 +24,7 @@ class MaxProcess_AstellasSuit extends FunSuite {
     val testActor: ActorRef = system.actorOf(MaxTestHeader.props(company, user, jobId))
     import com.pharbers.processSuit.MaxTestHeader._
 
-    test("astellas max process test") {
+    test("excelResultListmax process test") {
         val dateformat = new SimpleDateFormat("MM-dd HH:mm:ss")
         println(s"开始时间" + dateformat.format(new Date()))
         println()

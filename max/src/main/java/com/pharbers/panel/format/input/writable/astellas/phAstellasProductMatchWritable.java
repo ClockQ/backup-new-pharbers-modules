@@ -6,23 +6,24 @@ public class phAstellasProductMatchWritable extends phAstellasCommonWritable {
 
     public phAstellasProductMatchWritable() {
         titleMap = new HashMap<String, String>() {{
-            put("药品名称1", "MOLE_NAME1");
-            put("商品名1", "PRODUCT_NAME1");
-            put("剂型1", "APP2_COD1");
-            put("药品规格1", "PACK_DES1");
-            put("包装数量1", "PACK_NUMBER1");
-            put("企业名称1", "CORP_NAME1");
-            put("min1", "min1");
-            put("无分隔", "min0");
-            put("标准药品名称", "STANDARD_MOLE_NAME");
-            put("标准商品名", "STANDARD_PRODUCT_NAME");
-            put("标准剂型", "STANDARD_APP2_COD");
-            put("标准规格", "STANDARD_PACK_DES");
-            put("包装数量2", "PACK_NUMBER2");
-            put("标准企业", "STANDARD_CORP_NAME");
-            put("min2", "min2");
-            put("Pack_ID", "PACK_ID");
+            put("MOLE_NAME", "MOLE_NAME1");
+            put("PRODUCT_NAME", "PRODUCT_NAME1");
+            put("DOSAGE", "APP2_COD1");
+            put("PACK_DES", "PACK_DES1");
+            put("PACK_COUNT", "PACK_NUMBER1");
+            put("CORP_NAME", "CORP_NAME1");
+            put("MIN_PRODUCT_UNIT", "min1");
+            put("STANDARD_DOSAGE", "STANDARD_APP2_COD");
+            put("STANDARD_PACK_NUMBER", "PACK_NUMBER2");
+            put("MIN_PRODUCT_UNIT_STANDARD", "min2");
         }};
+    }
+
+    @Override
+    public String richWithInputRow(int index, String value) {
+        if (index == 1) {
+            return expendTitle(transTitle2Eng(value));
+        } else return expendValues(15, value);
     }
 
     @Override
@@ -41,24 +42,22 @@ public class phAstellasProductMatchWritable extends phAstellasCommonWritable {
             return lst[5];
         } else if (flag.equals("min1")) {
             return lst[6];
-        } else if (flag.equals("min0")) {
-            return lst[7];
         } else if (flag.equals("STANDARD_MOLE_NAME")) {
-            return lst[8];
+            return lst[7];
         } else if (flag.equals("STANDARD_PRODUCT_NAME")) {
-            return lst[9];
+            return lst[8];
         } else if (flag.equals("STANDARD_APP2_COD")) {
-            return lst[10];
+            return lst[9];
         } else if (flag.equals("STANDARD_PACK_DES")) {
-            return lst[11];
+            return lst[10];
         } else if (flag.equals("PACK_NUMBER2")) {
-            return lst[12];
+            return lst[11];
         } else if (flag.equals("STANDARD_CORP_NAME")) {
-            return lst[13];
+            return lst[12];
         } else if (flag.equals("min2")) {
-            return lst[14];
+            return lst[13];
         } else if (flag.equals("PACK_ID")) {
-            return lst[15];
+            return lst[14];
         }
 
         return "not implements";
@@ -88,32 +87,29 @@ public class phAstellasProductMatchWritable extends phAstellasCommonWritable {
         } else if (flag.equals("min1")) {
             lst[6] = value;
             return lst;
-        } else if (flag.equals("min0")) {
+        } else if (flag.equals("STANDARD_MOLE_NAME")) {
             lst[7] = value;
             return lst;
-        } else if (flag.equals("STANDARD_MOLE_NAME")) {
+        } else if (flag.equals("STANDARD_PRODUCT_NAME")) {
             lst[8] = value;
             return lst;
-        } else if (flag.equals("STANDARD_PRODUCT_NAME")) {
+        } else if (flag.equals("STANDARD_APP2_COD")) {
             lst[9] = value;
             return lst;
-        } else if (flag.equals("STANDARD_APP2_COD")) {
+        } else if (flag.equals("STANDARD_PACK_DES")) {
             lst[10] = value;
             return lst;
-        } else if (flag.equals("STANDARD_PACK_DES")) {
+        } else if (flag.equals("PACK_NUMBER2")) {
             lst[11] = value;
             return lst;
-        } else if (flag.equals("PACK_NUMBER2")) {
+        } else if (flag.equals("STANDARD_CORP_NAME")) {
             lst[12] = value;
             return lst;
-        } else if (flag.equals("STANDARD_CORP_NAME")) {
+        } else if (flag.equals("min2")) {
             lst[13] = value;
             return lst;
-        } else if (flag.equals("min2")) {
-            lst[14] = value;
-            return lst;
         } else if (flag.equals("PACK_ID")) {
-            lst[15] = value;
+            lst[14] = value;
             return lst;
         } else {
             return lst;
@@ -156,7 +152,6 @@ public class phAstellasProductMatchWritable extends phAstellasCommonWritable {
                 getCellKey(lst, "STANDARD_CORP_NAME");
 
         lst = setCellKey(lst, "min1", min1);
-        lst = setCellKey(lst, "min0", min1.replace("|", ""));
         lst = setCellKey(lst, "min2", min2);
 
         return mkString(lst, delimiter);

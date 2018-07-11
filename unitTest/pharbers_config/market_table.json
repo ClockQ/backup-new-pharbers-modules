@@ -2,14 +2,15 @@
   {
     "company": "5afa53bded925c05c6f69c54",
     "market": "麻醉市场",
-    "universe_file": "/nhwa/配置文件/Nhwa_universe_麻醉市场_20180703.xlsx",
+    "universe_file": "/nhwa/配置文件/Nhwa_universe_麻醉市场_20180705.xlsx",
     "product_match_file": "nhwa/配置文件/Nhwa_ProductMatchTable_20180629.xlsx",
     "fill_hos_data_file": "nhwa/配置文件/Nhwa_2018_FullHosp_20180629.xlsx",
     "markets_match_file": "nhwa/配置文件/Nhwa_MarketMatchTable_20180629.xlsx",
     "not_published_hosp_file": "nhwa/配置文件/Nhwa_2018_NotPublishedHosp_20180629.xlsx",
+    "hosp_ID": "nhwa/配置文件/Nhwa_2018_If_panel_all_麻醉市场_20180629.xlsx",
     "cpa_file": "Source/Nhwa/Nhwa_201804_CPA_20180629.xlsx",
     "gycx_file": "",
     "ym": "201804",
-    "offlineResult": "201804Nhwa/nhwa.xlsx"
+    "offlineResult": "201804Nhwa/Nhwa_201804_Offline_MaxResult_20180705 (1).xlsx"
   }
 ]

@@ -15,14 +15,12 @@ class phPanelInfo2Redis(override val defaultArgs: pActionArgs) extends pActionTr
     
     override def perform(pr: pActionArgs): pActionArgs = {
         val panelDF = pr.asInstanceOf[MapArgs].get("panel").asInstanceOf[DFArgs].get
-        val universe_file = pr.asInstanceOf[MapArgs].get("universe_file").asInstanceOf[DFArgs].get
+        val hosp_ID_file = pr.asInstanceOf[MapArgs].get("hosp_ID").asInstanceOf[DFArgs].get
                 .withColumnRenamed("PHA_HOSP_ID", "u_HOSP_ID")
                 .withColumnRenamed("PHA_HOSP_NAME", "HOSP_NAME")
                 .withColumnRenamed("IF_PANEL_ALL", "SAMPLE")
-                .withColumnRenamed("CITY_TIER_2010", "CityLevel")
-                .withColumnRenamed("PREFECTURE", "Prefecture")
                 .filter("SAMPLE like '1'")
-                .select("u_HOSP_ID", "HOSP_NAME", "Province", "Prefecture", "CityLevel")
+                .select("u_HOSP_ID", "HOSP_NAME")
         
         val company = defaultArgs.asInstanceOf[MapArgs].get("company").asInstanceOf[StringArgs].get
         val user = defaultArgs.asInstanceOf[MapArgs].get("user").asInstanceOf[StringArgs].get
@@ -38,9 +36,9 @@ class phPanelInfo2Redis(override val defaultArgs: pActionArgs) extends pActionTr
         val panel_sales = panelDF.agg(Map("Sales" -> "sum")).take(1)(0).toString().split('[').last.split(']').head.toDouble
         val panel_company_sales = if (panelDF_filter_company.count() == 0) 0.0
         else panelDF_filter_company.agg(Map("Sales" -> "sum")).take(1)(0).toString().split('[').last.split(']').head.toDouble
-        val not_panel_hosp_lst = universe_file
-                .join(panel_hosp_distinct, universe_file("u_HOSP_ID") === panel_hosp_distinct("p_HOSP_ID"), "left")
-                .filter("p_HOSP_ID is null").select("HOSP_NAME", "Province", "Prefecture", "CityLevel").collect().map(x => x.toString())
+        val not_panel_hosp_lst = hosp_ID_file
+                .join(panel_hosp_distinct, hosp_ID_file("u_HOSP_ID") === panel_hosp_distinct("p_HOSP_ID"), "left")
+                .filter("p_HOSP_ID is null").select("HOSP_NAME").collect().map(x => x.toString())
         
         val rd = new PhRedisDriver()
         //TODO:singleJobKey的加密改为Base64(company + ym + mkt)，同一公司下的所有用户可以看到彼此的保存历史
@@ -50,8 +48,8 @@ class phPanelInfo2Redis(override val defaultArgs: pActionArgs) extends pActionTr
         val not_panel_hosp_key = Sercurity.md5Hash(user + company + ym + mkt + "not_panel_hosp_lst")
         
         rd.addSet(job_id, panel_name)
-        rd.expire(job_id, 60 * 60 * 24)
         rd.addSet(job_id + "ym", ym)
+        rd.expire(job_id, 60 * 60 * 24)
         rd.expire(job_id + "ym", 60 * 60 * 24)
         
         rd.addMap(panel_name, "ym", ym)

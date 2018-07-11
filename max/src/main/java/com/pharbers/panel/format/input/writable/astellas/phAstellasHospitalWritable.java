@@ -6,22 +6,20 @@ public class phAstellasHospitalWritable extends phAstellasCommonWritable {
 
     public phAstellasHospitalWritable() {
         titleMap = new HashMap<String, String>() {{
-            put("ACN编码", "ACN_CODE");
-            put("ACN医院名称", "ACN_HOSP_NAME");
-            put("ACN医院等级", "ACN_HOSP_LEVEL");
-            put("CPA编码", "CPA_CODE");
-            put("CPA", "CPA_HOSP_NAME");
-            put("CPA医院等级", "CPA_HOSP_LEVEL");
-            put("GYC编码", "GYC_CODE");
-            put("GYC", "GYC_HOSP_NAME");
-            put("GYC医院等级", "GYC_HOSP_LEVEL");
-            put("标准编码", "STANDARD_CODE");
-            put("标准医院名称", "STANDARD_HOSP_NAME");
-            put("标准医院等级", "STANDARD_HOSP_LEVEL");
-            put("Source", "SOURCE");
-            put("CPA重复码", "CPA_DIS");
-            put("GYC重复码", "GYC_DIS");
+            put("ACN_ID", "ACN_CODE");
+            put("CPA_ID", "CPA_CODE");
+            put("GYCX_ID", "GYC_CODE");
+            put("GYCX_HOSP_NAME", "GYC_HOSP_NAME");
+            put("GYCX_HOSP_LEVEL", "GYC_HOSP_LEVEL");
+            put("STANDARD_ID", "STANDARD_CODE");
         }};
+    }
+
+    @Override
+    public String richWithInputRow(int index, String value) {
+        if (index == 1) {
+            return expendTitle(transTitle2Eng(value));
+        } else return expendValues(15, value);
     }
 
     @Override

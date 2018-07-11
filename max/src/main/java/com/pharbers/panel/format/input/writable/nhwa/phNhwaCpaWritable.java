@@ -6,26 +6,11 @@ public class phNhwaCpaWritable extends phNhwaCommonWritable {
 
     public phNhwaCpaWritable() {
         super.titleMap = new HashMap<String, String>() {{
-//            put("PROVINCES", "PROVINCES");
-//            put("CITY", "CITY");
-//            put("YEAR", "YEAR");
-//            put("QUARTER", "QUARTER");
-//            put("MONTH", "MONTH");
             put("HOSP_ID", "HOSPITAL_CODE");
-//            put("ATC编码", "ATC_CODE");
-//            put("ATC_CODE", "ATC_CODE");
-//            put("MOLE_NAME", "MOLE_NAME");
-//            put("PRODUCT_NAME", "PRODUCT_NAME");
-//            put("PACKAGE", "PACKAGE");
             put("药品规格", "PACK_DES");
-//            put("PACK_DES", "PACK_DES");
-//            put("PACK_NUMBER", "PACK_NUMBER");
-//            put("VALUE", "VALUE");
-//            put("STANDARD_UNIT", "STANDARD_UNIT");
             put("DOSAGE", "APP2_COD");
             put("给药途径", "APP1_COD");
             put("DELIVERY_WAY", "APP1_COD");
-//            put("CORP_NAME", "CORP_NAME");
         }};
     }
 

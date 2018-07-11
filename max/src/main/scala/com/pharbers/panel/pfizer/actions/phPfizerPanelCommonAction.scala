@@ -27,9 +27,9 @@ class phPfizerPanelCommonAction(override val defaultArgs : pActionArgs) extends 
 
         val universe_file = args.asInstanceOf[MapArgs].get("universe_file").asInstanceOf[DFArgs].get
 
-        //通用名市场定义 =>表b0
+        //通用名市场定义 =>表b0　
         val markets_match = args.asInstanceOf[MapArgs].get("markets_match_file").asInstanceOf[DFArgs].get
-            .filter(s"Market like '${mkt}'")
+            .filter(s"Market like '$mkt'")
 
         //待匹配min1_标准的min1表
         val splitMktResultDF = args.asInstanceOf[MapArgs].get("SplitMarketAction").asInstanceOf[DFArgs].get

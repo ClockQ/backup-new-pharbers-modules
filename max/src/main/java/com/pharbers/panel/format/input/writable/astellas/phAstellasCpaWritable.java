@@ -6,24 +6,17 @@ public class phAstellasCpaWritable extends phAstellasCommonWritable {
 
     public phAstellasCpaWritable() {
         titleMap = new HashMap<String, String>() {{
-            put("省", "PROVINCES");
-            put("城市", "CITY");
-            put("年月", "YM");
-            put("医院编码", "HOSPITAL_CODE");
-            put("竞品市场", "MARKET");
-            put("ATC码", "ATC_CODE");
-            put("药品名称", "MOLE_NAME");
-            put("商品名", "PRODUCT_NAME");
-            put("包装", "PACKAGE");
-            put("药品规格", "PACK_DES");
-            put("包装数量", "PACK_NUMBER");
-            put("金额（元）", "VALUE");
-            put("数量（支/片）", "STANDARD_UNIT");
-            put("剂型", "APP2_COD");
-            put("给药途径", "APP1_COD");
-            put("集团", "CORP_NAME");
-            put("商品名备注", "PRODUCT_NAME_NOTE");
+            put("HOSP_ID", "HOSPITAL_CODE");
+            put("DOSAGE", "APP2_COD");
+            put("DELIVERY_WAY", "APP1_COD");
         }};
+    }
+
+    @Override
+    public String richWithInputRow(int index, String value) {
+        if (index == 1) {
+            return expendTitle(transTitle2Eng(value));
+        } else return expendValues(17, value);
     }
 
     @Override

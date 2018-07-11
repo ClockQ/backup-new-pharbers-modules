@@ -25,12 +25,12 @@ class phNhwaPanelConcretJob(override val defaultArgs : pActionArgs) extends pAct
         val not_published_hosp_file = args.asInstanceOf[MapArgs].get("not_published_hosp_file").asInstanceOf[DFArgs].get
         val full_hosp_file : DataFrame = args.asInstanceOf[MapArgs].get("full_hosp_file").asInstanceOf[DFArgs].get
         val product_match_file = args.asInstanceOf[MapArgs].get("product_match_file").asInstanceOf[DFArgs].get
-        val universe_file = args.asInstanceOf[MapArgs].get("universe_file").asInstanceOf[DFArgs].get
+        val hosp_ID_file = args.asInstanceOf[MapArgs].get("hosp_ID").asInstanceOf[DFArgs].get
 
         def getPanelFile(ym: String, mkt: String) : pActionArgs = {
             val full_cpa = fullCPA(cpa, ym)
             val product_match = trimProductMatch(product_match_file)
-            val universe = trimUniverse(universe_file, mkt)
+            val universe = trimUniverse(hosp_ID_file, mkt)
             val markets_product_match = product_match.join(markets_match, markets_match("MOLE_NAME") === product_match("通用名"))
             val filted_panel = full_cpa.join(universe, full_cpa("HOSPITAL_CODE") === universe("ID"))
             val panelDF = trimPanel(filted_panel, markets_product_match)

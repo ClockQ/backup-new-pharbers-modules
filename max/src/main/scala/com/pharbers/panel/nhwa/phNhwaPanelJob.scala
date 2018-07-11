@@ -39,6 +39,7 @@ case class phNhwaPanelJob(args: Map[String, String])(implicit _actor: Actor) ext
     val fill_hos_data_file: String = match_dir + args("fill_hos_data_file")
     val markets_match_file: String = match_dir + args("markets_match_file")
     val cpa_file: String = source_dir + args("cpa")
+    val hosp_ID_file: String = match_dir + args("hosp_ID")
 
     lazy val ym: String = args("ym")
     lazy val mkt: String = args("mkt")
@@ -68,20 +69,20 @@ case class phNhwaPanelJob(args: Map[String, String])(implicit _actor: Actor) ext
     }
 
     /**
-      * 2. read universe file
+      * 2. read hosp_ID file
       */
-    val loadUniverseFile: choiceJob = new choiceJob {
-        override val name = "universe_file"
-        val actions: List[pActionTrait] = existenceRdd("universe_file") ::
-                csv2DFAction(temp_dir + "universe_file") ::
-                new sequenceJob {
-                    override val name: String = "read_universe_file_job"
-                    override val actions: List[pActionTrait] =
-                        xlsxReadingAction[PhExcelXLSXCommonFormat](universe_file, "universe_file") ::
-                                saveCurrenResultAction(temp_dir + "universe_file") ::
-                                csv2DFAction(temp_dir + "universe_file") :: Nil
-                } :: Nil
-    }
+        val load_hosp_ID_file: choiceJob = new choiceJob {
+            override val name: String = "hosp_ID"
+            override val actions: List[pActionTrait] = existenceRdd("hosp_ID") ::
+            csv2DFAction(temp_dir + "hosp_ID") ::
+            new sequenceJob {
+                override val name: String = "read_hosp_ID_file_job"
+                override val actions: List[pActionTrait] =
+                    xlsxReadingAction[PhExcelXLSXCommonFormat](hosp_ID_file, "hosp_ID") ::
+                            saveCurrenResultAction(temp_dir + "hosp_ID") ::
+                            csv2DFAction(temp_dir + "hosp_ID") :: Nil
+            } :: Nil
+        }
 
     /**
       * 3. read product match file
@@ -169,7 +170,7 @@ case class phNhwaPanelJob(args: Map[String, String])(implicit _actor: Actor) ext
                 addListenerAction(listener.MaxSparkListener(0, 10)) ::
                 loadNotPublishedHosp ::
                 addListenerAction(listener.MaxSparkListener(11, 20)) ::
-                loadUniverseFile ::
+                load_hosp_ID_file ::
                 addListenerAction(listener.MaxSparkListener(21, 30)) ::
                 loadProductMatchFile ::
                 addListenerAction(listener.MaxSparkListener(31, 40)) ::
