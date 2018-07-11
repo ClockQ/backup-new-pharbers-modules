@@ -2,7 +2,7 @@ package com.pharbers.max
 
 import com.pharbers.builder.SearchFacade
 import com.pharbers.pactions.actionbase._
-import com.pharbers.search.{phHistorySearchJob, phMaxDashboard, phMaxResultInfo, phPanelResultInfo}
+import com.pharbers.search.{phHistorySearchJob, phMaxCompanyDashboard, phMaxResultInfo, phPanelResultInfo}
 import org.scalatest.FunSuite
 import play.api.libs.json.JsValue
 import play.api.libs.json.Json.toJson
@@ -102,46 +102,6 @@ class MaxSearchSuite extends FunSuite {
 
         val search = new SearchFacade
         println(search.exportData(condition)._1.get.get("export_file_name").get)
-    }
-
-    test("max dashboard"){
-        val dashboard = phMaxDashboard(company, ym)
-//        val severalYMlist = dashboard.getLastSeveralYearYM(2, ym)
-//        severalYMlist.foreach(println)
-        val lastSeasonYM = dashboard.getLastSeveralMonthYM(4, ym).last
-        val currCompanySales = dashboard.getCurrMonthCompanySales
-        val currFullYearCompanySales = dashboard.getCurrFullYearSales
-        val currCurrYearSalesAvg = dashboard.getCurrYearSalesAvg
-        val yoy = dashboard.getYearOnYear
-        val mom = dashboard.getMonthOnMonth
-        val lstMonthSales = dashboard.getListMonthCompanySales
-        val fastestGrowingMkt = dashboard.getFastestGrowingMkt
-        val fastestSaleGrowingProd = dashboard.getFastestSaleGrowingProd
-        val fastestSaleDeclineProd = dashboard.getFastestSaleDeclineProd
-        val fastestShareGrowingProd = dashboard.getFastestShareGrowingProd
-        val fastestShareDeclineProd = dashboard.getFastestShareDeclineProd
-        println("currYM\t" + ym)
-        println("lastSeasonYM\t" + lastSeasonYM)
-        println("currCompanySales\t" + currCompanySales)
-        println("currFullYearCompanySales\t" + currFullYearCompanySales)
-        println("currCurrYearSalesAvg\t" + currCurrYearSalesAvg)
-        println("yoy\t" + yoy)
-        println("mom\t" + mom)
-        println("lstMonthSales\t" + lstMonthSales)
-        println("fastestGrowingMkt\t" + fastestGrowingMkt)
-        println("fastestSaleGrowingProd\t" + fastestSaleGrowingProd)
-        println("fastestSaleDeclineProd\t" + fastestSaleDeclineProd)
-        println("fastestShareGrowingProd\t" + fastestShareGrowingProd)
-        println("fastestShareDeclineProd\t" + fastestShareDeclineProd)
-    }
-
-    test("Regex"){
-        val pattern = new Regex("[a-zA-Z0-9]")
-        val str = "格列宁片剂150MG1上海诺华制药有限公司"
-        val product = pattern.split(str).head
-        val manufacturer = pattern.split(str).last
-        println(s"product = $product")
-        println(s"manufacturer = $manufacturer")
     }
 
 }

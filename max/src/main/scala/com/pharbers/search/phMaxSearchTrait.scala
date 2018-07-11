@@ -33,6 +33,8 @@ trait phMaxSearchTrait {
         (yearMonth :: getLastSeveralMonthYM(severalMonth, yearMonth)).reverse
     }
 
+    def getShare(partialData: Double, totalData: Double): Double = if (totalData == 0.0) 0.0 else partialData/totalData
+
     def getLastYearYM(yearMonth: String): String = (yearMonth.toInt - 100).toString
 
     def getFormatSales(originValue: Double): String = f"${originValue/1.0E6}%.2f"
