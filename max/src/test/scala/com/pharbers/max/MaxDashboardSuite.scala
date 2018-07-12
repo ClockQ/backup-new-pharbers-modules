@@ -50,11 +50,15 @@ class MaxDashboardSuite extends FunSuite {
         val currMonthCompanySales = dashboard.getCurrMonthCompanySales
         val currMonthCompanyShare = dashboard.getCurrMonthCompanyShare
         val listMonthTrend = dashboard.getListMonthTrend
+        val competingProductCount = dashboard.getCompetingProductCount
+        val prodSalesGrowth = dashboard.getProdSalesGrowth
 
         println("currMonthNationSales\t" + currMonthNationSales)
         println("currMonthCompanySales\t" + currMonthCompanySales)
         println("currMonthCompanyShare\t" + currMonthCompanyShare)
         println("listMonthTrend\t" + listMonthTrend)
+        println("competingProductCount\t" + competingProductCount)
+        println("prodSalesGrowth\t" + prodSalesGrowth)
     }
 
 }

@@ -107,4 +107,8 @@ trait phMaxDashboardCommon extends phMaxSearchTrait {
         })
     }
 
+    def getProdFromProdCorp(prodCorp: String): String = prodCorp.split("##").head
+
+    def getCorpFromProdCorp(prodCorp: String): String = prodCorp.split("##").last
+
 }

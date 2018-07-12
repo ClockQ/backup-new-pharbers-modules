@@ -35,8 +35,7 @@ trait phMaxDashboardCompanyModule extends phMaxDashboardCommon {
         val lastSeasonContribution = prodLastSeasonSales/getSalesByScopeYM("NATION_COMPANY_SALES", lastSeasonYM)
         val lastYearContribution = prodLastYearSales/getSalesByScopeYM("NATION_COMPANY_SALES", lastYearYM)
         Map(
-            "product" -> getFormatProdFromMin1(x("product")),
-//            "product" -> x("product"),
+            "product" -> getProdFromProdCorp(x("product")),
             "market" -> x("market"),
             "marketSales" -> mktSales,
             "marketGrowth" -> mktGrowth,

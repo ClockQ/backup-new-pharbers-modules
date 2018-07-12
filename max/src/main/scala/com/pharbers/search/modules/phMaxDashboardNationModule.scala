@@ -33,4 +33,34 @@ trait phMaxDashboardNationModule extends phMaxDashboardCommon {
     def getListSeasonTrend: List[Map[String, String]] = ???
     def getListYearTrend: List[Map[String, String]] = ???
 
+    def getCompetingProductCount: Int = getProdSalesMapByScopeYM("PRODUCT_SALES", ym, market).length - getProdSalesMapByScopeYM("PRODUCT_COMPANY_SALES", ym, market).length
+
+    def getCurrMktSalesGrowth: List[Map[String, String]] = getMktSalesMapByYM(ym, market).map(x => {
+        Map("market" -> x("market").toString, "sales" -> x("sales").toString, "growth" -> (x("sales").toString.toDouble - getMktSalesMapByYM(lastMonthYM, market).find(y => y("market")==x("market")).get("sales").toString.toDouble).toString)
+    })
+
+    private val currMktSalesGrowthMap = getCurrMktSalesGrowth
+
+    def getProdSalesGrowth: List[Map[String, String]] = getProdSalesMapByScopeYM("PRODUCT_SALES", ym, market).map(x => {
+        val mktSales = currMktSalesGrowthMap.find(m => m("market") == x("market")).get("sales")
+        val mktGrowth = currMktSalesGrowthMap.find(m => m("market") == x("market")).get("growth")
+        val prodLastMonthSales = getProdSalesMapByScopeYM("PRODUCT_SALES", lastMonthYM, market).find(y => y("market")==x("market") && y("product")==x("product")).getOrElse(Map("sales" -> "0.0"))("sales").toDouble
+        val prodGrowth = ((x("sales").toDouble - prodLastMonthSales)/prodLastMonthSales).toString
+        val EV = prodGrowth.toDouble/mktGrowth.toDouble * 100
+        val prodShare = x("sales").toDouble/mktSales.toDouble
+        val prodShareGrowth = (prodGrowth.toDouble + 1)/(mktGrowth.toDouble + 1) - 1
+        Map(
+            "product" -> getProdFromProdCorp(x("product")),
+            "corp" -> getCorpFromProdCorp(x("product")),
+            "market" -> x("market"),
+            "marketSales" -> mktSales,
+            "marketGrowth" -> mktGrowth,
+            "sales" -> x("sales"),
+            "productGrowth" -> prodGrowth,
+            "EV" -> EV.toString,
+            "prodShare" -> prodShare.toString,
+            "prodShareGrowth" -> prodShareGrowth.toString
+        )
+    })
+
 }
