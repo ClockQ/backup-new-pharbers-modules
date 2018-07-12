@@ -21,9 +21,9 @@ trait phMaxDashboardCommon extends phMaxSearchTrait {
     val currMonth: String = currYM.takeRight(2)
 
     val dashboardYear: String = ym.take(4)
-//    val dashboardMonth: String = if (currYear.toInt == dashboardYear.toInt) currMonth else "12"
-    val dashboardMonth: String = "12"
-    val dashboardYM: String = dashboardYear + dashboardMonth
+    val dashboardMonth: String = if (currYear.toInt == dashboardYear.toInt) currMonth else "12"
+    val dashboardStartYM: String = dashboardYear + "01"
+    val dashboardEndYM: String = dashboardYear + dashboardMonth
 
     val lastMonthYM: String = getLastMonthYM(ym)
     val lastSeasonYM: String = getLastSeveralMonthYM(4, ym).last
@@ -87,7 +87,7 @@ trait phMaxDashboardCommon extends phMaxSearchTrait {
         case Nil => 0.0
         case lst =>
             val lastPeriodCompanySales = getLstKeySales(lst.map(x => x._4), scope).sum
-            (getSalesByScopeYM(ym, scope, market) - lastPeriodCompanySales)/lastPeriodCompanySales
+            (getSalesByScopeYM(scope, ym, market) - lastPeriodCompanySales)/lastPeriodCompanySales
     }
 
     def getMktSalesMapByYM(yearMonth: String, market: String = "all"): List[Map[String, String]] = filterJobKeySet(todaySingleJobKeySet, yearMonth, company, market) match {

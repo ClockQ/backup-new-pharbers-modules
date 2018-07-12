@@ -4,7 +4,7 @@ trait phMaxDashboardCompanyModule extends phMaxDashboardCommon {
 
     def getCurrMonthCompanySales: Double = getSalesByScopeYM("NATION_COMPANY_SALES", ym)
 
-    def getListMonthCompanySales: List[Map[String, String]] = (dashboardYM :: getLastSeveralMonthYM(dashboardMonth.toInt, dashboardYM)).map(x => Map("ym" -> x, "sales" -> getSalesByScopeYM("NATION_COMPANY_SALES", x).toString))
+    def getListMonthCompanySales: List[Map[String, String]] = (dashboardEndYM :: getLastSeveralMonthYM(dashboardMonth.toInt, dashboardEndYM)).map(x => Map("ym" -> getFormatYM(x), "sales" -> getFormatSales(getSalesByScopeYM("NATION_COMPANY_SALES", x)))).reverse
 
     def getCurrFullYearCompanySales: Double = getSalesByScopeYM("NATION_COMPANY_SALES", dashboardYear)
 
@@ -31,6 +31,7 @@ trait phMaxDashboardCompanyModule extends phMaxDashboardCommon {
         val companyProdShare = x("sales").toDouble/mktSales.toDouble
         val companyProdShareGrowth = (prodGrowth.toDouble + 1)/(mktGrowth.toDouble + 1) - 1
         val contribution = x("sales").toDouble/getCurrMonthCompanySales
+
         val lastMonthContribution = prodLastMonthSales/getSalesByScopeYM("NATION_COMPANY_SALES", lastMonthYM)
         val lastSeasonContribution = prodLastSeasonSales/getSalesByScopeYM("NATION_COMPANY_SALES", lastSeasonYM)
         val lastYearContribution = prodLastYearSales/getSalesByScopeYM("NATION_COMPANY_SALES", lastYearYM)
@@ -53,29 +54,31 @@ trait phMaxDashboardCompanyModule extends phMaxDashboardCommon {
 
     private val companyProdCurrSalesGrowthMap = getCompanyProdCurrSalesGrowth
 
-    def getFastestGrowingMkt: String = mktCurrSalesGrowthMap.maxBy(x => x("growth").toString.toDouble) match {
-        case m if m("growth").toString.toDouble < 0 => "无"
-        case m => m("market").toString
+    def getFastestGrowingMkt: Map[String, String] = mktCurrSalesGrowthMap.maxBy(x => x("growth").toString.toDouble) match {
+        case m if m("growth").toString.toDouble < 0 => Map.empty
+        case m => m
     }
 
-    def getCompanyFastestSaleGrowingProd: String = companyProdCurrSalesGrowthMap.maxBy(x => x("productGrowth").toString.toDouble) match {
-        case m if m("productGrowth").toString.toDouble < 0 => "无"
-        case m => m("product").toString
+    def getCompanyFastestSaleGrowingProd: Map[String, String] = companyProdCurrSalesGrowthMap.maxBy(x => x("productGrowth").toString.toDouble) match {
+        case m if m("productGrowth").toString.toDouble < 0 => Map.empty
+        case m => m
     }
 
-    def getCompanyFastestSaleDeclineProd: String = companyProdCurrSalesGrowthMap.minBy(x => x("productGrowth").toString.toDouble) match {
-        case m if m("productGrowth").toString.toDouble > 0 => "无"
-        case m => m("product").toString
+    def getCompanyFastestSaleDeclineProd: Map[String, String] = companyProdCurrSalesGrowthMap.minBy(x => x("productGrowth").toString.toDouble) match {
+        case m if m("productGrowth").toString.toDouble > 0 => Map.empty
+        case m => m
     }
 
-    def getCompanyFastestShareGrowingProd: String = companyProdCurrSalesGrowthMap.maxBy(x => x("companyProdShareGrowth").toString.toDouble) match {
-        case m if m("companyProdShareGrowth").toString.toDouble < 0 => "无"
-        case m => m("product").toString
+    def getCompanyMaxShareProd: Map[String, String] = companyProdCurrSalesGrowthMap.maxBy(x => x("companyProdShare").toString.toDouble)
+
+    def getCompanyFastestShareGrowingProd: Map[String, String] = companyProdCurrSalesGrowthMap.maxBy(x => x("companyProdShareGrowth").toString.toDouble) match {
+        case m if m("companyProdShareGrowth").toString.toDouble < 0 => Map.empty
+        case m => m
     }
 
-    def getCompanyFastestShareDeclineProd: String = companyProdCurrSalesGrowthMap.minBy(x => x("companyProdShareGrowth").toString.toDouble) match {
-        case m if m("companyProdShareGrowth").toString.toDouble > 0 => "无"
-        case m => m("product").toString
+    def getCompanyFastestShareDeclineProd: Map[String, String] = companyProdCurrSalesGrowthMap.minBy(x => x("companyProdShareGrowth").toString.toDouble) match {
+        case m if m("companyProdShareGrowth").toString.toDouble > 0 => Map.empty
+        case m => m
     }
 
 }

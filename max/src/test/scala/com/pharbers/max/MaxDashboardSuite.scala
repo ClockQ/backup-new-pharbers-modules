@@ -1,9 +1,10 @@
 package com.pharbers.max
 
+import com.pharbers.common.algorithm.phDealRGB
 import com.pharbers.search.{phMaxCompanyDashboard, phMaxNativeDashboard}
 import org.scalatest.FunSuite
 
-class MaxDashboardSuite extends FunSuite {
+class MaxDashboardSuite extends FunSuite with phDealRGB {
 
     val company: String = "5afa53bded925c05c6f69c54"
     val user: String = "5afaa333ed925c30f8c066d1"
@@ -14,12 +15,14 @@ class MaxDashboardSuite extends FunSuite {
         val dashboard = phMaxCompanyDashboard(company, ym)
 //        val severalYMlist = dashboard.getLastSeveralYearYM(2, ym)
 //        severalYMlist.foreach(println)
+        val dashboardStartYM = dashboard.dashboardStartYM
+        val dashboardEndYM = dashboard.dashboardEndYM
         val lastSeasonYM = dashboard.getLastSeveralMonthYM(4, ym).last
         val currCompanySales = dashboard.getCurrMonthCompanySales
         val currFullYearCompanySales = dashboard.getCurrFullYearCompanySales
         val currCurrYearSalesAvg = dashboard.getCurrYearCompanySalesAvg
-        val yoy = dashboard.getCompanyYearOnYear
-        val mom = dashboard.getCompanyMonthOnMonth
+        val yoy = dashboard.getFormatShare(dashboard.getCompanyYearOnYear)
+        val mom = dashboard.getFormatShare(dashboard.getCompanyMonthOnMonth)
         val lstMonthSales = dashboard.getListMonthCompanySales
         val fastestGrowingMkt = dashboard.getFastestGrowingMkt
         val fastestSaleGrowingProd = dashboard.getCompanyFastestSaleGrowingProd
@@ -27,7 +30,12 @@ class MaxDashboardSuite extends FunSuite {
         val fastestShareGrowingProd = dashboard.getCompanyFastestShareGrowingProd
         val fastestShareDeclineProd = dashboard.getCompanyFastestShareDeclineProd
         val companyProdMap = dashboard.getCompanyProdCurrSalesGrowth
+
+
+
         println("currYM\t" + ym)
+        println("dashboardStartYM\t" + dashboardStartYM)
+        println("dashboardEndYM\t" + dashboardEndYM)
         println("lastSeasonYM\t" + lastSeasonYM)
         println("currCompanySales\t" + currCompanySales)
         println("currFullYearCompanySales\t" + currFullYearCompanySales)
@@ -41,6 +49,16 @@ class MaxDashboardSuite extends FunSuite {
         println("fastestShareGrowingProd\t" + fastestShareGrowingProd)
         println("fastestShareDeclineProd\t" + fastestShareDeclineProd)
         println("companyProdMap\t" + companyProdMap)
+
+
+
+//        val colorStep = companyProdMap.length
+//        val test = companyProdMap.zipWithIndex.map(m => {
+//            val color = getIndexColor(m._2, colorStep, "#000000", "#FFFFFF").toUpperCase()
+//            m._1 ++ Map("color" -> color)
+//        })
+//        println("test\t" + test.map(m => m("color")))
+
     }
 
     test("max dashboard nation module"){
@@ -60,5 +78,21 @@ class MaxDashboardSuite extends FunSuite {
         println("competingProductCount\t" + competingProductCount)
         println("prodSalesGrowth\t" + prodSalesGrowth)
     }
+
+    test("RGB"){
+        val contribution = 0.01
+        val blue = (255*contribution).toInt.toHexString
+        println(blue.toUpperCase())
+        println(getHexString(2))
+        println(4095.toHexString.toUpperCase)
+        println(Integer.parseInt("fff", 16))
+
+        val startRGB = "#2B82FF"
+        println(startRGB.substring(1, 3))
+        println(startRGB.substring(3, 5))
+        println(startRGB.substring(5, 7))
+    }
+
+
 
 }

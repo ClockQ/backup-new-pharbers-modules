@@ -16,7 +16,7 @@ trait phMaxDashboardNationModule extends phMaxDashboardCommon {
     def getCompanyShareYearOnYear: Double = getShare(getCompanySalesYearOnYear, getNationSalesYearOnYear)
     def getCompanyShareMonthOnMonth: Double = getShare(getCompanySalesMonthOnMonth, getNationSalesMonthOnMonth)
 
-    def getListMonthTrend: List[Map[String, String]] = (dashboardYM :: getLastSeveralMonthYM(dashboardMonth.toInt, dashboardYM)).map(x => {
+    def getListMonthTrend: List[Map[String, String]] = (dashboardEndYM :: getLastSeveralMonthYM(dashboardMonth.toInt, dashboardEndYM)).map(x => {
         val tempNationSales: Double = getSalesByScopeYM("NATION_SALES", x, market)
         val tempCompanySales: Double = getSalesByScopeYM("NATION_COMPANY_SALES", x, market)
         val tempCompanyShare: Double = getShare(tempCompanySales, tempNationSales)
