@@ -50,7 +50,7 @@ trait phMaxDashboardCommon extends phMaxSearchTrait {
         }).sum
     }
 
-    def getLstKeySalesMap(list: List[String], scope: String): List[Map[String, String]] = list match {
+    def getLstMktSalesMap(list: List[String], scope: String): List[Map[String, String]] = list match {
         case Nil => List.empty
         case lst => lst.map(x => {
             val mkt = new String(Base64.getDecoder.decode(x)).split("#")(2)
@@ -63,6 +63,22 @@ trait phMaxDashboardCommon extends phMaxSearchTrait {
         case lst => lst.flatMap(x => {
             val mkt = new String(Base64.getDecoder.decode(x)).split("#")(2)
             getAreaSalesByRange(scope, x).map(m => Map("market" -> mkt, "product" -> m("Area"), "sales" -> m("Sales")))
+        })
+    }
+
+    def getLstCitySalesMap(list: List[String], scope: String): List[Map[String, String]] = list match {
+        case Nil => List.empty
+        case lst => lst.flatMap(x => {
+            val mkt = new String(Base64.getDecoder.decode(x)).split("#")(2)
+            getAreaSalesByRange(scope, x).map(m => Map("market" -> mkt, "city" -> m("Area"), "sales" -> m("Sales")))
+        })
+    }
+
+    def getLstProvinceSalesMap(list: List[String], scope: String): List[Map[String, String]] = list match {
+        case Nil => List.empty
+        case lst => lst.flatMap(x => {
+            val mkt = new String(Base64.getDecoder.decode(x)).split("#")(2)
+            getAreaSalesByRange(scope, x).map(m => Map("market" -> mkt, "province" -> m("Area"), "sales" -> m("Sales")))
         })
     }
 
@@ -90,8 +106,8 @@ trait phMaxDashboardCommon extends phMaxSearchTrait {
             (getSalesByScopeYM(scope, ym, market) - lastPeriodCompanySales)/lastPeriodCompanySales
     }
 
-    def getMktSalesMapByYM(yearMonth: String, market: String = "all"): List[Map[String, String]] = filterJobKeySet(todaySingleJobKeySet, yearMonth, company, market) match {
-        case Nil => getLstKeySalesMap(filterJobKeySet(allSingleJobKeySet, yearMonth, company, market).map(x => x._4), "NATION_SALES")
+    def getMktSalesLstMap(yearMonth: String, market: String = "all"): List[Map[String, String]] = filterJobKeySet(todaySingleJobKeySet, yearMonth, company, market) match {
+        case Nil => getLstMktSalesMap(filterJobKeySet(allSingleJobKeySet, yearMonth, company, market).map(x => x._4), "NATION_SALES")
         case lst => lst.map(x => {
             Map("market" -> x._3, "sales" -> rd.getMapValue(x._4, "NATION_SALES"))
         })
@@ -103,6 +119,26 @@ trait phMaxDashboardCommon extends phMaxSearchTrait {
             rd.getListAllValue(x._4 + scope).map({y =>
                 val temp = y.replace("[","").replace("]","").split(",")
                 Map("market" -> x._3, "product" -> temp(0), "sales" -> temp(1))
+            })
+        })
+    }
+
+    def getCitySalesMapByScopeYM(scope: String, yearMonth: String, market: String = "all"): List[Map[String, String]] = filterJobKeySet(todaySingleJobKeySet, yearMonth, company, market) match {
+        case Nil => getLstCitySalesMap(filterJobKeySet(allSingleJobKeySet, yearMonth, company, market).map(x => x._4), scope)
+        case lst => lst.flatMap(x => {
+            rd.getListAllValue(x._4 + scope).map({y =>
+                val temp = y.replace("[","").replace("]","").split(",")
+                Map("market" -> x._3, "city" -> temp(0), "sales" -> temp(1))
+            })
+        })
+    }
+
+    def getProvinceSalesMapByScopeYM(scope: String, yearMonth: String, market: String = "all"): List[Map[String, String]] = filterJobKeySet(todaySingleJobKeySet, yearMonth, company, market) match {
+        case Nil => getLstProvinceSalesMap(filterJobKeySet(allSingleJobKeySet, yearMonth, company, market).map(x => x._4), scope)
+        case lst => lst.flatMap(x => {
+            rd.getListAllValue(x._4 + scope).map({y =>
+                val temp = y.replace("[","").replace("]","").split(",")
+                Map("market" -> x._3, "province" -> temp(0), "sales" -> temp(1))
             })
         })
     }

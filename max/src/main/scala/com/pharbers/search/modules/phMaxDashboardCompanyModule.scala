@@ -4,7 +4,7 @@ trait phMaxDashboardCompanyModule extends phMaxDashboardCommon {
 
     def getCurrMonthCompanySales: Double = getSalesByScopeYM("NATION_COMPANY_SALES", ym)
 
-    def getListMonthCompanySales: List[Map[String, String]] = (dashboardEndYM :: getLastSeveralMonthYM(dashboardMonth.toInt, dashboardEndYM)).map(x => Map("ym" -> getFormatYM(x), "sales" -> getFormatSales(getSalesByScopeYM("NATION_COMPANY_SALES", x)))).reverse
+    def getListMonthCompanySales: List[Map[String, String]] = (dashboardEndYM :: getLastSeveralMonthYM(dashboardMonth.toInt, dashboardEndYM)).map(x => Map("ym" -> x, "sales" -> getSalesByScopeYM("NATION_COMPANY_SALES", x).toString)).reverse
 
     def getCurrFullYearCompanySales: Double = getSalesByScopeYM("NATION_COMPANY_SALES", dashboardYear)
 
@@ -14,8 +14,8 @@ trait phMaxDashboardCompanyModule extends phMaxDashboardCommon {
 
     def getCompanyMonthOnMonth: Double = getSalesGrowthByScopeYM("NATION_COMPANY_SALES", lastMonthYM)
 
-    def getMktCurrSalesGrowth: List[Map[String, String]] = getMktSalesMapByYM(ym).map(x => {
-        Map("market" -> x("market").toString, "sales" -> x("sales").toString, "growth" -> (x("sales").toString.toDouble - getMktSalesMapByYM(lastMonthYM).find(y => y("market")==x("market")).get("sales").toString.toDouble).toString)
+    def getMktCurrSalesGrowth: List[Map[String, String]] = getMktSalesLstMap(ym).map(x => {
+        Map("market" -> x("market").toString, "sales" -> x("sales").toString, "growth" -> (x("sales").toString.toDouble - getMktSalesLstMap(lastMonthYM).find(y => y("market")==x("market")).getOrElse(Map("sales" -> "0.0"))("sales").toDouble).toString)
     })
 
     private val mktCurrSalesGrowthMap = getMktCurrSalesGrowth
@@ -32,9 +32,18 @@ trait phMaxDashboardCompanyModule extends phMaxDashboardCommon {
         val companyProdShareGrowth = (prodGrowth.toDouble + 1)/(mktGrowth.toDouble + 1) - 1
         val contribution = x("sales").toDouble/getCurrMonthCompanySales
 
-        val lastMonthContribution = prodLastMonthSales/getSalesByScopeYM("NATION_COMPANY_SALES", lastMonthYM)
-        val lastSeasonContribution = prodLastSeasonSales/getSalesByScopeYM("NATION_COMPANY_SALES", lastSeasonYM)
-        val lastYearContribution = prodLastYearSales/getSalesByScopeYM("NATION_COMPANY_SALES", lastYearYM)
+        val lastMonthContribution = getSalesByScopeYM("NATION_COMPANY_SALES", lastMonthYM) match {
+            case sale if sale == 0.0 => 0.0
+            case sale => prodLastMonthSales/sale
+        }
+        val lastSeasonContribution = getSalesByScopeYM("NATION_COMPANY_SALES", lastSeasonYM) match {
+            case sale if sale == 0.0 => 0.0
+            case sale => prodLastSeasonSales/sale
+        }
+        val lastYearContribution = getSalesByScopeYM("NATION_COMPANY_SALES", lastYearYM) match {
+            case sale if sale == 0.0 => 0.0
+            case sale => prodLastYearSales/sale
+        }
         Map(
             "product" -> getProdFromProdCorp(x("product")),
             "market" -> x("market"),

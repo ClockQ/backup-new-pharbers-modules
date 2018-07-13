@@ -39,7 +39,7 @@ trait phMaxSearchTrait {
 
     def getFormatYM(originYM: String, separator: String = "-"): String = originYM.take(4) + separator + originYM.takeRight(2)
 
-    def getFormatSales(originValue: Double): String = f"${originValue/1.0E6}%.2f"
+    def getFormatSales(originValue: Double): Double = f"${originValue/1.0E6}%.2f".toDouble
 
     def getFormatShare(originValue: Double): Double = f"$originValue%.4f".toDouble
 
@@ -85,6 +85,38 @@ trait phMaxSearchTrait {
             case lst => lst.map(x => Map(
                 "Area" -> x.getOrElse("Area", "").asInstanceOf[JsString].value,
                 "Sales" -> x.getOrElse("Sales", 0.0).asInstanceOf[JsNumber].value.doubleValue().toString
+            ))
+        }
+    }
+
+    def getProdSalesByArea(areaKey: String, areaValue: String, tempSingleJobKey: String) : List[Map[String, String]] = {
+        val db = MongoPool.queryDBInstance("data").get
+
+        val query: DBObject = DBObject(
+            areaKey -> areaValue
+        )
+
+        val output: DBObject => Map[String, JsValue] = { obj =>
+            Map(
+                "Province" -> toJson(obj.as[String]("Province")),
+                "City" -> toJson(obj.as[String]("City")),
+                "PRODUCT_NAME" -> toJson(obj.as[String]("PRODUCT_NAME")),
+                "CORP_NAME" -> toJson(obj.as[String]("CORP_NAME")),
+                "Sales" -> toJson(obj.as[Double]("f_sales")),
+                "b2c" -> toJson(obj.as[Int]("belong2company"))
+            )
+        }
+
+        val tmp = db.queryMultipleObject(query, tempSingleJobKey, "belong2company", 0, 1E6.toInt)(output)
+        tmp match {
+            case Nil => Nil
+            case lst => lst.map(x => Map(
+                "Province" -> x.getOrElse("Province", "").asInstanceOf[JsString].value,
+                "City" -> x.getOrElse("City", "").asInstanceOf[JsString].value,
+                "PRODUCT_NAME" -> x.getOrElse("PRODUCT_NAME", "").asInstanceOf[JsString].value,
+                "CORP_NAME" -> x.getOrElse("CORP_NAME", "").asInstanceOf[JsString].value,
+                "Sales" -> x.getOrElse("Sales", 0.0).asInstanceOf[JsNumber].value.doubleValue().toString,
+                "b2c" -> x.getOrElse("b2c", 0).asInstanceOf[JsNumber].value.intValue().toString
             ))
         }
     }

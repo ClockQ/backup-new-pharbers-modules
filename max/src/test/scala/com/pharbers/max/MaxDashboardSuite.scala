@@ -1,7 +1,7 @@
 package com.pharbers.max
 
 import com.pharbers.common.algorithm.phDealRGB
-import com.pharbers.search.{phMaxCompanyDashboard, phMaxNativeDashboard}
+import com.pharbers.search.{phMaxCompanyDashboard, phMaxNativeDashboard, phMaxProvinceDashboard}
 import org.scalatest.FunSuite
 
 class MaxDashboardSuite extends FunSuite with phDealRGB {
@@ -79,18 +79,11 @@ class MaxDashboardSuite extends FunSuite with phDealRGB {
         println("prodSalesGrowth\t" + prodSalesGrowth)
     }
 
-    test("RGB"){
-        val contribution = 0.01
-        val blue = (255*contribution).toInt.toHexString
-        println(blue.toUpperCase())
-        println(getHexString(2))
-        println(4095.toHexString.toUpperCase)
-        println(Integer.parseInt("fff", 16))
-
-        val startRGB = "#2B82FF"
-        println(startRGB.substring(1, 3))
-        println(startRGB.substring(3, 5))
-        println(startRGB.substring(5, 7))
+    test("max dashboard province module"){
+        val dashboard = phMaxProvinceDashboard(company, ym, mkt, "安徽")
+        val testListData = dashboard.getCurrProvinceSeveralMonthProdeSalesMap
+        testListData.foreach(println)
+        println(testListData.size)
     }
 
 

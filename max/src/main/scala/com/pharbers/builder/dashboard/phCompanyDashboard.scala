@@ -8,9 +8,9 @@ import play.api.libs.json.Json.toJson
 trait phCompanyDashboard extends phMaxSearchTrait with phDealRGB {
 
     def saleData(jv: JsValue): (Option[Map[String, JsValue]], Option[JsValue]) = {
-        val company_id = (jv \ "user" \ "company_id").asOpt[String].getOrElse(throw new Exception("Illegal company"))
-        val company_name = (jv \ "user" \ "company_name").asOpt[String].getOrElse(throw new Exception("Illegal company"))
-        val time = (jv \ "time").asOpt[String].getOrElse(throw new Exception("Illegal time"))
+        val company_id = (jv \ "user" \ "company" \ "company_id").asOpt[String].getOrElse(throw new Exception("Illegal company"))
+        val company_name = (jv \ "user" \ "company" \ "company_name").asOpt[String].getOrElse(throw new Exception("Illegal company"))
+        val time = (jv \ "condition" \ "time").asOpt[String].getOrElse(throw new Exception("Illegal time"))
         val ym = time.replaceAll("-", "")
 
         val dashboard = phMaxCompanyDashboard(company_id, ym)
@@ -26,16 +26,21 @@ trait phCompanyDashboard extends phMaxSearchTrait with phDealRGB {
                 "totle" -> toJson(getFormatSales(dashboard.getCurrFullYearCompanySales)),
                 "ave" -> toJson(getFormatSales(dashboard.getCurrYearCompanySalesAvg))
             )),
-            "prodSalesTable" -> toJson(dashboard.getListMonthCompanySales)
+            "prodSalesTable" -> toJson(dashboard.getListMonthCompanySales.map(x => {
+                toJson(Map(
+                    "ym" -> toJson(getFormatYM(x("ym"))),
+                    "sales" -> toJson(getFormatSales(x("sales").toDouble))
+                ))
+            }))
         )
 
         (Some(Map("tableSale" -> toJson(tableSale))), None)
     }
 
     def keyWord(jv: JsValue): (Option[Map[String, JsValue]], Option[JsValue]) = {
-        val company_id = (jv \ "user" \ "company_id").asOpt[String].getOrElse(throw new Exception("Illegal company"))
-        val company_name = (jv \ "user" \ "company_name").asOpt[String].getOrElse(throw new Exception("Illegal company"))
-        val time = (jv \ "time").asOpt[String].getOrElse(throw new Exception("Illegal time"))
+        val company_id = (jv \ "user" \ "company" \ "company_id").asOpt[String].getOrElse(throw new Exception("Illegal company"))
+        val company_name = (jv \ "user" \ "company" \ "company_name").asOpt[String].getOrElse(throw new Exception("Illegal company"))
+        val time = (jv \ "condition" \ "time").asOpt[String].getOrElse(throw new Exception("Illegal time"))
         val ym = time.replaceAll("-", "")
 
         val dashboard = phMaxCompanyDashboard(company_id, ym)
@@ -74,48 +79,48 @@ trait phCompanyDashboard extends phMaxSearchTrait with phDealRGB {
                 "subtitle" -> toJson(time),
                 "name" -> toJson(fastestGrowingMkt.getOrElse("market", "无")),
                 "subname" -> toJson(company_name),
-                "value" -> toJson(fastestGrowingMkt.getOrElse("sales", "0.0")),
-                "percent" -> toJson(fastestGrowingMkt.getOrElse("growth", "0.0"))
+                "value" -> toJson(getFormatSales(fastestGrowingMkt.getOrElse("sales", "0.0").toDouble)),
+                "percent" -> toJson(getFormatShare(fastestGrowingMkt.getOrElse("growth", "0.0").toDouble))
             )),
             toJson(Map(
                 "title" -> toJson("产品销售增长最快"),
                 "subtitle" -> toJson(time),
                 "name" -> toJson(fastestSaleGrowingProd.getOrElse("product", "无")),
                 "subname" -> toJson(fastestSaleGrowingProd.getOrElse("market", "无")),
-                "value" -> toJson(fastestSaleGrowingProd.getOrElse("sales", "0.0")),
-                "percent" -> toJson(fastestSaleGrowingProd.getOrElse("productGrowth", "0.0"))
+                "value" -> toJson(getFormatSales(fastestSaleGrowingProd.getOrElse("sales", "0.0").toDouble)),
+                "percent" -> toJson(getFormatShare(fastestSaleGrowingProd.getOrElse("productGrowth", "0.0").toDouble))
             )),
             toJson(Map(
                 "title" -> toJson("产品销售下滑最多"),
                 "subtitle" -> toJson(time),
                 "name" -> toJson(fastestSaleDeclineProd.getOrElse("product", "无")),
                 "subname" -> toJson(fastestSaleDeclineProd.getOrElse("market", "无")),
-                "value" -> toJson(fastestSaleDeclineProd.getOrElse("sales", "0.0")),
-                "percent" -> toJson(fastestSaleDeclineProd.getOrElse("productGrowth", "0.0"))
+                "value" -> toJson(getFormatSales(fastestSaleDeclineProd.getOrElse("sales", "0.0").toDouble)),
+                "percent" -> toJson(getFormatShare(fastestSaleDeclineProd.getOrElse("productGrowth", "0.0").toDouble))
             )),
             toJson(Map(
                 "title" -> toJson("份额最多"),
                 "subtitle" -> toJson(time),
                 "name" -> toJson(maxShareProd.getOrElse("product", "无")),
                 "subname" -> toJson(maxShareProd.getOrElse("market", "无")),
-                "value" -> toJson(maxShareProd.getOrElse("companyProdShare", "0.0")),
-                "percent" -> toJson(maxShareProd.getOrElse("companyProdShareGrowth", "0.0"))
+                "value" -> toJson(getFormatShare(maxShareProd.getOrElse("companyProdShare", "0.0").toDouble)),
+                "percent" -> toJson(getFormatShare(maxShareProd.getOrElse("companyProdShareGrowth", "0.0").toDouble))
             )),
             toJson(Map(
                 "title" -> toJson("产品份额增长最快"),
                 "subtitle" -> toJson(time),
                 "name" -> toJson(fastestShareGrowingProd.getOrElse("product", "无")),
                 "subname" -> toJson(fastestShareGrowingProd.getOrElse("market", "无")),
-                "value" -> toJson(fastestShareGrowingProd.getOrElse("companyProdShare", "0.0")),
-                "percent" -> toJson(fastestShareGrowingProd.getOrElse("companyProdShareGrowth", "0.0"))
+                "value" -> toJson(getFormatShare(fastestShareGrowingProd.getOrElse("companyProdShare", "0.0").toDouble)),
+                "percent" -> toJson(getFormatShare(fastestShareGrowingProd.getOrElse("companyProdShareGrowth", "0.0").toDouble))
             )),
             toJson(Map(
                 "title" -> toJson("份额下滑最多"),
                 "subtitle" -> toJson(time),
                 "name" -> toJson(fastestShareDeclineProd.getOrElse("product", "无")),
                 "subname" -> toJson(fastestShareDeclineProd.getOrElse("market", "无")),
-                "value" -> toJson(fastestShareDeclineProd.getOrElse("companyProdShare", "0.0")),
-                "percent" -> toJson(fastestShareDeclineProd.getOrElse("companyProdShareGrowth", "0.0"))
+                "value" -> toJson(getFormatShare(fastestShareDeclineProd.getOrElse("companyProdShare", "0.0").toDouble)),
+                "percent" -> toJson(getFormatShare(fastestShareDeclineProd.getOrElse("companyProdShareGrowth", "0.0").toDouble))
             ))
         )
 
@@ -123,9 +128,9 @@ trait phCompanyDashboard extends phMaxSearchTrait with phDealRGB {
     }
 
     def overView(jv: JsValue): (Option[Map[String, JsValue]], Option[JsValue]) = {
-        val company_id = (jv \ "user" \ "company_id").asOpt[String].getOrElse(throw new Exception("Illegal company"))
-        val company_name = (jv \ "user" \ "company_name").asOpt[String].getOrElse(throw new Exception("Illegal company"))
-        val time = (jv \ "time").asOpt[String].getOrElse(throw new Exception("Illegal time"))
+        val company_id = (jv \ "user" \ "company" \ "company_id").asOpt[String].getOrElse(throw new Exception("Illegal company"))
+        val company_name = (jv \ "user" \ "company" \ "company_name").asOpt[String].getOrElse(throw new Exception("Illegal company"))
+        val time = (jv \ "condition" \ "time").asOpt[String].getOrElse(throw new Exception("Illegal time"))
         val ym = time.replaceAll("-", "")
 
         val dashboard = phMaxCompanyDashboard(company_id, ym)
@@ -140,13 +145,13 @@ trait phCompanyDashboard extends phMaxSearchTrait with phDealRGB {
                 Map(
                     "prod" -> toJson(m.getOrElse("product", "无")),
                     "market" -> toJson(m.getOrElse("market", "无")),
-                    "market_scale" -> toJson(m.getOrElse("marketSales", "无")),
-                    "market_growth" -> toJson(m.getOrElse("marketGrowth", "无")),
-                    "sales" -> toJson(m.getOrElse("sales", "无")),
-                    "sales_growth" -> toJson(m.getOrElse("productGrowth", "无")),
-                    "ev_value" -> toJson(m.getOrElse("EV", "无")),
-                    "share" -> toJson(m.getOrElse("companyProdShare", "无")),
-                    "share_growth" -> toJson(m.getOrElse("companyProdShareGrowth", "无"))
+                    "market_scale" -> toJson(getFormatSales(m.getOrElse("marketSales", "0.0").toDouble)),
+                    "market_growth" -> toJson(getFormatShare(m.getOrElse("marketGrowth", "0.0").toDouble)),
+                    "sales" -> toJson(getFormatSales(m.getOrElse("sales", "0.0").toDouble)),
+                    "sales_growth" -> toJson(getFormatShare(m.getOrElse("productGrowth", "0.0").toDouble)),
+                    "ev_value" -> toJson(getFormatShare(m.getOrElse("EV", "0.0").toDouble)),
+                    "share" -> toJson(getFormatShare(m.getOrElse("companyProdShare", "0.0").toDouble)),
+                    "share_growth" -> toJson(getFormatShare(m.getOrElse("companyProdShareGrowth", "0.0").toDouble))
                 )
             }))
         )
@@ -155,9 +160,9 @@ trait phCompanyDashboard extends phMaxSearchTrait with phDealRGB {
     }
 
     def contribution(jv: JsValue): (Option[Map[String, JsValue]], Option[JsValue]) = {
-        val company_id = (jv \ "user" \ "company_id").asOpt[String].getOrElse(throw new Exception("Illegal company"))
-        val company_name = (jv \ "user" \ "company_name").asOpt[String].getOrElse(throw new Exception("Illegal company"))
-        val time = (jv \ "time").asOpt[String].getOrElse(throw new Exception("Illegal time"))
+        val company_id = (jv \ "user" \ "company" \ "company_id").asOpt[String].getOrElse(throw new Exception("Illegal company"))
+        val company_name = (jv \ "user" \ "company" \ "company_name").asOpt[String].getOrElse(throw new Exception("Illegal company"))
+        val time = (jv \ "condition" \ "time").asOpt[String].getOrElse(throw new Exception("Illegal time"))
         val ym = time.replaceAll("-", "")
 
         val dashboard = phMaxCompanyDashboard(company_id, ym)
@@ -176,8 +181,8 @@ trait phCompanyDashboard extends phMaxSearchTrait with phDealRGB {
             "pie" -> toJson(companyProdLstMapWithColor.map(m => {
                 Map(
                     "prod" -> toJson(m.getOrElse("product", "无")),
-                    "sales" -> toJson(m.getOrElse("sales", "无")),
-                    "cont" -> toJson(m.getOrElse("contribution", "无")),
+                    "sales" -> toJson(getFormatSales(m.getOrElse("sales", "0.0").toDouble)),
+                    "cont" -> toJson(getFormatShare(m.getOrElse("contribution", "0.0").toDouble)),
                     "color" -> toJson(m.getOrElse("color", "#FFFFFF"))
                 )
             })),
@@ -185,11 +190,11 @@ trait phCompanyDashboard extends phMaxSearchTrait with phDealRGB {
                 Map(
                     "prod" -> toJson(m.getOrElse("product", "无")),
                     "market" -> toJson(m.getOrElse("market", "无")),
-                    "sales" -> toJson(m.getOrElse("sales", "无")),
-                    "cont" -> toJson(m.getOrElse("contribution", "无")),
-                    "cont-month" -> toJson(m.getOrElse("lastMonthContribution", "无")),
-                    "cont-season" -> toJson(m.getOrElse("lastSeasonContribution", "无")),
-                    "cont-year" -> toJson(m.getOrElse("lastYearContribution", "无")),
+                    "sales" -> toJson(getFormatSales(m.getOrElse("sales", "0.0").toDouble)),
+                    "cont" -> toJson(getFormatShare(m.getOrElse("contribution", "0.0").toDouble)),
+                    "cont-month" -> toJson(getFormatShare(m.getOrElse("lastMonthContribution", "0.0").toDouble)),
+                    "cont-season" -> toJson(getFormatShare(m.getOrElse("lastSeasonContribution", "0.0").toDouble)),
+                    "cont-year" -> toJson(getFormatShare(m.getOrElse("lastYearContribution", "0.0").toDouble)),
                     "color" -> toJson(m.getOrElse("color", "#FFFFFF"))
                 )
             }))
