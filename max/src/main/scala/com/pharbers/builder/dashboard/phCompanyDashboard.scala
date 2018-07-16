@@ -168,7 +168,7 @@ trait phCompanyDashboard extends phMaxSearchTrait with phDealRGB {
         val dashboard = phMaxCompanyDashboard(company_id, ym)
         val companyProdLstMap = dashboard.getCompanyProdCurrSalesGrowth
         val colorStep = companyProdLstMap.length
-        val companyProdLstMapWithColor = companyProdLstMap.sortBy(x => x("contribution").toString.toDouble).reverse.zipWithIndex.map(m => {
+        val companyProdLstMapWithColor = companyProdLstMap.sortBy(x => x("contribution").toDouble).reverse.zipWithIndex.map(m => {
             val color = getIndexColor(m._2, colorStep).toUpperCase()
             m._1 ++ Map("color" -> color)
         })

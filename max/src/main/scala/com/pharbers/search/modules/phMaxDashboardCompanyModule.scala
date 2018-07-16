@@ -63,30 +63,30 @@ trait phMaxDashboardCompanyModule extends phMaxDashboardCommon {
 
     private val companyProdCurrSalesGrowthMap = getCompanyProdCurrSalesGrowth
 
-    def getFastestGrowingMkt: Map[String, String] = mktCurrSalesGrowthMap.maxBy(x => x("growth").toString.toDouble) match {
-        case m if m("growth").toString.toDouble < 0 => Map.empty
+    def getFastestGrowingMkt: Map[String, String] = mktCurrSalesGrowthMap.maxBy(x => x("growth").toDouble) match {
+        case m if m("growth").toDouble <= 0 => Map.empty
         case m => m
     }
 
-    def getCompanyFastestSaleGrowingProd: Map[String, String] = companyProdCurrSalesGrowthMap.maxBy(x => x("productGrowth").toString.toDouble) match {
-        case m if m("productGrowth").toString.toDouble < 0 => Map.empty
+    def getCompanyFastestSaleGrowingProd: Map[String, String] = companyProdCurrSalesGrowthMap.maxBy(x => x("productGrowth").toDouble) match {
+        case m if m("productGrowth").toDouble <= 0 => Map.empty
         case m => m
     }
 
-    def getCompanyFastestSaleDeclineProd: Map[String, String] = companyProdCurrSalesGrowthMap.minBy(x => x("productGrowth").toString.toDouble) match {
-        case m if m("productGrowth").toString.toDouble > 0 => Map.empty
+    def getCompanyFastestSaleDeclineProd: Map[String, String] = companyProdCurrSalesGrowthMap.minBy(x => x("productGrowth").toDouble) match {
+        case m if m("productGrowth").toDouble >= 0 => Map.empty
         case m => m
     }
 
-    def getCompanyMaxShareProd: Map[String, String] = companyProdCurrSalesGrowthMap.maxBy(x => x("companyProdShare").toString.toDouble)
+    def getCompanyMaxShareProd: Map[String, String] = companyProdCurrSalesGrowthMap.maxBy(x => x("companyProdShare").toDouble)
 
-    def getCompanyFastestShareGrowingProd: Map[String, String] = companyProdCurrSalesGrowthMap.maxBy(x => x("companyProdShareGrowth").toString.toDouble) match {
-        case m if m("companyProdShareGrowth").toString.toDouble < 0 => Map.empty
+    def getCompanyFastestShareGrowingProd: Map[String, String] = companyProdCurrSalesGrowthMap.maxBy(x => x("companyProdShareGrowth").toDouble) match {
+        case m if m("companyProdShareGrowth").toDouble <= 0 => Map.empty
         case m => m
     }
 
-    def getCompanyFastestShareDeclineProd: Map[String, String] = companyProdCurrSalesGrowthMap.minBy(x => x("companyProdShareGrowth").toString.toDouble) match {
-        case m if m("companyProdShareGrowth").toString.toDouble > 0 => Map.empty
+    def getCompanyFastestShareDeclineProd: Map[String, String] = companyProdCurrSalesGrowthMap.minBy(x => x("companyProdShareGrowth").toDouble) match {
+        case m if m("companyProdShareGrowth").toDouble >= 0 => Map.empty
         case m => m
     }
 

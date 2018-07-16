@@ -41,10 +41,10 @@ trait phMaxDashboardNationModule extends phMaxDashboardCommon {
 
     private val currMktSalesGrowthMap = getCurrMktSalesGrowth
 
-    def getProdSalesGrowth: List[Map[String, String]] = getProdSalesMapByScopeYM("PRODUCT_SALES", ym, market).map(x => {
+    def getProdSalesGrowthByYM(temp_ym: String): List[Map[String, String]] = getProdSalesMapByScopeYM("PRODUCT_SALES", temp_ym, market).map(x => {
         val mktSales = currMktSalesGrowthMap.find(m => m("market") == x("market")).get("sales")
         val mktGrowth = currMktSalesGrowthMap.find(m => m("market") == x("market")).get("growth")
-        val prodLastMonthSales = getProdSalesMapByScopeYM("PRODUCT_SALES", lastMonthYM, market).find(y => y("market")==x("market") && y("product")==x("product")).getOrElse(Map("sales" -> "0.0"))("sales").toDouble
+        val prodLastMonthSales = getProdSalesMapByScopeYM("PRODUCT_SALES", getLastMonthYM(temp_ym), market).find(y => y("market")==x("market") && y("product")==x("product")).getOrElse(Map("sales" -> "0.0"))("sales").toDouble
         val prodGrowth = prodLastMonthSales match {
             case 0.0 => "0.0"
             case lastSales => ((x("sales").toDouble - lastSales)/lastSales).toString
@@ -68,11 +68,36 @@ trait phMaxDashboardNationModule extends phMaxDashboardCommon {
             "marketSales" -> mktSales,
             "marketGrowth" -> mktGrowth,
             "sales" -> x("sales"),
-            "productGrowth" -> prodGrowth,
+            "salesGrowth" -> prodGrowth,
             "EV" -> EV,
             "prodShare" -> prodShare,
             "prodShareGrowth" -> prodShareGrowth.toString
         )
+    })
+
+    private lazy val currMonthProdLstMap = getProdSalesGrowthByYM(ym)
+
+    def getFastestShareGrowingProd: Map[String, String] = currMonthProdLstMap.maxBy(x => x("prodShareGrowth").toDouble) match {
+        case m if m("prodShareGrowth").toDouble <= 0 => Map.empty
+        case m => m
+    }
+
+    def getFastestShareDeclineProd: Map[String, String] = currMonthProdLstMap.minBy(x => x("prodShareGrowth").toDouble) match {
+        case m if m("prodShareGrowth").toDouble >= 0 => Map.empty
+        case m => m
+    }
+
+    private lazy val lastMonthProdLstMap = getProdSalesGrowthByYM(lastMonthYM)
+
+    def getLastMonthProdSortByKey(key: String) = lastMonthProdLstMap.sortBy(m => m(key).toDouble).reverse.zipWithIndex
+
+    def getCurrMonthProdSortByKey(key: String) = currMonthProdLstMap.sortBy(m => m(key).toDouble).reverse.zipWithIndex.map(one => {
+        val lastMonthProdRank = getLastMonthProdSortByKey(key).find(x => x._1("product") == one._1("product") && x._1("corp") == one._1("corp")).getOrElse((Map.empty, -1))._2
+        val RankChanges = lastMonthProdRank match {
+            case -1 => "0"
+            case _ => (lastMonthProdRank - one._2).toString
+        }
+        one._1 ++ Map(s"${key}RankChanges" -> RankChanges, s"${key}Rank" -> one._2.toString)
     })
 
 }

@@ -69,14 +69,21 @@ class MaxDashboardSuite extends FunSuite with phDealRGB {
         val currMonthCompanyShare = dashboard.getCurrMonthCompanyShare
         val listMonthTrend = dashboard.getListMonthTrend
         val competingProductCount = dashboard.getCompetingProductCount
-        val prodSalesGrowth = dashboard.getProdSalesGrowth
+        val prodSalesGrowth = dashboard.getProdSalesGrowthByYM(ym)
+        val salesSorted = dashboard.getCurrMonthProdSortByKey("sales")
+        val salesGrowth = dashboard.getCurrMonthProdSortByKey("salesGrowth")
+        val prodShare = dashboard.getCurrMonthProdSortByKey("prodShare")
+        val prodShareGrowth = dashboard.getCurrMonthProdSortByKey("prodShareGrowth")
 
-        println("currMonthNationSales\t" + currMonthNationSales)
-        println("currMonthCompanySales\t" + currMonthCompanySales)
-        println("currMonthCompanyShare\t" + currMonthCompanyShare)
-        println("listMonthTrend\t" + listMonthTrend)
-        println("competingProductCount\t" + competingProductCount)
-        println("prodSalesGrowth\t" + prodSalesGrowth)
+//        println("currMonthNationSales\t" + currMonthNationSales)
+//        println("currMonthCompanySales\t" + currMonthCompanySales)
+//        println("currMonthCompanyShare\t" + currMonthCompanyShare)
+//        println("listMonthTrend\t" + listMonthTrend)
+//        println("competingProductCount\t" + competingProductCount)
+//        println("prodSalesGrowth\t" + prodSalesGrowth)
+
+//        prodShareGrowth.foreach(println)
+
     }
 
     test("max dashboard province module"){
