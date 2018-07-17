@@ -36,7 +36,12 @@ trait phMaxDashboardNationModule extends phMaxDashboardCommon {
     def getCompetingProductCount: Int = getProdSalesMapByScopeYM("PRODUCT_SALES", ym, market).length - getProdSalesMapByScopeYM("PRODUCT_COMPANY_SALES", ym, market).length
 
     def getCurrMktSalesGrowth: List[Map[String, String]] = getMktSalesLstMap(ym, market).map(x => {
-        Map("market" -> x("market").toString, "sales" -> x("sales").toString, "growth" -> (x("sales").toString.toDouble - getMktSalesLstMap(lastMonthYM, market).find(y => y("market")==x("market")).getOrElse(Map("sales" -> "0.0"))("sales").toDouble).toString)
+        val lastMonthMktSales = getMktSalesLstMap(lastMonthYM, market).find(y => y("market")==x("market")).getOrElse(Map("sales" -> "0.0"))("sales").toDouble
+        val growth = lastMonthMktSales match {
+            case 0.0 => 0.0
+            case _ => (x("sales").toString.toDouble - lastMonthMktSales)/lastMonthMktSales
+        }
+        Map("market" -> x("market").toString, "sales" -> x("sales").toString, "growth" -> growth.toString)
     })
 
     private val currMktSalesGrowthMap = getCurrMktSalesGrowth
@@ -51,7 +56,7 @@ trait phMaxDashboardNationModule extends phMaxDashboardCommon {
         }
         val EV = mktGrowth match {
             case "0.0" => "0.0"
-            case mkt_growth => (prodGrowth.toDouble/mkt_growth.toDouble * 100).toString
+            case mkt_growth => (prodGrowth.toDouble/mkt_growth.toDouble).toString
         }
         val prodShare = mktSales match {
             case "0.0" => "0.0"
@@ -97,7 +102,7 @@ trait phMaxDashboardNationModule extends phMaxDashboardCommon {
             case -1 => "0"
             case _ => (lastMonthProdRank - one._2).toString
         }
-        one._1 ++ Map(s"${key}RankChanges" -> RankChanges, s"${key}Rank" -> one._2.toString)
+        one._1 ++ Map(s"${key}RankChanges" -> RankChanges, s"${key}Rank" -> (one._2 + 1).toString)
     })
 
 }

@@ -1,10 +1,10 @@
 package com.pharbers.max
 
 import com.pharbers.common.algorithm.phDealRGB
-import com.pharbers.search.{phMaxCompanyDashboard, phMaxNativeDashboard, phMaxProvinceDashboard}
+import com.pharbers.search.{phMaxCompanyDashboard, phMaxNativeDashboard, phMaxProvinceDashboard, phMaxSearchTrait}
 import org.scalatest.FunSuite
 
-class MaxDashboardSuite extends FunSuite with phDealRGB {
+class MaxDashboardSuite extends FunSuite with phMaxSearchTrait with phDealRGB {
 
     val company: String = "5afa53bded925c05c6f69c54"
     val user: String = "5afaa333ed925c30f8c066d1"
@@ -80,8 +80,9 @@ class MaxDashboardSuite extends FunSuite with phDealRGB {
 //        println("currMonthCompanyShare\t" + currMonthCompanyShare)
 //        println("listMonthTrend\t" + listMonthTrend)
 //        println("competingProductCount\t" + competingProductCount)
-//        println("prodSalesGrowth\t" + prodSalesGrowth)
+        println("prodSalesGrowth\t" + prodSalesGrowth.length)
 
+        prodSalesGrowth.foreach(println)
 //        prodShareGrowth.foreach(println)
 
     }

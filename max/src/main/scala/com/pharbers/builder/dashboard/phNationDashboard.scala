@@ -39,7 +39,7 @@ trait phNationDashboard extends phMaxSearchTrait with phDealRGB {
                 "title" -> toJson("产品份额"),
                 "subtitle" -> toJson(time),
                 "area" -> toJson("全国"),
-                "num" -> toJson(getFormatSales(dashboard.getCurrMonthCompanyShare)),
+                "num" -> toJson(getFormatShare(dashboard.getCurrMonthCompanyShare)),
                 "tag" -> toJson("%"),
                 "yearOnYear" -> toJson(getFormatShare(dashboard.getCompanyShareYearOnYear)),
                 "ringRatio" -> toJson(getFormatShare(dashboard.getCompanyShareMonthOnMonth))
@@ -189,27 +189,35 @@ trait phNationDashboard extends phMaxSearchTrait with phDealRGB {
         val ym = time.replaceAll("-", "")
 
         val unit = tag match {
-            case t if t.toLowerCase().contains("sale") => "mil"
             case t if t.toLowerCase().contains("share") => "%"
+            case t if t.toLowerCase().contains("grow") => "%"
+            case t if t.toLowerCase().contains("sale") => "mil"
             case _ => "undefined"
         }
 
         val dashboard = phMaxNativeDashboard(company_id, ym, market)
 
         val ranking = dashboard.getCurrMonthProdSortByKey(tag).map(m => {
+            val value = m.getOrElse(tag, "0.0").toDouble
+            val formatValue: Double = tag match {
+                case t if t.toLowerCase().contains("share") => getFormatShare(value)
+                case t if t.toLowerCase().contains("grow") => getFormatShare(value)
+                case t if t.toLowerCase().contains("sale") => getFormatSales(value)
+                case _ => 0.0
+            }
             Map(
                 "no" -> toJson(m.getOrElse(s"${tag}Rank", "0").toInt),
                 "prod" -> toJson(m.getOrElse("product", "无")),
                 "manu" -> toJson(m.getOrElse("corp", "无")),
                 "growth" -> toJson(m.getOrElse(s"${tag}RankChanges", "0").toInt),
-                "value" -> toJson(m.getOrElse(tag, "0"))
+                "value" -> toJson(formatValue)
             )
         })
 
         (Some(Map("unit" -> toJson(unit), "ranking" -> toJson(ranking))), None)
     }
 
-    def getNationproductTable(jv: JsValue): (Option[Map[String, JsValue]], Option[JsValue]) = {
+    def getNationProductTable(jv: JsValue): (Option[Map[String, JsValue]], Option[JsValue]) = {
         val company_id = (jv \ "user" \ "company" \ "company_id").asOpt[String].getOrElse(throw new Exception("Illegal company"))
         val company_name = (jv \ "user" \ "company" \ "company_name").asOpt[String].getOrElse(throw new Exception("Illegal company"))
         val time = (jv \ "condition" \ "time").asOpt[String].getOrElse(throw new Exception("Illegal time"))
@@ -230,7 +238,7 @@ trait phNationDashboard extends phMaxSearchTrait with phDealRGB {
                 "manufacturer" -> toJson(m.getOrElse("corp", "无")),
                 "market_sale" -> toJson(getFormatSales(m.getOrElse("sales", "0.0").toDouble)),
                 "sales_growth" -> toJson(getFormatShare(m.getOrElse("salesGrowth", "0.0").toDouble)),
-                "ev_value" -> toJson(m.getOrElse("EV", "0.0").toDouble),
+                "ev_value" -> toJson(getFormatShare(m.getOrElse("EV", "0.0").toDouble)),
                 "share" -> toJson(getFormatShare(m.getOrElse("prodShare", "0.0").toDouble)),
                 "share_growth" -> toJson(getFormatShare(m.getOrElse("prodShareGrowth", "0.0").toDouble))
             )

@@ -41,7 +41,7 @@ trait phMaxSearchTrait {
 
     def getFormatSales(originValue: Double): Double = f"${originValue/1.0E6}%.2f".toDouble
 
-    def getFormatShare(originValue: Double): Double = f"$originValue%.4f".toDouble * 100
+    def getFormatShare(originValue: Double): Double = f"${originValue * 100}%.2f".toDouble
 
     def getFormatProdFromMin1(min1: String): String = (pattern split min1).head
 
