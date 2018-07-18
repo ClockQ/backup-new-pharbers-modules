@@ -103,7 +103,7 @@ trait phNationDashboard extends phMaxSearchTrait with phDealRGB {
             case _ => dashboard.getFastestShareDeclineProd
         }
 
-        val saleShareCard: List[JsValue] = List(
+        val mostCard: List[JsValue] = List(
             toJson(Map(
                 "title" -> toJson("竟品数量"),
                 "subtitle" -> toJson(time),
@@ -143,7 +143,7 @@ trait phNationDashboard extends phMaxSearchTrait with phDealRGB {
             ))
         )
 
-        (Some(Map("saleShareCard" -> toJson(saleShareCard))), None)
+        (Some(Map("mostCard" -> toJson(mostCard))), None)
     }
 
     def getNationProductShare(jv: JsValue): (Option[Map[String, JsValue]], Option[JsValue]) = {
@@ -156,11 +156,13 @@ trait phNationDashboard extends phMaxSearchTrait with phDealRGB {
         val dashboard = phMaxNativeDashboard(company_id, ym, market)
         val prodSalesGrowthLst = dashboard.getProdSalesGrowthByYM(ym)
 
-        val colorStep = prodSalesGrowthLst.length
-        val prodLstMapWithColor = prodSalesGrowthLst.sortBy(x => x("prodShare").toDouble).reverse.zipWithIndex.map(m => {
-            val color = getIndexColor(m._2, colorStep).toUpperCase()
-            m._1 ++ Map("color" -> color)
-        })
+        val prodLstMapWithColor = prodSalesGrowthLst match {
+            case Nil => List.empty
+            case lst => lst.sortBy(x => x("prodShare").toDouble).reverse.zipWithIndex.map(m => {
+                val color = getIndexColor(m._2, lst.length).toUpperCase()
+                m._1 ++ Map("color" -> color)
+            })
+        }
 
         val prodSalesOverview = Map(
             "title" -> toJson(company_name + "各产品销售份额"),
@@ -188,6 +190,8 @@ trait phNationDashboard extends phMaxSearchTrait with phDealRGB {
         val tag = (jv \ "condition" \ "tag").asOpt[String].getOrElse(throw new Exception("Illegal tag"))
         val ym = time.replaceAll("-", "")
 
+        val dashboard = phMaxNativeDashboard(company_id, ym, market)
+
         val unit = tag match {
             case t if t.toLowerCase().contains("share") => "%"
             case t if t.toLowerCase().contains("grow") => "%"
@@ -195,24 +199,26 @@ trait phNationDashboard extends phMaxSearchTrait with phDealRGB {
             case _ => "undefined"
         }
 
-        val dashboard = phMaxNativeDashboard(company_id, ym, market)
-
-        val ranking = dashboard.getCurrMonthProdSortByKey(tag).map(m => {
-            val value = m.getOrElse(tag, "0.0").toDouble
-            val formatValue: Double = tag match {
-                case t if t.toLowerCase().contains("share") => getFormatShare(value)
-                case t if t.toLowerCase().contains("grow") => getFormatShare(value)
-                case t if t.toLowerCase().contains("sale") => getFormatSales(value)
-                case _ => 0.0
-            }
-            Map(
-                "no" -> toJson(m.getOrElse(s"${tag}Rank", "0").toInt),
-                "prod" -> toJson(m.getOrElse("product", "无")),
-                "manu" -> toJson(m.getOrElse("corp", "无")),
-                "growth" -> toJson(m.getOrElse(s"${tag}RankChanges", "0").toInt),
-                "value" -> toJson(formatValue)
-            )
-        })
+        val ranking = dashboard.getProdSalesGrowthByYM(ym) match {
+            case Nil => List.empty
+            case _ =>
+                dashboard.getCurrMonthProdSortByKey(tag).map(m => {
+                    val value = m.getOrElse(tag, "0.0").toDouble
+                    val formatValue: Double = tag match {
+                        case t if t.toLowerCase().contains("share") => getFormatShare(value)
+                        case t if t.toLowerCase().contains("grow") => getFormatShare(value)
+                        case t if t.toLowerCase().contains("sale") => getFormatSales(value)
+                        case _ => 0.0
+                    }
+                    Map(
+                        "no" -> toJson(m.getOrElse(s"${tag}Rank", "0").toInt),
+                        "prod" -> toJson(m.getOrElse("product", "无")),
+                        "manu" -> toJson(m.getOrElse("corp", "无")),
+                        "growth" -> toJson(m.getOrElse(s"${tag}RankChanges", "0").toInt),
+                        "value" -> toJson(formatValue)
+                    )
+                })
+        }
 
         (Some(Map("unit" -> toJson(unit), "ranking" -> toJson(ranking))), None)
     }
