@@ -49,7 +49,7 @@ trait phProvinceDashboard extends phMaxSearchTrait with phDealRGB {
                 "name" -> toJson(provSalesMax.getOrElse("province", "无")),
                 "tag" -> toJson("mil"),
                 "value" -> toJson(getFormatSales(provSalesMax.getOrElse("provinceSales", "0.0").toDouble)),
-                "precent" -> toJson(getFormatShare(provSalesMax.getOrElse("provMomGrowth", "0.0").toDouble))
+                "percent" -> toJson(getFormatShare(provSalesMax.getOrElse("provMomGrowth", "0.0").toDouble))
             )),
             toJson(Map(
                 "title" -> toJson("市场规模增长最快"),
@@ -57,7 +57,7 @@ trait phProvinceDashboard extends phMaxSearchTrait with phDealRGB {
                 "name" -> toJson(provSalesGrowingFastest.getOrElse("province", "无")),
                 "tag" -> toJson("mil"),
                 "value" -> toJson(getFormatSales(provSalesGrowingFastest.getOrElse("provinceSales", "0.0").toDouble)),
-                "precent" -> toJson(getFormatShare(provSalesGrowingFastest.getOrElse("provMomGrowth", "0.0").toDouble))
+                "percent" -> toJson(getFormatShare(provSalesGrowingFastest.getOrElse("provMomGrowth", "0.0").toDouble))
             )),
             toJson(Map(
                 "title" -> toJson("产品销售额最高"),
@@ -65,7 +65,7 @@ trait phProvinceDashboard extends phMaxSearchTrait with phDealRGB {
                 "name" -> toJson(provCompanySalesMax.getOrElse("province", "无")),
                 "tag" -> toJson("mil"),
                 "value" -> toJson(getFormatSales(provCompanySalesMax.getOrElse("companySales", "0.0").toDouble)),
-                "precent" -> toJson(getFormatShare(provCompanySalesMax.getOrElse("companySalesMomGrowth", "0.0").toDouble))
+                "percent" -> toJson(getFormatShare(provCompanySalesMax.getOrElse("companySalesMomGrowth", "0.0").toDouble))
             )),
             toJson(Map(
                 "title" -> toJson("产品销售额增长最快"),
@@ -73,7 +73,7 @@ trait phProvinceDashboard extends phMaxSearchTrait with phDealRGB {
                 "name" -> toJson(provCompanySalesGrowingFastest.getOrElse("province", "无")),
                 "tag" -> toJson("mil"),
                 "value" -> toJson(getFormatSales(provCompanySalesGrowingFastest.getOrElse("companySales", "0.0").toDouble)),
-                "precent" -> toJson(getFormatShare(provCompanySalesGrowingFastest.getOrElse("companySalesMomGrowth", "0.0").toDouble))
+                "percent" -> toJson(getFormatShare(provCompanySalesGrowingFastest.getOrElse("companySalesMomGrowth", "0.0").toDouble))
             )),
             toJson(Map(
                 "title" -> toJson("产品份额最高"),
@@ -81,7 +81,7 @@ trait phProvinceDashboard extends phMaxSearchTrait with phDealRGB {
                 "name" -> toJson(provCompanyShareMax.getOrElse("province", "无")),
                 "tag" -> toJson("%"),
                 "value" -> toJson(getFormatShare(provCompanyShareMax.getOrElse("companyShare", "0.0").toDouble)),
-                "precent" -> toJson(getFormatShare(provCompanyShareMax.getOrElse("companyShareMomGrowth", "0.0").toDouble))
+                "percent" -> toJson(getFormatShare(provCompanyShareMax.getOrElse("companyShareMomGrowth", "0.0").toDouble))
             )),
             toJson(Map(
                 "title" -> toJson("产品份额增长最快"),
@@ -89,7 +89,7 @@ trait phProvinceDashboard extends phMaxSearchTrait with phDealRGB {
                 "name" -> toJson(provCompanyShareGrowingFastest.getOrElse("province", "无")),
                 "tag" -> toJson("%"),
                 "value" -> toJson(getFormatShare(provCompanyShareGrowingFastest.getOrElse("companyShare", "0.0").toDouble)),
-                "precent" -> toJson(getFormatShare(provCompanyShareGrowingFastest.getOrElse("companyShareMomGrowth", "0.0").toDouble))
+                "percent" -> toJson(getFormatShare(provCompanyShareGrowingFastest.getOrElse("companyShareMomGrowth", "0.0").toDouble))
             ))
         )
 
