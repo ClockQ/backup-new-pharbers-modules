@@ -77,48 +77,60 @@ trait phCompanyDashboard extends phMaxSearchTrait with phDealRGB {
             toJson(Map(
                 "title" -> toJson("市场规模增长最快"),
                 "subtitle" -> toJson(time),
+                "tag" -> toJson("str"),
                 "name" -> toJson(fastestGrowingMkt.getOrElse("market", "无")),
                 "subname" -> toJson(company_name),
+                "unit" -> toJson("mil"),
                 "value" -> toJson(getFormatSales(fastestGrowingMkt.getOrElse("sales", "0.0").toDouble)),
                 "percent" -> toJson(getFormatShare(fastestGrowingMkt.getOrElse("growth", "0.0").toDouble))
             )),
             toJson(Map(
                 "title" -> toJson("产品销售增长最快"),
                 "subtitle" -> toJson(time),
+                "tag" -> toJson("str"),
                 "name" -> toJson(fastestSaleGrowingProd.getOrElse("product", "无")),
                 "subname" -> toJson(fastestSaleGrowingProd.getOrElse("market", "无")),
+                "unit" -> toJson("mil"),
                 "value" -> toJson(getFormatSales(fastestSaleGrowingProd.getOrElse("sales", "0.0").toDouble)),
                 "percent" -> toJson(getFormatShare(fastestSaleGrowingProd.getOrElse("productGrowth", "0.0").toDouble))
             )),
             toJson(Map(
                 "title" -> toJson("产品销售下滑最多"),
                 "subtitle" -> toJson(time),
+                "tag" -> toJson("str"),
                 "name" -> toJson(fastestSaleDeclineProd.getOrElse("product", "无")),
                 "subname" -> toJson(fastestSaleDeclineProd.getOrElse("market", "无")),
+                "unit" -> toJson("mil"),
                 "value" -> toJson(getFormatSales(fastestSaleDeclineProd.getOrElse("sales", "0.0").toDouble)),
                 "percent" -> toJson(getFormatShare(fastestSaleDeclineProd.getOrElse("productGrowth", "0.0").toDouble))
             )),
             toJson(Map(
                 "title" -> toJson("份额最多"),
                 "subtitle" -> toJson(time),
+                "tag" -> toJson("str"),
                 "name" -> toJson(maxShareProd.getOrElse("product", "无")),
                 "subname" -> toJson(maxShareProd.getOrElse("market", "无")),
+                "unit" -> toJson("%"),
                 "value" -> toJson(getFormatShare(maxShareProd.getOrElse("companyProdShare", "0.0").toDouble)),
                 "percent" -> toJson(getFormatShare(maxShareProd.getOrElse("companyProdShareGrowth", "0.0").toDouble))
             )),
             toJson(Map(
                 "title" -> toJson("产品份额增长最快"),
                 "subtitle" -> toJson(time),
+                "tag" -> toJson("str"),
                 "name" -> toJson(fastestShareGrowingProd.getOrElse("product", "无")),
                 "subname" -> toJson(fastestShareGrowingProd.getOrElse("market", "无")),
+                "unit" -> toJson("%"),
                 "value" -> toJson(getFormatShare(fastestShareGrowingProd.getOrElse("companyProdShare", "0.0").toDouble)),
                 "percent" -> toJson(getFormatShare(fastestShareGrowingProd.getOrElse("companyProdShareGrowth", "0.0").toDouble))
             )),
             toJson(Map(
                 "title" -> toJson("份额下滑最多"),
                 "subtitle" -> toJson(time),
+                "tag" -> toJson("str"),
                 "name" -> toJson(fastestShareDeclineProd.getOrElse("product", "无")),
                 "subname" -> toJson(fastestShareDeclineProd.getOrElse("market", "无")),
+                "unit" -> toJson("%"),
                 "value" -> toJson(getFormatShare(fastestShareDeclineProd.getOrElse("companyProdShare", "0.0").toDouble)),
                 "percent" -> toJson(getFormatShare(fastestShareDeclineProd.getOrElse("companyProdShareGrowth", "0.0").toDouble))
             ))

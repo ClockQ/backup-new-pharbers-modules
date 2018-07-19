@@ -1,9 +1,17 @@
 package com.pharbers.search.modules
 
+import java.io
+
+import scala.collection.immutable
+
 trait phMaxDashboardProvinceModule extends phMaxDashboardCommon {
 
     val market : String
     val province : String
+
+    def getCurrMonthAllProvLst = getProvinceSalesMapByScopeYM("PROVINCE_SALES", ym, market).map(m => m.getOrElse("province", "无"))
+
+    def getDashboardMonthLst = (dashboardEndYM :: getLastSeveralMonthYM(dashboardMonth.toInt, dashboardEndYM))
 
     def getProvinceSalesLstMap(temp_ym: String): List[Map[String, String]] = getProvinceSalesMapByScopeYM("PROVINCE_SALES", temp_ym, market).map(x => {
 
@@ -73,9 +81,9 @@ trait phMaxDashboardProvinceModule extends phMaxDashboardCommon {
     private val currMonthProvinceSalesLstMap = getProvinceSalesLstMap(ym)
     private val lastMonthProvinceSalesLstMap = getProvinceSalesLstMap(lastMonthYM)
 
-    def getLastMonthProvSortByKey(key: String) = lastMonthProvinceSalesLstMap.sortBy(m => m(key).toDouble).reverse.zipWithIndex
+    def getLastMonthProvSortByKey(key: String): List[(Map[String, String], Int)] = lastMonthProvinceSalesLstMap.sortBy(m => m(key).toDouble).reverse.zipWithIndex
 
-    def getCurrMonthProvSortByKey(key: String) = currMonthProvinceSalesLstMap.sortBy(m => m(key).toDouble).reverse.zipWithIndex.map(one => {
+    def getCurrMonthProvSortByKey(key: String): List[Map[String, String]] = currMonthProvinceSalesLstMap.sortBy(m => m(key).toDouble).reverse.zipWithIndex.map(one => {
         val lastMonthProvRank = getLastMonthProvSortByKey(key).find(x => x._1("province") == one._1("province") && x._1("market") == one._1("market")).getOrElse((Map.empty, -1))._2
         val RankChanges = lastMonthProvRank match {
             case -1 => "0"
@@ -131,19 +139,25 @@ trait phMaxDashboardProvinceModule extends phMaxDashboardCommon {
 
     def getProvinceTotalSalesByYM(temp_ym: String): String = getSeveralMonthProvinceSalesMap.find(x => x("ym") == temp_ym).get.getOrElse("provinceSale", "0.0")
 
-    def getCurrProvinceProdSaleMapByYM(temp_ym: String): List[Map[String, String]] = filterJobKeySet(allSingleJobKeySet, temp_ym, company, market) match {
+    def getCurrProvinceProdSimpleSaleMapByYM(temp_ym: String): List[Map[String, String]] = filterJobKeySet(allSingleJobKeySet, temp_ym, company, market) match {
         case Nil => List.empty
         case lst => {
-            val lastMonthProvinceTotalSales: String = getProvinceTotalSalesByYM(getLastMonthYM(temp_ym))
+            val currMonthProvinceTotalSales: String = getProvinceTotalSalesByYM(temp_ym)
             getProdSalesByArea("Province", province, lst.head._4).groupBy(x => x("Province")+"##"+x("PRODUCT_NAME")+"##"+x("CORP_NAME")+"##"+x("b2c")).map(x => {
                 val ppcb = x._1.split("##")
+
+                val share = currMonthProvinceTotalSales match {
+                    case total_sale if total_sale.toDouble == 0.0 => "0.0"
+                    case total_sale => (x._2.map(m => m("Sales").toDouble).sum/total_sale.toDouble).toString
+                }
+
                 Map(
                     "Province" -> ppcb(0),
                     "PRODUCT_NAME" -> ppcb(1),
                     "CORP_NAME" -> ppcb(2),
                     "b2c" -> ppcb(3),
                     "sales" -> x._2.map(m => m("Sales").toDouble).sum.toString,
-                    "share" -> (x._2.map(m => m("Sales").toDouble).sum/lastMonthProvinceTotalSales.toDouble).toString
+                    "share" -> share
                 )
             }).toList
         }
@@ -159,11 +173,12 @@ trait phMaxDashboardProvinceModule extends phMaxDashboardCommon {
                 case last_sales if last_sales.toDouble == 0.0 => "0.0"
                 case last_sales => ((currMonthProvinceTotalSales.toDouble - last_sales.toDouble)/last_sales.toDouble).toString
             }
+            val lastMonthProvProdMap = getCurrProvinceProdSimpleSaleMapByYM(temp_last_ym)
             getProdSalesByArea("Province", province, lst.head._4).groupBy(x => x("Province")+"##"+x("PRODUCT_NAME")+"##"+x("CORP_NAME")+"##"+x("b2c")).map(x => {
                 val ppcb = x._1.split("##")
                 val sales = x._2.map(m => m("Sales").toDouble).sum.toString
                 val share = (x._2.map(m => m("Sales").toDouble).sum/currMonthProvinceTotalSales.toDouble).toString
-                val lastMonthMap = getCurrProvinceProdSaleMapByYM(temp_last_ym).find(x => x("PRODUCT_NAME") == ppcb(1) && x("CORP_NAME") == ppcb(2)).getOrElse(Map.empty)
+                val lastMonthMap = lastMonthProvProdMap.find(x => x("PRODUCT_NAME") == ppcb(1) && x("CORP_NAME") == ppcb(2)).getOrElse(Map.empty)
                 val lastMonthSales = lastMonthMap.getOrElse("sales", "0.0")
                 val lastMonthShare = lastMonthMap.getOrElse("share", "0.0")
                 val salesGrowth = lastMonthSales match {
@@ -199,14 +214,17 @@ trait phMaxDashboardProvinceModule extends phMaxDashboardCommon {
 
     def getLastMonthProvProdSortByKey(key: String) = lastProvinceSalesLstMap.sortBy(m => m(key).toDouble).reverse.zipWithIndex
 
-    def getCurrMonthProvProdSortByKey(key: String) = currProvinceProdLstMap.sortBy(m => m(key).toDouble).reverse.zipWithIndex.map(one => {
-        val lastMonthProvRank = getLastMonthProvProdSortByKey(key).find(x => x._1("PRODUCT_NAME") == one._1("PRODUCT_NAME") && x._1("CORP_NAME") == one._1("CORP_NAME")).getOrElse((Map.empty, -1))._2
-        val RankChanges = lastMonthProvRank match {
-            case -1 => "0"
-            case _ => (lastMonthProvRank - one._2).toString
-        }
-        one._1 ++ Map(s"${key}RankChanges" -> RankChanges, s"${key}Rank" -> (one._2 + 1).toString)
-    })
+    def getCurrMonthProvProdSortByKey(key: String) = {
+        val lastMonthProvRank = getLastMonthProvProdSortByKey(key)
+        currProvinceProdLstMap.sortBy(m => m(key).toDouble).reverse.zipWithIndex.map(one => {
+            val lastMonthProvProdRank = lastMonthProvRank.find(x => x._1("PRODUCT_NAME") == one._1("PRODUCT_NAME") && x._1("CORP_NAME") == one._1("CORP_NAME")).getOrElse((Map.empty, -1))._2
+            val RankChanges = lastMonthProvProdRank match {
+                case -1 => "0"
+                case _ => (lastMonthProvProdRank - one._2).toString
+            }
+            one._1 ++ Map(s"${key}RankChanges" -> RankChanges, s"${key}Rank" -> (one._2 + 1).toString)
+        })
+    }
 
 
     private lazy val currProvinceCompetingProdLstMap = currProvinceProdLstMap.filter(x => x("b2c").toInt == 0)
@@ -229,15 +247,32 @@ trait phMaxDashboardProvinceModule extends phMaxDashboardCommon {
 
     def getCurrProvinceAllProdLstMap = currProvinceProdLstMap
 
-    def getCurrProvinceSeveralMonthProdeSalesMap: List[Map[String, String]] = (dashboardEndYM :: getLastSeveralMonthYM(dashboardMonth.toInt, dashboardEndYM)).flatMap(x => {
-        getCurrProvinceProdSaleMapByYM(x).map(pm => {
+    def getCurrProvinceSeveralMonthProdMap: List[Map[String, String]] = (dashboardEndYM :: getLastSeveralMonthYM(dashboardMonth.toInt, dashboardEndYM)).flatMap(x => {
+        getProvinceProdLstMapByYM(x).map(pm => {
             Map(
                 "ym" -> x,
                 "PRODUCT_NAME" -> pm("PRODUCT_NAME"),
                 "sales" -> pm("sales"),
-                "share" -> pm("share")
+                "salesGrowth" -> pm("salesGrowth"),
+                "share" -> pm("share"),
+                "shareGrowth" -> pm("shareGrowth")
             )
         })
     })
 
+    private lazy val currProvinceSeveralMonthProdMap = getCurrProvinceSeveralMonthProdMap
+    private lazy val currProvinceProdSimpleMap = getCurrProvinceProdSimpleSaleMapByYM(ym)
+
+    def getProvinceSeveralMonthProdMapByKey(key: String): List[Map[String, io.Serializable]] = currProvinceSeveralMonthProdMap.groupBy(x => x("PRODUCT_NAME")).toList.map(one => {
+        Map(
+            "name" -> one._1,
+            "values" -> (dashboardEndYM :: getLastSeveralMonthYM(dashboardMonth.toInt, dashboardEndYM)).reverse.map(temp_ym =>{
+                Map(
+                    "ym" -> temp_ym,
+                    "value" -> one._2.find(m => m.getOrElse("ym", "无") == temp_ym).getOrElse(Map.empty).getOrElse(key, "0.0")
+                )
+
+            })
+        )
+    })
 }

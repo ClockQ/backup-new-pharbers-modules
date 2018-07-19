@@ -1,11 +1,26 @@
 package com.pharbers.builder.dashboard
 
+import java.text.Collator
+
 import com.pharbers.common.algorithm.phDealRGB
 import com.pharbers.search.{phMaxProvinceDashboard, phMaxSearchTrait}
 import play.api.libs.json.JsValue
 import play.api.libs.json.Json.toJson
 
 trait phProvinceDashboard extends phMaxSearchTrait with phDealRGB {
+
+    def getProvinceLst(jv: JsValue): (Option[Map[String, JsValue]], Option[JsValue]) = {
+        val company_id = (jv \ "user" \ "company" \ "company_id").asOpt[String].getOrElse(throw new Exception("Illegal company"))
+        val time = (jv \ "condition" \ "time").asOpt[String].getOrElse(throw new Exception("Illegal time"))
+        val market = (jv \ "condition" \ "market").asOpt[String].getOrElse(throw new Exception("Illegal market"))
+        val ym = time.replaceAll("-", "")
+        val collator = Collator.getInstance(java.util.Locale.CHINA)
+
+        val dashboard = phMaxProvinceDashboard(company_id, ym, market)
+        val provinces = dashboard.getCurrMonthAllProvLst.sortWith((s1, s2) => collator.compare(s1, s2) < 0)
+
+        (Some(Map("provinces" -> toJson(provinces))), None)
+    }
 
     def getProvinceCardData(jv: JsValue): (Option[Map[String, JsValue]], Option[JsValue]) = {
         val company_id = (jv \ "user" \ "company" \ "company_id").asOpt[String].getOrElse(throw new Exception("Illegal company"))
@@ -94,6 +109,38 @@ trait phProvinceDashboard extends phMaxSearchTrait with phDealRGB {
         )
 
         (Some(Map("provinceWord" -> toJson(provinceWord))), None)
+    }
+
+    def getProvinceLineOverview(jv: JsValue): (Option[Map[String, JsValue]], Option[JsValue]) = {
+        val company_id = (jv \ "user" \ "company" \ "company_id").asOpt[String].getOrElse(throw new Exception("Illegal company"))
+        val company_name = (jv \ "user" \ "company" \ "company_name").asOpt[String].getOrElse(throw new Exception("Illegal company"))
+        val time = (jv \ "condition" \ "time").asOpt[String].getOrElse(throw new Exception("Illegal time"))
+        val market = (jv \ "condition" \ "market").asOpt[String].getOrElse(throw new Exception("Illegal market"))
+        val ym = time.replaceAll("-", "")
+
+        val dashboard = phMaxProvinceDashboard(company_id, ym, market)
+        val provinceSalesLst = dashboard.getProvinceSalesLstMap(ym)
+
+        val provLineOverview: Map[String, JsValue] = Map(
+            "title" -> toJson(s"${market}市场各省销售概况")
+        )
+
+        val mixedGraphData = provinceSalesLst match {
+            case Nil => List.empty
+            case lst => lst.map(m => {
+                Map(
+                    "province" -> toJson(m.getOrElse("province", "无")),
+                    "scale" -> toJson(getFormatSales(m.getOrElse("provinceSales", "0.0").toDouble)),
+                    "market_growth" -> toJson(getFormatShare(m.getOrElse("provMomGrowth", "0.0").toDouble)),
+                    "sales" -> toJson(getFormatSales(m.getOrElse("companySales", "0.0").toDouble)),
+                    "prod_growth" -> toJson(getFormatShare(m.getOrElse("companySalesMomGrowth", "0.0").toDouble))
+                )
+            })
+        }
+
+        val graphSale = Map("provLineOverview" -> toJson(provLineOverview), "mixedGraphData" -> toJson(mixedGraphData))
+
+        (Some(Map("graphSale" -> toJson(graphSale))), None)
     }
 
     def getProvinceTableOverview(jv: JsValue): (Option[Map[String, JsValue]], Option[JsValue]) = {
@@ -269,7 +316,7 @@ trait phProvinceDashboard extends phMaxSearchTrait with phDealRGB {
             )),
             "multiData" -> toJson(dashboard.getSeveralMonthProvinceSalesMap.map(x => {
                 toJson(Map(
-                    "date" -> toJson(getFormatYM(x("ym"))),
+                    "ym" -> toJson(getFormatYM(x("ym"))),
                     "marketSales" -> toJson(getFormatSales(x("provinceSale").toDouble)),
                     "prodSales" -> toJson(getFormatSales(x("currProvinceCompanySale").toDouble)),
                     "share" -> toJson(getFormatShare(x("currProvinceCompanyShare").toDouble))
@@ -290,21 +337,21 @@ trait phProvinceDashboard extends phMaxSearchTrait with phDealRGB {
 
         val dashboard = phMaxProvinceDashboard(company_id, ym, market, province)
 
-        val provinceSalesLst = dashboard.getProvinceSalesLstMap(ym)
+        val provinceProdSalesLst = dashboard.getCurrProvinceAllProdLstMap
 
-        val competingProdCount = provinceSalesLst match {
+        val competingProdCount = provinceProdSalesLst match {
             case Nil => 0
             case _ => dashboard.getCurrProvinceCompetingProdCount
         }
-        val currProvMaxShareMap: Map[String, String] = provinceSalesLst match {
+        val currProvMaxShareMap: Map[String, String] = provinceProdSalesLst match {
             case Nil => Map.empty
             case _ => dashboard.getCurrProvinceMaxShareProdMap
         }
-        val currProvFastGrowingSaleMap: Map[String, String] = provinceSalesLst match {
+        val currProvFastGrowingSaleMap: Map[String, String] = provinceProdSalesLst match {
             case Nil => Map.empty
             case _ => dashboard.getCurrProvSalesFastGrowingProdMap
         }
-        val currProvFastDeclineShareMap: Map[String, String] = provinceSalesLst match {
+        val currProvFastDeclineShareMap: Map[String, String] = provinceProdSalesLst match {
             case Nil => Map.empty
             case _ => dashboard.getCurrProvShareFastDeclineProdMap
         }
@@ -461,6 +508,50 @@ trait phProvinceDashboard extends phMaxSearchTrait with phDealRGB {
         })
 
         (Some(Map("prodSalesOverview" -> toJson(prodSalesOverview), "competeSaleTable" -> toJson(competeSaleTable))), None)
+    }
+
+    def getProvProdTrendAnalysis(jv: JsValue): (Option[Map[String, JsValue]], Option[JsValue]) = {
+        val company_id = (jv \ "user" \ "company" \ "company_id").asOpt[String].getOrElse(throw new Exception("Illegal company"))
+        val company_name = (jv \ "user" \ "company" \ "company_name").asOpt[String].getOrElse(throw new Exception("Illegal company"))
+        val time = (jv \ "condition" \ "time").asOpt[String].getOrElse(throw new Exception("Illegal time"))
+        val market = (jv \ "condition" \ "market").asOpt[String].getOrElse(throw new Exception("Illegal market"))
+        implicit val tag: String = (jv \ "condition" \ "tag").asOpt[String].getOrElse(throw new Exception("Illegal tag"))
+        val province = (jv \ "condition" \ "province").asOpt[String].getOrElse(throw new Exception("Illegal province"))
+        val ym = time.replaceAll("-", "")
+
+        val dashboard = phMaxProvinceDashboard(company_id, ym, market, province)
+        val currProvinceSeveralMonthProdMap = dashboard.getCurrProvinceSeveralMonthProdMap
+
+        val unit = tag match {
+            case t if t.toLowerCase().contains("share") => "%"
+            case t if t.toLowerCase().contains("grow") => "%"
+            case t if t.toLowerCase().contains("sale") => "mil"
+            case _ => "undefined"
+        }
+
+        val prodSalesOverview = Map(
+            "title" -> toJson(s"${market}产品销售趋势分析"),
+            "timeStart" -> toJson(getFormatYM(dashboard.dashboardStartYM)),
+            "timeOver" -> toJson(getFormatYM(dashboard.dashboardEndYM)),
+            "area" -> toJson(province)
+        )
+
+        val multiData = currProvinceSeveralMonthProdMap.groupBy(x => x("PRODUCT_NAME")).map(one => {
+            Map(
+                "name" -> toJson(one._1),
+                "values" -> toJson(
+                    dashboard.getDashboardMonthLst.reverse.map(temp_ym =>{
+                        Map(
+                            "ym" -> toJson(temp_ym),
+                            "unit" -> toJson(unit),
+                            "value" -> toJson(formatValue(one._2.find(m => m.getOrElse("ym", "无") == temp_ym).getOrElse(Map.empty).getOrElse(tag, "0.0")))
+                        )
+                    })
+                )
+            )
+        })
+
+        (Some(Map("prodSalesOverview" -> toJson(prodSalesOverview), "multiData" -> toJson(multiData))), None)
     }
 
 }

@@ -1,5 +1,7 @@
 package com.pharbers.max
 
+import java.text.Collator
+
 import com.pharbers.common.algorithm.phDealRGB
 import com.pharbers.search.{phMaxCompanyDashboard, phMaxNativeDashboard, phMaxProvinceDashboard, phMaxSearchTrait}
 import org.scalatest.FunSuite
@@ -75,23 +77,44 @@ class MaxDashboardSuite extends FunSuite with phMaxSearchTrait with phDealRGB {
         val prodShare = dashboard.getCurrMonthProdSortByKey("prodShare")
         val prodShareGrowth = dashboard.getCurrMonthProdSortByKey("prodShareGrowth")
 
-//        println("currMonthNationSales\t" + currMonthNationSales)
-//        println("currMonthCompanySales\t" + currMonthCompanySales)
-//        println("currMonthCompanyShare\t" + currMonthCompanyShare)
-//        println("listMonthTrend\t" + listMonthTrend)
-//        println("competingProductCount\t" + competingProductCount)
+        println("currMonthNationSales\t" + currMonthNationSales)
+        println("currMonthCompanySales\t" + currMonthCompanySales)
+        println("currMonthCompanyShare\t" + currMonthCompanyShare)
+        println("listMonthTrend\t" + listMonthTrend)
+        println("competingProductCount\t" + competingProductCount)
         println("prodSalesGrowth\t" + prodSalesGrowth.length)
 
         prodSalesGrowth.foreach(println)
-//        prodShareGrowth.foreach(println)
+        prodShareGrowth.foreach(println)
 
     }
 
     test("max dashboard province module"){
-        val dashboard = phMaxProvinceDashboard(company, ym, mkt, "安徽")
-        val testListData = dashboard.getCurrProvinceSeveralMonthProdeSalesMap
-        testListData.foreach(println)
-        println(testListData.size)
+        val dashboard = phMaxProvinceDashboard(company, ym, mkt, "北京")
+
+        val currProvProdLstMap = dashboard.getCurrProvinceAllProdLstMap
+        currProvProdLstMap.foreach(println)
+        println(currProvProdLstMap.size)
+
+        val currProvProdSalesRank = dashboard.getCurrMonthProvProdSortByKey("sales")
+        currProvProdSalesRank.foreach(println)
+        println(currProvProdSalesRank.size)
+
+        val currProvinceSeveralMonthProdMap = dashboard.getCurrProvinceSeveralMonthProdMap
+        currProvinceSeveralMonthProdMap.foreach(println)
+        println(currProvinceSeveralMonthProdMap.size)
+
+        val currProvinceSeveralMonthProdSalesMap = dashboard.getProvinceSeveralMonthProdMapByKey("sales")
+        currProvinceSeveralMonthProdSalesMap.foreach(println)
+        println(currProvinceSeveralMonthProdSalesMap.size)
+
+        val com = Collator.getInstance(java.util.Locale.CHINA)
+        val currMonthAllProvLst = dashboard.getCurrMonthAllProvLst.sortWith((s1, s2) => com.compare(s1, s2) < 0)
+        currMonthAllProvLst.foreach(println)
+        println(currMonthAllProvLst.size)
+
+        val test = dashboard.getCurrProvinceMaxShareProdMap
+        println("test\t" + test)
     }
 
 

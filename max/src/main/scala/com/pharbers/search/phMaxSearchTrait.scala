@@ -121,4 +121,11 @@ trait phMaxSearchTrait {
         }
     }
 
+    def formatValue(originValue: String)(implicit tag: String) = tag match {
+        case t if t.toLowerCase().contains("share") => getFormatShare(originValue.toDouble)
+        case t if t.toLowerCase().contains("grow") => getFormatShare(originValue.toDouble)
+        case t if t.toLowerCase().contains("sale") => getFormatSales(originValue.toDouble)
+        case _ => 0.0
+    }
+
 }
