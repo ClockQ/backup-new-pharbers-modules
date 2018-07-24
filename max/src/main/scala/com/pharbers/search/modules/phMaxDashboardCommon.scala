@@ -25,6 +25,8 @@ trait phMaxDashboardCommon extends phMaxSearchTrait {
     val dashboardStartYM: String = dashboardYear + "01"
     val dashboardEndYM: String = dashboardYear + dashboardMonth
 
+    def getDashboardMonthLst = (dashboardEndYM :: getLastSeveralMonthYM(dashboardMonth.toInt, dashboardEndYM)).reverse
+
     val lastMonthYM: String = getLastMonthYM(ym)
     val lastSeasonYM: String = getLastSeveralMonthYM(4, ym).last
     val lastYearYM: String = getLastYearYM(ym)

@@ -169,12 +169,30 @@ trait phNationDashboard extends phMaxSearchTrait with phDealRGB {
             "subtitle" -> toJson(time),
             "area" -> toJson("全国")
         )
+
         val pie = prodLstMapWithColor.map(m => {
             Map(
-                "prod" -> toJson(m.getOrElse("product", "无")),
-                "sales" -> toJson(getFormatSales(m.getOrElse("sales", "0.0").toDouble)),
-                "share" -> toJson(getFormatShare(m.getOrElse("prodShare", "0.0").toDouble)),
-                "color" -> toJson(m.getOrElse("color", "#FFFFFF"))
+                "show_value" -> toJson(getFormatShare(m.getOrElse("prodShare", "0.0").toDouble)),
+                "show_unit" -> toJson("%"),
+                "title" -> toJson(m.getOrElse("product", "无")),
+                "color" -> toJson(m.getOrElse("color", "#FFFFFF")),
+                "tips" -> toJson(List(
+                    Map(
+                        "key" -> toJson("生产商"),
+                        "value" -> toJson(m.getOrElse("corp", "无")),
+                        "unit" -> toJson("str")
+                    ),
+                    Map(
+                        "key" -> toJson("销售额"),
+                        "value" -> toJson(getFormatSales(m.getOrElse("sales", "0.0").toDouble)),
+                        "unit" -> toJson("mil")
+                    ),
+                    Map(
+                        "key" -> toJson("份额"),
+                        "value" -> toJson(getFormatShare(m.getOrElse("prodShare", "0.0").toDouble)),
+                        "unit" -> toJson("%")
+                    )
+                ))
             )
         })
 
@@ -252,6 +270,50 @@ trait phNationDashboard extends phMaxSearchTrait with phDealRGB {
 
 
         (Some(Map("prodSalesOverview" -> toJson(prodSalesOverview), "prodSalesValue" -> toJson(prodSalesValue))), None)
+    }
+
+    def getNationProdTrendAnalysis(jv: JsValue): (Option[Map[String, JsValue]], Option[JsValue]) = {
+        val company_id = (jv \ "user" \ "company" \ "company_id").asOpt[String].getOrElse(throw new Exception("Illegal company"))
+        val company_name = (jv \ "user" \ "company" \ "company_name").asOpt[String].getOrElse(throw new Exception("Illegal company"))
+        val time = (jv \ "condition" \ "time").asOpt[String].getOrElse(throw new Exception("Illegal time"))
+        val market = (jv \ "condition" \ "market").asOpt[String].getOrElse(throw new Exception("Illegal market"))
+        implicit val tag: String = (jv \ "condition" \ "tag").asOpt[String].getOrElse(throw new Exception("Illegal tag"))
+        val ym = time.replaceAll("-", "")
+
+        val dashboard = phMaxNativeDashboard(company_id, ym, market)
+        val severalMonthProdLstMap = dashboard.getSeveralMonthProdMap
+
+        val unit = tag match {
+            case t if t.toLowerCase().contains("share") => "%"
+            case t if t.toLowerCase().contains("grow") => "%"
+            case t if t.toLowerCase().contains("sale") => "mil"
+            case _ => "undefined"
+        }
+
+        val prodSalesOverview = Map(
+            "title" -> toJson(s"${market}-产品销售趋势分析"),
+            "timeStart" -> toJson(getFormatYM(dashboard.dashboardStartYM)),
+            "timeOver" -> toJson(getFormatYM(dashboard.dashboardEndYM)),
+            "area" -> toJson("全国")
+        )
+
+        val multiData = severalMonthProdLstMap.groupBy(x => x("PRODUCT_NAME")).map(one => {
+            Map(
+                "name" -> toJson(one._1),
+                "values" -> toJson(
+                    dashboard.getDashboardMonthLst.map(temp_ym =>{
+                        Map(
+                            "ym" -> toJson(temp_ym),
+                            "unit" -> toJson(unit),
+                            "value" -> toJson(formatValue(one._2.find(m => m.getOrElse("ym", "无") == temp_ym).getOrElse(Map.empty).getOrElse(tag, "0.0")))
+                        )
+                    })
+                )
+            )
+        })
+
+
+        (Some(Map("prodSalesOverview" -> toJson(prodSalesOverview), "multiData" -> toJson(multiData))), None)
     }
 
 }

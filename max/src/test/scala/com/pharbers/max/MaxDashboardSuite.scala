@@ -113,10 +113,8 @@ class MaxDashboardSuite extends FunSuite with phMaxSearchTrait with phDealRGB {
         currMonthAllProvLst.foreach(println)
         println(currMonthAllProvLst.size)
 
-        val test = dashboard.getCurrProvinceMaxShareProdMap
-        println("test\t" + test)
+        val currProvinceMaxShareProdMap = dashboard.getCurrProvinceMaxShareProdMap
+        println("currProvinceMaxShareProdMap\t" + currProvinceMaxShareProdMap)
     }
-
-
 
 }

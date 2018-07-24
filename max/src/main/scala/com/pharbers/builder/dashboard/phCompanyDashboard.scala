@@ -191,11 +191,24 @@ trait phCompanyDashboard extends phMaxSearchTrait with phDealRGB {
                 "subtitle" -> toJson(time)
             )),
             "pie" -> toJson(companyProdLstMapWithColor.map(m => {
+
                 Map(
-                    "prod" -> toJson(m.getOrElse("product", "无")),
-                    "sales" -> toJson(getFormatSales(m.getOrElse("sales", "0.0").toDouble)),
-                    "cont" -> toJson(getFormatShare(m.getOrElse("contribution", "0.0").toDouble)),
-                    "color" -> toJson(m.getOrElse("color", "#FFFFFF"))
+                    "show_value" -> toJson(getFormatShare(m.getOrElse("contribution", "0.0").toDouble)),
+                    "show_unit" -> toJson("%"),
+                    "title" -> toJson(m.getOrElse("product", "无")),
+                    "color" -> toJson(m.getOrElse("color", "#FFFFFF")),
+                    "tips" -> toJson(List(
+                        Map(
+                            "key" -> toJson("销售额"),
+                            "value" -> toJson(getFormatSales(m.getOrElse("sales", "0.0").toDouble)),
+                            "unit" -> toJson("mil")
+                        ),
+                        Map(
+                            "key" -> toJson("贡献度"),
+                            "value" -> toJson(getFormatShare(m.getOrElse("contribution", "0.0").toDouble)),
+                            "unit" -> toJson("%")
+                        )
+                    ))
                 )
             })),
             "prodContValue" -> toJson(companyProdLstMapWithColor.map(m => {

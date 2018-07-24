@@ -9,73 +9,85 @@ trait phMaxDashboardProvinceModule extends phMaxDashboardCommon {
     val market : String
     val province : String
 
+    def getCurrMktNationSalesByYM(temp_ym: String): Double = getSalesByScopeYM("NATION_SALES", temp_ym, market)
+
     def getCurrMonthAllProvLst = getProvinceSalesMapByScopeYM("PROVINCE_SALES", ym, market).map(m => m.getOrElse("province", "无"))
 
-    def getDashboardMonthLst = (dashboardEndYM :: getLastSeveralMonthYM(dashboardMonth.toInt, dashboardEndYM))
+    def getProvinceSalesLstMap(temp_ym: String): List[Map[String, String]] = {
 
-    def getProvinceSalesLstMap(temp_ym: String): List[Map[String, String]] = getProvinceSalesMapByScopeYM("PROVINCE_SALES", temp_ym, market).map(x => {
+        val lastMonthProvMap = getProvinceSalesMapByScopeYM("PROVINCE_SALES", getLastMonthYM(temp_ym), market)
+        val lastYearProvMap = getProvinceSalesMapByScopeYM("PROVINCE_SALES", getLastYearYM(temp_ym), market)
+        val currMonthNationSales = getCurrMktNationSalesByYM(temp_ym)
 
-        val lastMonthProvSales = getProvinceSalesMapByScopeYM("PROVINCE_SALES", lastMonthYM, market).find(y => y("market")==x("market") && y("province")==x("province")).getOrElse(Map("sales" -> "0.0"))("sales").toDouble
-        val lastYearProvSales = getProvinceSalesMapByScopeYM("PROVINCE_SALES", lastYearYM, market).find(y => y("market")==x("market") && y("province")==x("province")).getOrElse(Map("sales" -> "0.0"))("sales").toDouble
-        val provMomGrowth = lastMonthProvSales match {
-            case 0.0 => "0.0"
-            case lastSales => ((x("sales").toDouble - lastSales)/lastSales).toString
-        }
-        val provYoyGrowth = lastYearProvSales match {
-            case 0.0 => "0.0"
-            case lastSales => ((x("sales").toDouble - lastSales)/lastSales).toString
-        }
+        getProvinceSalesMapByScopeYM("PROVINCE_SALES", temp_ym, market).map(x => {
 
-        val companySales = getProvinceSalesMapByScopeYM("PROVINCE_COMPANY_SALES", temp_ym, market).find(y => y("market")==x("market") && y("province")==x("province")).getOrElse(Map("sales" -> "0.0"))("sales")
-        val lastMonthCompanySales = getProvinceSalesMapByScopeYM("PROVINCE_COMPANY_SALES", lastMonthYM, market).find(y => y("market")==x("market") && y("province")==x("province")).getOrElse(Map("sales" -> "0.0"))("sales").toDouble
-        val lastYearCompanySales = getProvinceSalesMapByScopeYM("PROVINCE_COMPANY_SALES", lastYearYM, market).find(y => y("market")==x("market") && y("province")==x("province")).getOrElse(Map("sales" -> "0.0"))("sales").toDouble
-        val companySalesMomGrowth = lastMonthCompanySales match {
-            case 0.0 => "0.0"
-            case lastSales => ((companySales.toDouble - lastSales)/lastSales).toString
-        }
-        val companySalesYoyGrowth = lastYearCompanySales match {
-            case 0.0 => "0.0"
-            case lastSales => ((companySales.toDouble - lastSales)/lastSales).toString
-        }
+            val lastMonthProvSales = lastMonthProvMap.find(y => y("market")==x("market") && y("province")==x("province")).getOrElse(Map("sales" -> "0.0"))("sales").toDouble
+            val lastYearProvSales = lastYearProvMap.find(y => y("market")==x("market") && y("province")==x("province")).getOrElse(Map("sales" -> "0.0"))("sales").toDouble
+            val provMomGrowth = lastMonthProvSales match {
+                case 0.0 => "0.0"
+                case lastSales => ((x("sales").toDouble - lastSales)/lastSales).toString
+            }
+            val provYoyGrowth = lastYearProvSales match {
+                case 0.0 => "0.0"
+                case lastSales => ((x("sales").toDouble - lastSales)/lastSales).toString
+            }
+            val provShare = currMonthNationSales match {
+                case 0.0 => "0.0"
+                case nationSales => (x("sales").toDouble/nationSales).toString
+            }
 
-        val companyShare = x("sales") match {
-            case sale if sale.toDouble == 0.0 => "0.0"
-            case sale => (companySales.toDouble/sale.toDouble).toString
-        }
-        val lastMonthShare = lastMonthProvSales match {
-            case sale if sale.toDouble == 0.0 => "0.0"
-            case sale => (lastMonthCompanySales.toDouble/sale.toDouble).toString
-        }
-        val lastYearShare = lastYearProvSales match {
-            case sale if sale.toDouble == 0.0 => "0.0"
-            case sale => (lastYearCompanySales.toDouble/sale.toDouble).toString
-        }
-        val companyShareMomGrowth = lastMonthShare match {
-            case last_share if last_share.toDouble == 0.0 => "0.0"
-            case last_share => ((companyShare.toDouble - last_share.toDouble)/last_share.toDouble).toString
-        }
-        val companyShareYoyGrowth = lastYearShare match {
-            case last_share if last_share.toDouble == 0.0 => "0.0"
-            case last_share => ((companyShare.toDouble - last_share.toDouble)/last_share.toDouble).toString
-        }
+            val companySales = getProvinceSalesMapByScopeYM("PROVINCE_COMPANY_SALES", temp_ym, market).find(y => y("market")==x("market") && y("province")==x("province")).getOrElse(Map("sales" -> "0.0"))("sales")
+            val lastMonthCompanySales = getProvinceSalesMapByScopeYM("PROVINCE_COMPANY_SALES", lastMonthYM, market).find(y => y("market")==x("market") && y("province")==x("province")).getOrElse(Map("sales" -> "0.0"))("sales").toDouble
+            val lastYearCompanySales = getProvinceSalesMapByScopeYM("PROVINCE_COMPANY_SALES", lastYearYM, market).find(y => y("market")==x("market") && y("province")==x("province")).getOrElse(Map("sales" -> "0.0"))("sales").toDouble
+            val companySalesMomGrowth = lastMonthCompanySales match {
+                case 0.0 => "0.0"
+                case lastSales => ((companySales.toDouble - lastSales)/lastSales).toString
+            }
+            val companySalesYoyGrowth = lastYearCompanySales match {
+                case 0.0 => "0.0"
+                case lastSales => ((companySales.toDouble - lastSales)/lastSales).toString
+            }
 
-        val EV = (companySalesMomGrowth.toDouble/provMomGrowth.toDouble).toString
+            val companyShare = x("sales") match {
+                case sale if sale.toDouble == 0.0 => "0.0"
+                case sale => (companySales.toDouble/sale.toDouble).toString
+            }
+            val lastMonthShare = lastMonthProvSales match {
+                case sale if sale.toDouble == 0.0 => "0.0"
+                case sale => (lastMonthCompanySales.toDouble/sale.toDouble).toString
+            }
+            val lastYearShare = lastYearProvSales match {
+                case sale if sale.toDouble == 0.0 => "0.0"
+                case sale => (lastYearCompanySales.toDouble/sale.toDouble).toString
+            }
+            val companyShareMomGrowth = lastMonthShare match {
+                case last_share if last_share.toDouble == 0.0 => "0.0"
+                case last_share => ((companyShare.toDouble - last_share.toDouble)/last_share.toDouble).toString
+            }
+            val companyShareYoyGrowth = lastYearShare match {
+                case last_share if last_share.toDouble == 0.0 => "0.0"
+                case last_share => ((companyShare.toDouble - last_share.toDouble)/last_share.toDouble).toString
+            }
 
-        Map(
-            "province" -> x("province"),
-            "market" -> x("market"),
-            "provinceSales" -> x("sales"),
-            "provMomGrowth" -> provMomGrowth,
-            "provYoyGrowth" -> provYoyGrowth,
-            "companySales" -> companySales,
-            "companySalesMomGrowth" -> companySalesMomGrowth,
-            "companySalesYoyGrowth" -> companySalesYoyGrowth,
-            "companyShare" -> companyShare,
-            "companyShareMomGrowth" -> companyShareMomGrowth,
-            "companyShareYoyGrowth" -> companyShareYoyGrowth,
-            "EV" -> EV
-        )
-    })
+            val EV = (companySalesMomGrowth.toDouble/provMomGrowth.toDouble).toString
+
+            Map(
+                "province" -> x("province"),
+                "market" -> x("market"),
+                "provinceSales" -> x("sales"),
+                "provinceShare" -> provShare,
+                "provMomGrowth" -> provMomGrowth,
+                "provYoyGrowth" -> provYoyGrowth,
+                "companySales" -> companySales,
+                "companySalesMomGrowth" -> companySalesMomGrowth,
+                "companySalesYoyGrowth" -> companySalesYoyGrowth,
+                "companyShare" -> companyShare,
+                "companyShareMomGrowth" -> companyShareMomGrowth,
+                "companyShareYoyGrowth" -> companyShareYoyGrowth,
+                "EV" -> EV
+            )
+        })
+    }
 
     //TODO:整合成一个排序接口
     private val currMonthProvinceSalesLstMap = getProvinceSalesLstMap(ym)
@@ -115,7 +127,7 @@ trait phMaxDashboardProvinceModule extends phMaxDashboardCommon {
 
     def getCurrProvinceSalesMap: Map[String, String] = currMonthProvinceSalesLstMap.find(m => m("province") == province).getOrElse(Map.empty)
 
-    def getSeveralMonthProvinceSalesMap: List[Map[String, String]] = (dashboardEndYM :: getLastSeveralMonthYM(dashboardMonth.toInt, dashboardEndYM)).map(x => {
+    def getSeveralMonthProvinceSalesMap: List[Map[String, String]] = (dashboardEndYM :: getLastSeveralMonthYM(dashboardMonth.toInt, dashboardEndYM)).reverse.map(x => {
         val currProvinceSale = getProvinceSalesMapByScopeYM("PROVINCE_SALES", x, market).find(m => m("province") == province).getOrElse(Map.empty).getOrElse("sales", "0.0")
         val currProvinceCompanySale = getProvinceSalesMapByScopeYM("PROVINCE_COMPANY_SALES", x, market).find(m => m("province") == province).getOrElse(Map.empty).getOrElse("sales", "0.0")
         val currProvinceCompanyShare = currProvinceSale match {
@@ -260,8 +272,8 @@ trait phMaxDashboardProvinceModule extends phMaxDashboardCommon {
         })
     })
 
+    //For test.
     private lazy val currProvinceSeveralMonthProdMap = getCurrProvinceSeveralMonthProdMap
-    private lazy val currProvinceProdSimpleMap = getCurrProvinceProdSimpleSaleMapByYM(ym)
 
     def getProvinceSeveralMonthProdMapByKey(key: String): List[Map[String, io.Serializable]] = currProvinceSeveralMonthProdMap.groupBy(x => x("PRODUCT_NAME")).toList.map(one => {
         Map(
@@ -275,4 +287,5 @@ trait phMaxDashboardProvinceModule extends phMaxDashboardCommon {
             })
         )
     })
+
 }

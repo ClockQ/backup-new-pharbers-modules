@@ -1,5 +1,7 @@
 package com.pharbers.search.modules
 
+import java.io
+
 trait phMaxDashboardNationModule extends phMaxDashboardCommon {
 
     val market : String
@@ -16,7 +18,7 @@ trait phMaxDashboardNationModule extends phMaxDashboardCommon {
     def getCompanyShareYearOnYear: Double = getShare(getCompanySalesYearOnYear, getNationSalesYearOnYear)
     def getCompanyShareMonthOnMonth: Double = getShare(getCompanySalesMonthOnMonth, getNationSalesMonthOnMonth)
 
-    def getListMonthTrend: List[Map[String, String]] = (dashboardEndYM :: getLastSeveralMonthYM(dashboardMonth.toInt, dashboardEndYM)).map(x => {
+    def getListMonthTrend: List[Map[String, String]] = (dashboardEndYM :: getLastSeveralMonthYM(dashboardMonth.toInt, dashboardEndYM)).reverse.map(x => {
         val tempNationSales: Double = getSalesByScopeYM("NATION_SALES", x, market)
         val tempCompanySales: Double = getSalesByScopeYM("NATION_COMPANY_SALES", x, market)
         val tempCompanyShare: Double = getShare(tempCompanySales, tempNationSales)
@@ -103,6 +105,34 @@ trait phMaxDashboardNationModule extends phMaxDashboardCommon {
             case _ => (lastMonthProdRank - one._2).toString
         }
         one._1 ++ Map(s"${key}RankChanges" -> RankChanges, s"${key}Rank" -> (one._2 + 1).toString)
+    })
+
+    def getSeveralMonthProdMap: List[Map[String, String]] = (dashboardEndYM :: getLastSeveralMonthYM(dashboardMonth.toInt, dashboardEndYM)).flatMap(x => {
+        getProdSalesGrowthByYM(x).map(pm => {
+            Map(
+                "ym" -> x,
+                "PRODUCT_NAME" -> pm("product"),
+                "sales" -> pm("sales"),
+                "salesGrowth" -> pm("salesGrowth"),
+                "share" -> pm("prodShare"),
+                "shareGrowth" -> pm("prodShareGrowth")
+            )
+        })
+    })
+
+    private lazy val severalMonthProdMap = getSeveralMonthProdMap
+
+    def getSeveralMonthProdMapByKey(key: String): List[Map[String, io.Serializable]] = severalMonthProdMap.groupBy(x => x("PRODUCT_NAME")).toList.map(one => {
+        Map(
+            "name" -> one._1,
+            "values" -> (dashboardEndYM :: getLastSeveralMonthYM(dashboardMonth.toInt, dashboardEndYM)).reverse.map(temp_ym =>{
+                Map(
+                    "ym" -> temp_ym,
+                    "value" -> one._2.find(m => m.getOrElse("ym", "无") == temp_ym).getOrElse(Map.empty).getOrElse(key, "0.0")
+                )
+
+            })
+        )
     })
 
 }
