@@ -14,16 +14,16 @@ case class phMaxResultInfo(company: String, ym:String, mkt: String) extends phMa
 
     val rd = new PhRedisDriver()
     val singleJobKey: String = Base64.getEncoder.encodeToString((company +"#"+ ym +"#"+ mkt).getBytes())
-    val max_sales_city_lst_key: String = Sercurity.md5Hash(company + ym + mkt + "max_sales_city_lst_key")
-    val max_sales_prov_lst_key: String = Sercurity.md5Hash(company + ym + mkt + "max_sales_prov_lst_key")
-    val company_sales_city_lst_key: String = Sercurity.md5Hash(company + ym + mkt + "company_sales_city_lst_key")
-    val company_sales_prov_lst_key: String = Sercurity.md5Hash(company + ym + mkt + "company_sales_prov_lst_key")
+    val max_sales_city_lst_key = singleJobKey + "_CITY_SALES"
+    val max_sales_prov_lst_key = singleJobKey + "_PROVINCE_SALES"
+    val company_sales_city_lst_key = singleJobKey + "_CITY_COMPANY_SALES"
+    val company_sales_prov_lst_key = singleJobKey + "_PROVINCE_COMPANY_SALES"
 
     val lastYearYM: String = getLastYearYM(ym)
     val lastYearSingleJobKey: String = Base64.getEncoder.encodeToString((company +"#"+ lastYearYM +"#"+ mkt).getBytes())
 
-    def getMaxResultSales: Double = rd.getMapValue(singleJobKey, "max_sales").toDouble
-    def getCurrCompanySales: Double = rd.getMapValue(singleJobKey, "max_company_sales").toDouble
+    def getMaxResultSales: Double = rd.getMapValue(singleJobKey, "NATION_SALES").toDouble
+    def getCurrCompanySales: Double = rd.getMapValue(singleJobKey, "NATION_COMPANY_SALES").toDouble
 
     val getLastYearResultSales : Double = getHistorySalesByRange("NATION_SALES", lastYearSingleJobKey)
     val getLastYearCurrCompanySales : Double = getHistorySalesByRange("NATION_COMPANY_SALES", lastYearSingleJobKey)
@@ -41,8 +41,14 @@ case class phMaxResultInfo(company: String, ym:String, mkt: String) extends phMa
     def getLastSeveralMonthResultSalesLst(severalCount: Int): List[Map[String, JsValue]] = {
         val tmpLst = getLastSeveralMonthYM(severalCount, ym).map(singleYM => {
             val tempSingleJobKey = Base64.getEncoder.encodeToString((company + "#" + singleYM + "#" + mkt).getBytes())
-            val tempMaxSales = getHistorySalesByRange("NATION_SALES", tempSingleJobKey)
-            val tempCompanySales = getHistorySalesByRange("NATION_COMPANY_SALES", tempSingleJobKey)
+            val tempMaxSales = rd.getMapValue(tempSingleJobKey, "NATION_SALES") match {
+                case x => x.toDouble
+                case null => getHistorySalesByRange("NATION_SALES", tempSingleJobKey)
+            }
+            val tempCompanySales = rd.getMapValue(singleJobKey, "NATION_COMPANY_SALES") match {
+                case x => x.toDouble
+                case null => getHistorySalesByRange("NATION_COMPANY_SALES", tempSingleJobKey)
+            }
             val tempPercentage = tempMaxSales match {
                 case 0.0 => 0.0
                 case _ => tempCompanySales / tempMaxSales

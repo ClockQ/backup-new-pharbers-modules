@@ -5,10 +5,15 @@ import play.api.libs.json.Json.toJson
 import play.api.libs.json.{JsNumber, JsString, JsValue}
 import com.pharbers.builder.phMarketTable.MongoDBPool._
 
+import scala.collection.mutable
+import scala.util.matching.Regex
+
 /**
   * Created by jeorch on 18-5-16.
   */
 trait phMaxSearchTrait {
+
+    val pattern = new Regex("[a-zA-Z0-9]")
 
     def getLastMonthYM(yearMonth: String): String = yearMonth.takeRight(2) match {
         case "01" => (yearMonth.take(4).toInt - 1) + "12"
@@ -23,11 +28,26 @@ trait phMaxSearchTrait {
         }).toList
     }
 
+    def getLastSeveralYearYM(severalCount: Int, yearMonth: String): List[String] = {
+        val severalMonth = severalCount * 12 + yearMonth.takeRight(2).toInt
+        (yearMonth :: getLastSeveralMonthYM(severalMonth, yearMonth)).reverse
+    }
+
+    def getShare(partialData: Double, totalData: Double): Double = if (totalData == 0.0) 0.0 else partialData/totalData
+
     def getLastYearYM(yearMonth: String): String = (yearMonth.toInt - 100).toString
 
-    def getFormatSales(originValue: Double): String = f"${originValue/1.0E6}%.2f"
+    def getFormatYM(originYM: String, separator: String = "-"): String = originYM.take(4) + separator + originYM.takeRight(2)
 
-    def getFormatShare(originValue: Double): Double = f"$originValue%.4f".toDouble
+    def getFormatSales(originValue: Double): Double = f"${originValue/1.0E6}%.2f".toDouble
+
+    def getFormatShare(originValue: Double): Double = f"${originValue * 100}%.2f".toDouble
+
+    def getFormatProdFromMin1(min1: String): String = (pattern split min1).head
+
+    def getFormatCorpFromMin1(min1: String): String = (pattern split min1).last
+
+    def getAllCollections : mutable.Set[String] = MongoPool.queryDBInstance("data").get.getOneDBAllCollectionNames
 
     def getHistorySalesByRange(range: String, tempSingleJobKey: String) : Double = {
         val db = MongoPool.queryDBInstance("aggregation").get
@@ -67,6 +87,45 @@ trait phMaxSearchTrait {
                 "Sales" -> x.getOrElse("Sales", 0.0).asInstanceOf[JsNumber].value.doubleValue().toString
             ))
         }
+    }
+
+    def getProdSalesByArea(areaKey: String, areaValue: String, tempSingleJobKey: String) : List[Map[String, String]] = {
+        val db = MongoPool.queryDBInstance("data").get
+
+        val query: DBObject = DBObject(
+            areaKey -> areaValue
+        )
+
+        val output: DBObject => Map[String, JsValue] = { obj =>
+            Map(
+                "Province" -> toJson(obj.as[String]("Province")),
+                "City" -> toJson(obj.as[String]("City")),
+                "PRODUCT_NAME" -> toJson(obj.as[String]("PRODUCT_NAME")),
+                "CORP_NAME" -> toJson(obj.as[String]("CORP_NAME")),
+                "Sales" -> toJson(obj.as[Double]("f_sales")),
+                "b2c" -> toJson(obj.as[Int]("belong2company"))
+            )
+        }
+
+        val tmp = db.queryMultipleObject(query, tempSingleJobKey, "belong2company", 0, 1E6.toInt)(output)
+        tmp match {
+            case Nil => Nil
+            case lst => lst.map(x => Map(
+                "Province" -> x.getOrElse("Province", "").asInstanceOf[JsString].value,
+                "City" -> x.getOrElse("City", "").asInstanceOf[JsString].value,
+                "PRODUCT_NAME" -> x.getOrElse("PRODUCT_NAME", "").asInstanceOf[JsString].value,
+                "CORP_NAME" -> x.getOrElse("CORP_NAME", "").asInstanceOf[JsString].value,
+                "Sales" -> x.getOrElse("Sales", 0.0).asInstanceOf[JsNumber].value.doubleValue().toString,
+                "b2c" -> x.getOrElse("b2c", 0).asInstanceOf[JsNumber].value.intValue().toString
+            ))
+        }
+    }
+
+    def formatValue(originValue: String)(implicit tag: String) = tag match {
+        case t if t.toLowerCase().contains("share") => getFormatShare(originValue.toDouble)
+        case t if t.toLowerCase().contains("grow") => getFormatShare(originValue.toDouble)
+        case t if t.toLowerCase().contains("sale") => getFormatSales(originValue.toDouble)
+        case _ => 0.0
     }
 
 }

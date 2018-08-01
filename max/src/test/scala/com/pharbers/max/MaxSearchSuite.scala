@@ -2,21 +2,23 @@ package com.pharbers.max
 
 import com.pharbers.builder.SearchFacade
 import com.pharbers.pactions.actionbase._
-import com.pharbers.search.{phHistorySearchJob, phMaxResultInfo, phPanelResultInfo}
+import com.pharbers.search.{phHistorySearchJob, phMaxCompanyDashboard, phMaxResultInfo, phPanelResultInfo}
 import org.scalatest.FunSuite
 import play.api.libs.json.JsValue
 import play.api.libs.json.Json.toJson
+
+import scala.util.matching.Regex
 
 /**
   * Created by jeorch on 18-5-9.
   */
 class MaxSearchSuite extends FunSuite {
 
-    val company: String = "5b028f95ed925c2c705b85ba"
-    val user: String = "5b028feced925c2c705b85bb"
-    val jobId: String = "20180623test001"
-    val ym = "201804"
-    val mkt = "INF"
+    val company: String = "5afa53bded925c05c6f69c54"
+    val user: String = "5afaa333ed925c30f8c066d1"
+    val jobId: String = "20180709test001"
+    val ym = "201703"
+    val mkt = "麻醉市场"
 
     test("history search"){
 
