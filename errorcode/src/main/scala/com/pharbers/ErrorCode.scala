@@ -28,6 +28,11 @@ object ErrorCode extends PharbersSingletonModule {
 
     lazy val xls: List[ErrorNode] = config.mc.find(p => p._1 == "error").get._2.asInstanceOf[List[ErrorNode]]
 
+    def getErrorNameByCode(code: Int): String = (xls.find(x => x.code == code)) match {
+        case Some(y) => y.name
+        case None => "unknown error"
+    }
+
     def getErrorCodeByName(name: String): Int = (xls.find(x => x.name == name)) match {
         case Some(y) => y.code
         case None => -9999
