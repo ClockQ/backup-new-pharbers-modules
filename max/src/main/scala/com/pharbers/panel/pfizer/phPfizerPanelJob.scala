@@ -31,6 +31,7 @@ case class phPfizerPanelJob(args: Map[String, String])(implicit _actor: Actor) e
     val universe_file: String = match_dir + args("universe_file")
     val product_match_file: String = match_dir + args("product_match_file")
     val markets_match_file: String = match_dir + args("markets_match_file")
+    val hosp_ID_file: String = match_dir + args("hosp_ID")
     /**
       * 不同年份有不同的补充文件,是否需要进行历史补充医院的合并?
       * ToDo:为了满足用户不仅仅可以计算当月,还可以计算历史月份
@@ -52,17 +53,17 @@ case class phPfizerPanelJob(args: Map[String, String])(implicit _actor: Actor) e
     implicit val mp: (sendEmTrait, Double, String) => Unit = sendMultiProgress(company, user, "panel")(p_current, p_total).multiProgress
 
 
-    //1. read universe_file
-    val load_universe_file: choiceJob = new choiceJob {
-        override val name = "universe_file"
-        val actions: List[pActionTrait] = existenceRdd("universe_file") ::
-                csv2DFAction(temp_dir + "universe_file") ::
+    //1. read hosp_ID file
+    val load_hosp_ID_file: choiceJob = new choiceJob {
+        override val name: String = "hosp_ID"
+        override val actions: List[pActionTrait] = existenceRdd("hosp_ID") ::
+                csv2DFAction(temp_dir + "hosp_ID") ::
                 new sequenceJob {
-                    override val name: String = "read_universe_file_job"
+                    override val name: String = "read_hosp_ID_file_job"
                     override val actions: List[pActionTrait] =
-                        xlsxReadingAction[PhExcelXLSXCommonFormat](universe_file, "universe_file") ::
-                                saveCurrenResultAction(temp_dir + "universe_file") ::
-                                csv2DFAction(temp_dir + "universe_file") :: Nil
+                        xlsxReadingAction[PhExcelXLSXCommonFormat](hosp_ID_file, "hosp_ID") ::
+                                saveCurrenResultAction(temp_dir + "hosp_ID") ::
+                                csv2DFAction(temp_dir + "hosp_ID") :: Nil
                 } :: Nil
     }
 
@@ -192,7 +193,7 @@ case class phPfizerPanelJob(args: Map[String, String])(implicit _actor: Actor) e
     override val actions: List[pActionTrait] = { jarPreloadAction() ::
             setLogLevelAction("ERROR") ::
             addListenerAction(MaxSparkListener(0, 10)) ::
-            load_universe_file ::
+            load_hosp_ID_file ::
             addListenerAction(MaxSparkListener(11, 20)) ::
             load_product_match_file ::
             addListenerAction(MaxSparkListener(21, 30)) ::

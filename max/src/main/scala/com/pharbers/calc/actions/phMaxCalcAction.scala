@@ -30,7 +30,6 @@ class phMaxCalcAction(override val defaultArgs: pActionArgs) extends pActionTrai
                     .withColumnRenamed("PHA_HOSP_ID", "PHA_ID")
                     .withColumnRenamed("IF_PANEL_ALL", "IS_PANEL_HOSP")
                     .withColumnRenamed("IF_PANEL_TO_USE", "NEED_MAX_HOSP")
-                    .withColumnRenamed("SEGMENT", "SEGMENT")
                     .withColumnRenamed("FACTOR", "Factor")
                     .withColumnRenamed("PROVINCE", "Province")
                     .withColumnRenamed("WEST_MEDICINE_INCOME", "westMedicineIncome")

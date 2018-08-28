@@ -4,37 +4,35 @@ public class phPfizerCpaWritable extends phPfizerCommonWritable {
 
     @Override
     protected String getCellKey(String[] lst, String flag) {
-        if (flag.equals("CITY")) {
+        if (flag.equals("YEAR")) {
             return lst[0];
-        } else if (flag.equals("YEAR")) {
-            return lst[1];
         } else if (flag.equals("MONTH")) {
-            if(lst[2].length() == 1) return "0" + lst[2];
+            if(lst[1].length() == 1) return "0" + lst[1];
+            return lst[1];
+        } else if (flag.equals("HOSP_ID")) {
             return lst[2];
-        } else if (flag.equals("HOSPITAL_CODE")) {
-            return lst[3];
         } else if (flag.equals("MOLE_NAME")) {
-            return lst[4];
+            return lst[3];
         } else if (flag.equals("PRODUCT_NAME")) {
-            return lst[5].trim();
+            return lst[4].trim();
         } else if (flag.equals("PACK_DES")) {
-            return lst[6].trim();
+            return lst[5].trim();
         }else if (flag.equals("PACK_NUMBER")) {
-            return lst[7].trim();
+            return lst[6].trim();
         }else if (flag.equals("VALUE")) {
-            return lst[8];
+            return lst[7];
         }else if (flag.equals("STANDARD_UNIT")) {
-            return lst[9];
-        }else if (flag.equals("APP2_COD")) {
-            return lst[10].trim();
-        }else if (flag.equals("APP1_COD")) {
-            return lst[11];
+            return lst[8];
+        }else if (flag.equals("DOSAGE")) {
+            return lst[9].trim();
+        }else if (flag.equals("DELIVERY_WAY")) {
+            return lst[10];
         }else if (flag.equals("CORP_NAME")) {
-            return lst[12].trim();
+            return lst[11].trim();
         }else if (flag.equals("YM")) {
-            return lst[13];
+            return lst[12];
         }else if (flag.equals("min1")) {
-            return lst[14];
+            return lst[13];
         }
 
         return "not implements";
@@ -44,16 +42,16 @@ public class phPfizerCpaWritable extends phPfizerCommonWritable {
     @Override
     protected String[] setCellKey(String[] lst, String flag, String value) {
         if (flag.equals("PRODUCT_NAME")) {
-            lst[5] = value;
+            lst[4] = value;
             return lst;
         } else if (flag.equals("PACK_DES")) {
-            lst[6] = value;
+            lst[5] = value;
             return lst;
         } else if (flag.equals("VALUE")) {
-            lst[8] = value;
+            lst[7] = value;
             return lst;
         } else if (flag.equals("STANDARD_UNIT")) {
-            lst[9] = value;
+            lst[8] = value;
             return lst;
         } else{
             return lst;

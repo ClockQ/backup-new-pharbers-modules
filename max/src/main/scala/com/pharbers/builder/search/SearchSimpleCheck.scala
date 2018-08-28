@@ -45,10 +45,7 @@ trait SearchSimpleCheck {
                     val temp = x._1.replace("[", "").replace("]", "").split(",")
                     toJson(Map(
                         "index" -> toJson(x._2 + 1),
-                        "hospitalName" -> toJson(temp(0)),
-                        "province" -> toJson(temp(1)),
-                        "city" -> toJson(temp(2)),
-                        "cityLevel" -> toJson(temp(3))
+                        "hospitalName" -> toJson(temp(0))
                     ))
                 }))
             )
