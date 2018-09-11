@@ -44,11 +44,11 @@ class resultCheckAction(override val defaultArgs: pActionArgs) extends pActionTr
                 .withColumnRenamed("f_sales(offline)", "offlineSales")
         
         //保存max结果
-        maxDF.coalesce(1).write
-                .format("csv")
-                .option("header", value = true)
-                .option("delimiter", 31.toChar.toString)
-                .save(s"/mnt/config/result/$market" + "线上max结果")
+//        maxDF.coalesce(1).write
+//                .format("csv")
+//                .option("header", value = true)
+//                .option("delimiter", 31.toChar.toString)
+//                .save(s"/mnt/config/result/$market" + "线上max结果")
 
 
         //比较全国
@@ -122,7 +122,8 @@ class resultCheckAction(override val defaultArgs: pActionArgs) extends pActionTr
                     .groupBy("area")
                     .agg(expr("count(distinct area)") as "onlineHospNum", expr("count(distinct Product)") as "onlineProductNum", expr("sum(f_sales)") as "onlineSales", expr("sum(f_units)") as "onlineUnits")
             val offlineTotalResult = offlineDF.filter(" scope == 'HOSP' ")
-            val totalResult = offlineTotalResult.join(onlineTotalResult, offlineTotalResult("ID") === onlineTotalResult("area"), "full")
+            val totalResult = offlineTotalResult.join(onlineTotalResult, offlineTotalResult("ID") === onlineTotalResult("area"), "full").persist()
+            
             val nomalTotalResult = totalResult.na.drop()
                     .withColumn("hospBoolean", addBooleanCol(totalResult("offlineHospNum"), totalResult("onlineHospNum")))
                     .withColumn("productBoolean", addBooleanCol(totalResult("offlineProductNum"), totalResult("onlineProductNum")))

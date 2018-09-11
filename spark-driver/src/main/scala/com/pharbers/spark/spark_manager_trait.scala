@@ -11,7 +11,7 @@ import org.bson.Document
   * Created by clock on 18-2-27.
   */
 
-trait spark_managers extends mongo2RDD with csv2RDD with dataFrame2Mongo
+trait spark_managers extends mongo2RDD with csv2RDD with dataFrame2Mongo with readCsv
 
 sealed trait spark_manager_trait {
     implicit val conn_instance: spark_conn_instance
@@ -48,17 +48,26 @@ trait csv2RDD extends spark_manager_trait {
     }
 }
 
+trait readCsv extends spark_manager_trait {
+    def readCsv(file_path: String, delimiter: String = ",") = {
+        ss.read.format("com.databricks.spark.csv")
+                .option("header", "true")
+                .option("delimiter", delimiter)
+                .load(file_path)
+    }
+}
+
 trait dataFrame2Mongo extends spark_manager_trait {
     def dataFrame2Mongo(dataFrame: DataFrame,
-                 mongodbHost: String,
-                 mongodbPort: String,
-                 databaseName: String,
-                 collName: String,
-                 saveMode: String = "append"): Unit = {
+                        mongodbHost: String,
+                        mongodbPort: String,
+                        databaseName: String,
+                        collName: String,
+                        saveMode: String = "append"): Unit = {
         dataFrame.write.format("com.mongodb.spark.sql.DefaultSource").mode(saveMode)
-            .option("uri", s"mongodb://$mongodbHost:$mongodbPort/")
-            .option("database", databaseName)
-            .option("collection", collName)
-            .save()
+                .option("uri", s"mongodb://$mongodbHost:$mongodbPort/")
+                .option("database", databaseName)
+                .option("collection", collName)
+                .save()
     }
 }

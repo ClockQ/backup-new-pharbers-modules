@@ -15,7 +15,7 @@ case class startTest() extends readJsonTrait {
 
     val system = ActorSystem("unitTest")
     implicit val t: Timeout = 1200 minutes
-    val path = "/mnt/config/线下MAX对比文件/"
+    val path = "hdfs:///data/"
 //    val companyLst: List[Map[String, String]] = testData.filter(_("company") == "5afa53bded925c05c6f69c54")
     val companyLst: List[Map[String, String]] = testData
     def doTest(): List[String] = companyLst.map{ c =>
@@ -43,12 +43,12 @@ case class startTest() extends readJsonTrait {
                     .option("header", "true") //这里如果在csv第一行有属性的话，没有就是"false"
                     .option("inferSchema", true.toString) //这是自动推断属性列的数据类型。
                     .option("delimiter", 31.toChar.toString)
-                    .load("/mnt/config/result/" + f) //文件的路径
+                    .load("hdfs:///workData/UnitTest/" + f) //文件的路径
         }.reduce((totalResult, f) => totalResult union f).coalesce(1).write
                 .format("csv")
                 .option("header", value = true)
                 .option("delimiter", 31.toChar.toString)
-                .save("/mnt/config/result/" + uuid)
+                .save("hdfs:///workData/UnitTest/" + uuid)
         println("最终结果" + uuid)
         StringArgs(uuid)
     }

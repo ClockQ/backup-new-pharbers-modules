@@ -15,7 +15,7 @@ class phPanelInfo2Redis(override val defaultArgs: pActionArgs) extends pActionTr
     
     override def perform(pr: pActionArgs): pActionArgs = {
         val panelDF = pr.asInstanceOf[MapArgs].get("panel").asInstanceOf[DFArgs].get
-        val hosp_ID_file = pr.asInstanceOf[MapArgs].get("hosp_ID").asInstanceOf[DFArgs].get
+        val hosp_ID_file = pr.asInstanceOf[MapArgs].get("hosp_ID_file").asInstanceOf[DFArgs].get
                 .withColumnRenamed("PHA_HOSP_ID", "u_HOSP_ID")
                 .withColumnRenamed("PHA_HOSP_NAME", "HOSP_NAME")
                 .withColumnRenamed("IF_PANEL_ALL", "SAMPLE")

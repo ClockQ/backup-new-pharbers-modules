@@ -47,7 +47,7 @@ class phMaxCalcAction(override val defaultArgs: pActionArgs) extends pActionTrai
                     .withColumnRenamed("sum(Units)", "sumUnits")
         }
         
-        val joinDataWithEmptyValue = panelDF.select("YM", "min1", "MARKET").distinct() join universeDF
+        val joinDataWithEmptyValue = panelDF.select("YM", "min1", "MARKET").distinct() crossJoin universeDF
         
         val joinData = {
             joinDataWithEmptyValue

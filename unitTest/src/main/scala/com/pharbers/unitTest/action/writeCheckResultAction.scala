@@ -14,7 +14,7 @@ class writeCheckResultAction(override val defaultArgs : pActionArgs) extends pAc
 
     override def perform(args : pActionArgs): pActionArgs = {
         val totalResult: DataFrame = args.asInstanceOf[MapArgs].get("result_check").asInstanceOf[DFArgs].get
-        val path = "/mnt/config/result/"
+        val path = "hdfs:///workData/UnitTest/"
         val uuid = UUID.randomUUID().toString
         totalResult.coalesce(1).write
                 .format("csv")

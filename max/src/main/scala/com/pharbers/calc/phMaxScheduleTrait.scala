@@ -35,7 +35,7 @@ trait phMaxScheduleTrait {
         rd.flush
         rdd2mongoJobsCount
     }
-
+    
     def mongo2rdd: Int = {
         val rd = new PhRedisDriver()
         val sd = phSparkDriver()

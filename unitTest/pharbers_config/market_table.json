@@ -1,16 +1,17 @@
 [
   {
-    "company": "5afa53bded925c05c6f69c54",
-    "market": "麻醉市场",
-    "universe_file": "/nhwa/配置文件/Nhwa_universe_麻醉市场_20180705.xlsx",
-    "product_match_file": "nhwa/配置文件/Nhwa_ProductMatchTable_20180629.xlsx",
-    "fill_hos_data_file": "nhwa/配置文件/Nhwa_2018_FullHosp_20180629.xlsx",
-    "markets_match_file": "nhwa/配置文件/Nhwa_MarketMatchTable_20180629.xlsx",
-    "not_published_hosp_file": "nhwa/配置文件/Nhwa_2018_NotPublishedHosp_20180629.xlsx",
-    "hosp_ID": "nhwa/配置文件/Nhwa_2018_If_panel_all_麻醉市场_20180629.xlsx",
-    "cpa_file": "Source/Nhwa/Nhwa_201804_CPA_20180629.xlsx",
-    "gycx_file": "",
+    "company": "5b023787810c6e0268fe6ff6",
+    "market": "阿洛刻市场",
+    "universe_file": "astellas/pha_config_repository1804/Astellas_Universe_Allelock_20180709.csv",
+    "product_match_file": "astellas/pha_config_repository1804/Astellas_ProductMatchTable_20180703.csv",
+    "fill_hos_data_file": "astellas/pha_config_repository1804/Astellas_2018_FullHosp_20180629.csv",
+    "markets_match_file": "astellas/pha_config_repository1804/Astellas_MarketMatchTable_Allelock_20180702.csv",
+    "hospital_file": "astellas/pha_config_repository1804/Astellas_ThreeSourceTable_20180629.csv",
+    "not_published_hosp_file": "astellas/pha_config_repository1804/Astellas_2018_NotPublishedHosp_20180629.csv",
+    "cpa_file": "astellas/pha_config_repository1804/Astellas_201804_CPA.csv",
+    "gycx_file": "astellas/pha_config_repository1804/Astellas_201804_Gycx_20180703.csv",
+    "hosp_ID_file": "astellas/pha_config_repository1804/Astellas_2018_If_panel_all_Allelock_20180703.csv",
     "ym": "201804",
-    "offlineResult": "201804Nhwa/Nhwa_201804_Offline_MaxResult_20180705 (1).xlsx"
+    "offlineResult": "astellas/pha_config_repository1804/Astellas_201804_Offline_MaxResult_20180710.csv"
   }
 ]

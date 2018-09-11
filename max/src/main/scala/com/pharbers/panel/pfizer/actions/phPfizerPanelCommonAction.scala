@@ -4,7 +4,7 @@ import com.pharbers.pactions.actionbase._
 import com.pharbers.spark.phSparkDriver
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions.{col, when, _}
-import org.apache.spark.sql.types.{DoubleType, LongType}
+import org.apache.spark.sql.types.{DoubleType, IntegerType, LongType}
 
 /**
   * Created by jeorch on 18-4-18.
@@ -16,6 +16,7 @@ object phPfizerPanelCommonAction {
 class phPfizerPanelCommonAction(override val defaultArgs: pActionArgs) extends pActionTrait {
     override val name: String = "panel"
     lazy val sparkDriver: phSparkDriver = phSparkDriver()
+    import sparkDriver.ss.implicits._
     
     override def perform(args: pActionArgs): pActionArgs = {
         
@@ -23,9 +24,26 @@ class phPfizerPanelCommonAction(override val defaultArgs: pActionArgs) extends p
         val mkt = defaultArgs.asInstanceOf[MapArgs].get("mkt").asInstanceOf[StringArgs].get
         
         val cpa = args.asInstanceOf[MapArgs].get("cpa").asInstanceOf[DFArgs].get
-        val gyc = args.asInstanceOf[MapArgs].get("gyc").asInstanceOf[DFArgs].get
+                .na.fill(value = "0", cols = Array("VALUE", "STANDARD_UNIT"))
+                .withColumn("PRODUCT_NAME", when(col("PRODUCT_NAME").isNull, col("MOLE_NAME"))
+                        .otherwise(col("PRODUCT_NAME")))
+                .withColumn("MONTH", 'MONTH.cast(IntegerType))
+                .withColumn("MONTH", when(col("MONTH").>=(10), col("MONTH"))
+                        .otherwise(concat(col("MONTH").*(0).cast("int"), col("MONTH"))))
+                .withColumn("min1", concat(col("PRODUCT_NAME"), col("DOSAGE"), col("PACK_DES"), col("PACK_NUMBER"), col("CORP_NAME")))
+                .withColumn("ym", concat(col("YEAR"), col("MONTH")))
         
-        val universe_file = args.asInstanceOf[MapArgs].get("universe_file").asInstanceOf[DFArgs].get
+        val gyc = args.asInstanceOf[MapArgs].get("gyc").asInstanceOf[DFArgs].get
+                .na.fill(value = "0", cols = Array("VALUE", "STANDARD_UNIT"))
+                .withColumn("PRODUCT_NAME", when(col("PRODUCT_NAME").isNull, col("MOLE_NAME"))
+                        .otherwise(col("PRODUCT_NAME")))
+                .withColumn("MONTH", 'MONTH.cast(IntegerType))
+                .withColumn("MONTH", when(col("MONTH").>=(10), col("MONTH"))
+                        .otherwise(concat(col("MONTH").*(0).cast("int"), col("MONTH"))))
+                .withColumn("min1", concat(col("PRODUCT_NAME"), col("DOSAGE"), col("PACK_DES"), col("PACK_NUMBER"), col("CORP_NAME")))
+                .withColumn("ym", concat(col("YEAR"), col("MONTH")))
+        
+        val hosp_ID_file = args.asInstanceOf[MapArgs].get("hosp_ID_file").asInstanceOf[DFArgs].get
         
         //通用名市场定义 =>表b0　
         val markets_match = args.asInstanceOf[MapArgs].get("markets_match_file").asInstanceOf[DFArgs].get
@@ -45,8 +63,9 @@ class phPfizerPanelCommonAction(override val defaultArgs: pActionArgs) extends p
             
             val full_cpa_gyc = fullCPAandGYCX
             val filter_cpa_gyc = full_cpa_gyc.join(markets_match, full_cpa_gyc("MOLE_NAME") === markets_match("MOLE_NAME_M"))
-            val universe = trimUniverse
-            val filted_panel = filter_cpa_gyc.join(universe, filter_cpa_gyc("HOSP_ID") === universe("ID"))
+                    .withColumnRenamed("HOSP_ID", "HOSP_ID_cpa_gyc")
+            val Hosp_ID = trimHosp_ID
+            val filted_panel = filter_cpa_gyc.join(Hosp_ID, filter_cpa_gyc("HOSP_ID_cpa_gyc") === Hosp_ID("ID"))
             val panelDF = trimPanel(filted_panel, splitMktResultDF)
             DFArgs(panelDF)
         }
@@ -60,17 +79,19 @@ class phPfizerPanelCommonAction(override val defaultArgs: pActionArgs) extends p
                     .withColumnRenamed("HOSP_ID", "ID")
                     .select("ID")
             val miss_hosp = not_arrival_hosp.distinct()
+                    .withColumn("ID", 'ID.cast(IntegerType))
             val reduced_cpa = primal_cpa.join(miss_hosp, primal_cpa("HOSP_ID") === miss_hosp("ID"), "left").filter("ID is null").drop("ID")
             val full_hosp_id = full_hosp_file.filter(col("MONTH") === filter_month)
+                    .withColumn("HOSP_ID", 'HOSP_ID.cast(IntegerType))
             val full_hosp = miss_hosp.join(full_hosp_id, miss_hosp("ID") === full_hosp_id("HOSP_ID")).drop("ID").select(reduced_cpa.columns.head, reduced_cpa.columns.tail: _*)
             
             import sparkDriver.ss.implicits._
             reduced_cpa.union(full_hosp).union(gyc.filter(s"YM like '$ym'").select(reduced_cpa.columns.head, reduced_cpa.columns.tail: _*)).withColumn("HOSP_ID", 'HOSP_ID.cast(LongType))
         }
         
-        def trimUniverse = {
+        def trimHosp_ID = {
             import sparkDriver.ss.implicits._
-            universe_file.withColumnRenamed("HOSP_ID", "ID")
+            hosp_ID_file.withColumnRenamed("HOSP_ID", "ID")
                     .withColumnRenamed("PHA_HOSP_NAME", "HOSP_NAME")
                     .withColumnRenamed("PHA_HOSP_ID", "HOSP_ID")
                     .withColumnRenamed("MARKET", "DOI")

@@ -40,5 +40,11 @@
     <property>  
         <name>dfs.namenode.handler.count</name>  
         <value>27</value>  
-    </property> 
+    </property>
+    <property>
+        <name>dfs.client.use.datanode.hostname</name>
+        <value>true</value>
+        <description>Whether clients should use datanode hostnames when connecting to datanodes.
+        </description>
+    </property>
 </configuration>

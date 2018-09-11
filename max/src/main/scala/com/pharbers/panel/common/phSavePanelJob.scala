@@ -20,7 +20,7 @@ class phSavePanelJob(override val defaultArgs: pActionArgs) extends pActionTrait
                 .option("delimiter", 31.toChar.toString)
                 .option("codec", "org.apache.hadoop.io.compress.GzipCodec")
                 .save(panel_location)
-
+        println(panel_name)
         StringArgs(panel_name)
     }
 }
