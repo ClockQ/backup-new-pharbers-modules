@@ -3,40 +3,44 @@ package com.pharbers.xmpp
 import org.jivesoftware.smack._
 import org.jivesoftware.smack.packet.Message
 
-class xmppClient {
-    val config: ConnectionConfiguration = new ConnectionConfiguration("192.168.100.172", 5222)
+case class xmppClient(host: String, port: Int) extends xmppTrait {
+
+    val config: ConnectionConfiguration = new ConnectionConfiguration(host, port)
     val conn = new XMPPConnection(config)
     try {
         conn.connect()
     } catch {
         case ex: XMPPException => ex.printStackTrace()
     }
-    //登录
-    conn.login("cui", "cui")
-    val chatMamager = conn.getChatManager
-    val newChat = chatMamager.createChat("jeorch@localhost", new MessageListener(){
-        override def processMessage(chat: Chat, message: Message): Unit ={
-            println("Receivedmessage:" + message.getBody)
-        }
-    })
-    
-    try {
-        newChat.sendMessage("Hello world!")
-    } catch {
-        case ex: XMPPException => ex.printStackTrace()
+
+    def login(username: String, password: String): Unit = {
+        conn.login(username, password)
     }
-    //获取用户
-//    val roster: Roster = conn.getRoster
-//    val entries: util.Collection[RosterEntry] = roster.getEntries
-//    println(entries)
-//    val x = entries.iterator()
-//    val i = entries.size()
-//    var n = 1
-//    while(x.hasNext){
-//        val entry: RosterEntry = x.next()
-//        println(entry)
-//    }
-    //关闭连接
-    Thread.sleep(20000)
-    conn.disconnect()
+
+    def disconnect(): Unit = {
+        conn.disconnect()
+    }
+
+    def listen(userJID: String)(replyFunc: (Chat, Message) => Unit): Unit = {
+        val chatMamager = conn.getChatManager
+        chatMamager.createChat(userJID, new MessageListener(){
+            override def processMessage(chat: Chat, message: Message): Unit = replyFunc
+        })
+    }
+
+    def chat(userJID: String, msg: String): Unit = {
+        val chatMamager = conn.getChatManager
+        val newChat = chatMamager.createChat(userJID, new MessageListener(){
+            override def processMessage(chat: Chat, message: Message): Unit ={
+                println("Receivedmessage:" + message.getBody)
+            }
+        })
+
+        try {
+            newChat.sendMessage(msg)
+        } catch {
+            case ex: XMPPException => ex.printStackTrace()
+        }
+    }
 }
+
