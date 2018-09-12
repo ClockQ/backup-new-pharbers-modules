@@ -20,11 +20,11 @@
         <module>security</module>
         <module>paction</module>
         <module>timer</module>
+        <module>xmppClient</module>
         <module>max</module>
         <module>unitTest</module>
         <module>gatling</module>
         <module>client-pattern</module>
-        <module>xmppClient</module>
     </modules>
 
 </project>

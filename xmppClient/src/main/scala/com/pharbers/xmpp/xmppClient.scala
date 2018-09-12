@@ -32,10 +32,10 @@ case class xmppClient(context : ActorSystem) extends PharbersInjectModule {
         conn
     }
 
-    def startXmpp(decode : String => Any) = {
+    def startXmpp(handler : String => Unit) = {
         conn.login(xmpp_user, xmpp_pwd)
 
-        lazy val xmpp_receiver = context.actorOf(Props[xmppReceiver].withRouter(RoundRobinPool(5)))
+        lazy val xmpp_receiver = context.actorOf(xmppReceiver.props(handler).withRouter(RoundRobinPool(5)))
         val cm = conn.getChatManager
         xmpp_listens.foreach { userJID =>
             cm.createChat(userJID, new MessageListener {
@@ -47,7 +47,7 @@ case class xmppClient(context : ActorSystem) extends PharbersInjectModule {
         }
     }
 
-    def broadcastXmppMsg(encode : Any => String)(item : Any) = {
+    def broadcastXmppMsg(encode : AnyRef => String)(item : AnyRef) = {
         val cm= conn.getChatManager
 
         xmpp_report.foreach { userJID =>

@@ -107,6 +107,11 @@
                     <artifactId>pharbers-timer</artifactId>
                     <version>0.1</version>
                 </dependency>
+                <dependency>
+                    <groupId>com.pharbers</groupId>
+                    <artifactId>pharbers-xmpp</artifactId>
+                    <version>0.1</version>
+                </dependency>
 
                 <!-- spark lib -->
                 <dependency>
@@ -173,11 +178,20 @@
                 </dependency>
 
                 <!-- https://mvnrepository.com/artifact/amplab/spark-indexedrdd -->
+                <!--<dependency>-->
+                    <!--<groupId>amplab</groupId>-->
+                    <!--<artifactId>spark-indexedrdd</artifactId>-->
+                    <!--<version>0.4.0</version>-->
+                <!--</dependency>-->
+
                 <dependency>
-                    <groupId>amplab</groupId>
+                    <groupId>com.pharbers</groupId>
                     <artifactId>spark-indexedrdd</artifactId>
                     <version>0.4.0</version>
+                    <scope>system</scope>
+                    <systemPath>${project.basedir}/src/main/resource/spark-indexedrdd-0.4.0.jar</systemPath>
                 </dependency>
+
             </dependencies>
         </profile>
     </profiles>
