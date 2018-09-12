@@ -1,7 +1,6 @@
 package com.pharbers.xmpp
 
-import org.jivesoftware.smack.Chat
-import org.jivesoftware.smack.packet.Message
+import com.pharbers.pattern2.detail.commonresult
 
 /**
   * @ ProjectName pharbers-xmppClient.com.pharbers.xmpp.xmppTrait
@@ -10,11 +9,7 @@ import org.jivesoftware.smack.packet.Message
   * @ Description: TODO
   */
 trait xmppTrait {
-    val host: String
-    val port: Int
-
-    def login(username: String, password: String): Unit
-    def listen(userJID: String)(replyFunc: (Chat, Message) => Unit): Unit
-    def disconnect(): Unit
-
+    val encodeHandler: commonresult => String
+    val decodeHandler: String => commonresult
+    val consumeHandler: String => String
 }

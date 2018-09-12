@@ -21,10 +21,10 @@ object main extends App with PharbersInjectModule {
     lazy val using_kafka = config.mc.find(p => p._1 == "kafka").get._2.toString
     lazy val using_xmpp = config.mc.find(p => p._1 == "xmpp").get._2.toString
 
-    TimerJob(new phMaxScheduleJob().getClass.getName).start(0, 24 * 60 * 60)
+//    TimerJob(new phMaxScheduleJob().getClass.getName).start(0, 24 * 60 * 60)
 
     if (using_kafka == "true") callJobConsumer("max_calc")(system)
-    else if (using_xmpp == "true") xmppClient(system).startXmpp(new callJobXmppConsumer().test)
+    else if (using_xmpp == "true") xmppClient(system)(new callJobXmppConsumer(system)).startXmpp
     else Unit
     alTempLog("MAX Driver started")
 }

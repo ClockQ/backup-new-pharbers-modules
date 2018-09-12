@@ -1,39 +1,38 @@
 package com.pharbers.channel.chanelImpl
 
-import akka.actor.{ActorContext, Props}
-import akka.pattern.ask
+import akka.actor.ActorSystem
 import akka.util.Timeout
-import com.pharbers.bmmessages.{CommonModules, MessageRoutes, excute}
-import com.pharbers.bmpattern.LogMessage.msg_log
-import com.pharbers.bmpattern.ResultMessage.msg_CommonResultMessage
-import com.pharbers.bmpattern.RoutesActor
-import com.pharbers.channel.callJobRequestMessage.{msg_executeJob, msg_responseJob}
-import play.api.libs.json.JsValue
-import play.api.libs.json.Json.toJson
+import com.pharbers.channel.callJobRequestModule2
+import com.pharbers.pattern2.detail.{PhMaxJob, commonresult}
+import com.pharbers.pattern2.entry.DispatchEntry
+import com.pharbers.xmpp.xmppTrait
+import pattern.manager.SequenceSteps
+import io.circe.syntax._
+import com.pharbers.macros._
+import com.pharbers.jsonapi.model._
+import com.pharbers.macros.convert.jsonapi.JsonapiMacro._
+import com.pharbers.jsonapi.json.circe.CirceJsonapiSupport
 
-import scala.concurrent.Await
 import scala.concurrent.duration._
 
-class callJobXmppConsumer {
-//    implicit val t: Timeout = 10 minutes
-//
-//    def commonExcution(msr: MessageRoutes): Unit = {
-//        val act = context.actorOf(Props[RoutesActor])
-//        val r = act ? excute(msr)
-//        val result = Await.result(r.mapTo[JsValue], t.duration)
-//    }
-//
-//    val consumeHandler : AnyRef => MessageRoutes = { jv =>
-////        import com.pharbers.bmpattern.LogMessage.common_log
-////        import com.pharbers.bmpattern.ResultMessage.common_result
-////        MessageRoutes(msg_log(toJson(Map("method" -> toJson("call job request"))), jv)
-////            :: msg_executeJob(jv)
-////            :: msg_responseJob(jv)
-////            :: msg_CommonResultMessage() :: Nil, None)(CommonModules(Some(Map("as" -> dispatch))))
-//    }
+class callJobXmppConsumer(context : ActorSystem) extends xmppTrait with CirceJsonapiSupport {
+    implicit val t: Timeout = 10 minutes
+    val entry = DispatchEntry()(context)
 
-    def test(tt : String) : AnyRef = {
-        println(tt)
-        null
+    override val encodeHandler: commonresult => String = { obj =>
+        toJsonapi(obj).asJson.noSpaces
+    }
+
+    override val decodeHandler: String => commonresult = { str =>
+        val json_data = parseJson(str)
+        val jsonapi = decodeJson[RootObject](json_data)
+        formJsonapi[PhMaxJob](jsonapi)
+    }
+
+    override val consumeHandler: String => String = { input =>
+        val obj = decodeHandler(input)
+        val reVal = entry.commonExcution(
+            SequenceSteps(callJobRequestModule2(obj) :: Nil, None))
+        encodeHandler(reVal)
     }
 }

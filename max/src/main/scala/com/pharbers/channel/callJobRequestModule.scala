@@ -7,6 +7,9 @@ import com.pharbers.channel.callJobRequestMessage._
 import com.pharbers.channel.chanelImpl.responsePusher
 import com.pharbers.channel.doJobActor._
 import com.pharbers.channel.util.getJV2Map
+import com.pharbers.pattern2.detail.commonresult
+import com.pharbers.pattern2.error.commonerror
+import com.pharbers.pattern2.steps.commonstep
 import play.api.libs.json.JsValue
 
 object callJobRequestModule extends ModuleTrait with callJobRequestTrait {
@@ -20,7 +23,6 @@ object callJobRequestModule extends ModuleTrait with callJobRequestTrait {
 
         case _ => ???
     }
-
 }
 
 trait callJobRequestTrait extends getJV2Map {

@@ -6,5 +6,6 @@
         <xmpp-pwd value="cui" />
         <xmpp-listens value="jeroch@localhost#" />
         <xmpp-report value="jeroch@localhost#" />
+        <xmpp-pool-num value="2" />
     </xmpp-module>
 </pharbers-modules>

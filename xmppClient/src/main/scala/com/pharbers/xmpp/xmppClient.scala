@@ -3,15 +3,15 @@ package com.pharbers.xmpp
 import com.pharbers.baseModules.PharbersInjectModule
 import org.jivesoftware.smack._
 import org.jivesoftware.smack.packet.Message
-import akka.actor.{ActorSystem, Props}
+import akka.actor.{ActorSystem}
 import akka.routing.RoundRobinPool
 
-case class xmppClient(context : ActorSystem)(handler : String => Unit) extends PharbersInjectModule {
+case class xmppClient(context : ActorSystem)(handler : xmppTrait) extends PharbersInjectModule {
 
     override val id: String = "xmpp-module"
     override val configPath: String = "pharbers_config/xmpp_manager.xml"
     override val md = "xmpp-host" :: "xmpp-port" :: "xmpp-user" ::
-        "xmpp-pwd" :: "xmpp-listens" :: "xmpp-report" :: Nil
+        "xmpp-pwd" :: "xmpp-listens" :: "xmpp-report" :: "xmpp-pool-num" :: Nil
 
     val xmpp_host = config.mc.find(p => p._1 == "xmpp-host").get._2.toString
     val xmpp_port = config.mc.find(p => p._1 == "xmpp-port").get._2.toString.toInt
@@ -21,7 +21,9 @@ case class xmppClient(context : ActorSystem)(handler : String => Unit) extends P
     val xmpp_listens = config.mc.find(p => p._1 == "xmpp-listens").get._2.toString.split("#")
     val xmpp_report = config.mc.find(p => p._1 == "xmpp-report").get._2.toString.split("#")
 
-    lazy val xmpp_receiver = context.actorOf(xmppReceiver.props(handler).withRouter(RoundRobinPool(5)))
+    val xmpp_pool_num = config.mc.find(p => p._1 == "xmpp-pool-num").get._2.toString.toInt
+
+    val xmpp_receiver = context.actorOf(RoundRobinPool(xmpp_pool_num ).props(xmppReceiver.props(handler)), "xmpp-receiver")
     lazy val xmpp_config : ConnectionConfiguration = new ConnectionConfiguration(xmpp_host, xmpp_port)
     lazy val conn = {
         val conn = new XMPPConnection(xmpp_config)
@@ -33,7 +35,7 @@ case class xmppClient(context : ActorSystem)(handler : String => Unit) extends P
         conn
     }
 
-    def startXmpp(handler : String => Unit) = {
+    def startXmpp = {
         conn.login(xmpp_user, xmpp_pwd)
 
         val cm = conn.getChatManager
