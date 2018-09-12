@@ -9,7 +9,7 @@ import akka.routing.RoundRobinPool
 case class xmppClient(context : ActorSystem) extends PharbersInjectModule {
 
     override val id: String = "xmpp-module"
-    override val configPath: String = "pharbers_config/xmpp_cmanager.xml"
+    override val configPath: String = "pharbers_config/xmpp_manager.xml"
     override val md = "xmpp-host" :: "xmpp-port" :: "xmpp-user" ::
         "xmpp-pwd" :: "xmpp-listens" :: "xmpp-report" :: Nil
 
