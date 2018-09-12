@@ -1,0 +1,10 @@
+<pharbers-modules>
+    <xmpp-module>
+        <xmpp-host value="192.168.100.172" />
+        <xmpp-port value="5222" />
+        <xmpp-user value="cui" />
+        <xmpp-pwd value="cui" />
+        <xmpp-listens value="jeroch@localhost#" />
+        <xmpp-report value="jeroch@localhost#" />
+    </xmpp-module>
+</pharbers-modules>
