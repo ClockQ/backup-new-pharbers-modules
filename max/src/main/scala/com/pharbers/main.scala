@@ -24,7 +24,8 @@ object main extends App with PharbersInjectModule {
 //    TimerJob(new phMaxScheduleJob().getClass.getName).start(0, 24 * 60 * 60)
 
     if (using_kafka == "true") callJobConsumer("max_calc")(system)
-    else if (using_xmpp == "true") xmppClient(system)(new callJobXmppConsumer(system)).startXmpp
+    else if (using_xmpp == "true") xmppClient.startLocalClient(system, new callJobXmppConsumer(system))
     else Unit
     alTempLog("MAX Driver started")
+    while (true) {}
 }

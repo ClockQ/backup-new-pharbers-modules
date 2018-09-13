@@ -2,7 +2,7 @@ package com.pharbers.channel.chanelImpl
 
 import akka.actor.ActorSystem
 import akka.util.Timeout
-import com.pharbers.channel.callJobRequestModule2
+import com.pharbers.channel.{executeJob}
 import com.pharbers.pattern2.detail.{PhMaxJob, commonresult}
 import com.pharbers.pattern2.entry.DispatchEntry
 import com.pharbers.xmpp.xmppTrait
@@ -19,20 +19,16 @@ class callJobXmppConsumer(context : ActorSystem) extends xmppTrait with CirceJso
     implicit val t: Timeout = 10 minutes
     val entry = DispatchEntry()(context)
 
-    override val encodeHandler: commonresult => String = { obj =>
+    override val encodeHandler: commonresult => String = obj =>
         toJsonapi(obj).asJson.noSpaces
-    }
 
-    override val decodeHandler: String => commonresult = { str =>
-        val json_data = parseJson(str)
-        val jsonapi = decodeJson[RootObject](json_data)
-        formJsonapi[PhMaxJob](jsonapi)
-    }
+    override val decodeHandler: String => commonresult = str =>
+        formJsonapi[PhMaxJob](decodeJson[RootObject](parseJson(str)))
 
     override val consumeHandler: String => String = { input =>
         val obj = decodeHandler(input)
         val reVal = entry.commonExcution(
-            SequenceSteps(callJobRequestModule2(obj) :: Nil, None))
+            SequenceSteps(executeJob(obj)(context) :: Nil, None))
         encodeHandler(reVal)
     }
 }

@@ -4,7 +4,8 @@
         <xmpp-port value="5222" />
         <xmpp-user value="cui" />
         <xmpp-pwd value="cui" />
-        <xmpp-listens value="jeorch@localhost#" />
+        <xmpp-listens value="alfred@localhost#" />
         <xmpp-report value="jeorch@localhost#" />
+        <xmpp-pool-num value="2" />
     </xmpp-module>
 </pharbers-modules>
