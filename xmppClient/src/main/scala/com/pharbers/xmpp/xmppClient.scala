@@ -1,12 +1,29 @@
 package com.pharbers.xmpp
 
+import java.util.function.Consumer
+
 import com.pharbers.baseModules.PharbersInjectModule
 import org.jivesoftware.smack._
 import org.jivesoftware.smack.packet.Message
-import akka.actor.{ActorSystem}
+import akka.actor.{Actor, ActorLogging, ActorRef, ActorSystem, Props}
 import akka.routing.RoundRobinPool
 
-case class xmppClient(context : ActorSystem)(handler : xmppTrait) extends PharbersInjectModule {
+object xmppClient {
+    def props(handler : xmppTrait) = Props(new xmppClient(handler))
+    var a : ActorRef = null
+
+    def startLocalClient(as : ActorSystem, handler : xmppTrait) = {
+        if (a == null) {
+            a = as.actorOf(props(handler), name = "xmpp")
+            println("=====> actor address : " + a.path.toString)
+            a ! "start"
+        }
+
+        a.path.address.toString
+    }
+}
+
+class xmppClient(val handler : xmppTrait) extends PharbersInjectModule with Actor with ActorLogging {
 
     override val id: String = "xmpp-module"
     override val configPath: String = "pharbers_config/xmpp_manager.xml"
@@ -23,41 +40,48 @@ case class xmppClient(context : ActorSystem)(handler : xmppTrait) extends Pharbe
 
     val xmpp_pool_num = config.mc.find(p => p._1 == "xmpp-pool-num").get._2.toString.toInt
 
-    val xmpp_receiver = context.actorOf(RoundRobinPool(xmpp_pool_num ).props(xmppReceiver.props(handler)), "xmpp-receiver")
+    val xmpp_receiver = context.actorOf(RoundRobinPool(xmpp_pool_num ).props(xmppReceiver.props(handler)), name = "xmpp-receiver")
     lazy val xmpp_config : ConnectionConfiguration = new ConnectionConfiguration(xmpp_host, xmpp_port)
-    lazy val conn = {
-        val conn = new XMPPConnection(xmpp_config)
+    lazy val (conn, cm) : (XMPPConnection, ChatManager) = {
         try {
+            val conn = new XMPPConnection(xmpp_config)
             conn.connect()
+            conn.login(xmpp_user, xmpp_pwd)
+            (conn, conn.getChatManager)
         } catch {
-            case ex: XMPPException => ex.printStackTrace()
+            case ex: XMPPException => ex.printStackTrace(); (null, null)
         }
-        conn
     }
 
     def startXmpp = {
-        conn.login(xmpp_user, xmpp_pwd)
+        cm.addChatListener(new ChatManagerListener {
+            override def chatCreated(chat: Chat, b: Boolean): Unit = {
+                println("==========> chat created !!!")
+                if (!chat.getListeners.isEmpty) return
 
-        val cm = conn.getChatManager
-        xmpp_listens.foreach { userJID =>
-            cm.createChat(userJID, new MessageListener {
-                override def processMessage(chat: Chat, message: Message): Unit = {
-                    println("receiving message:" + message.getBody)
-                    xmpp_receiver ! (userJID, message.getBody)
-                }
-            })
-        }
+                chat.addMessageListener(new MessageListener {
+                    override def processMessage(chat: Chat, message: Message): Unit = {
+                        println("=======> receiving message:" + message.getBody)
+                        println("=======> message from :" + chat.getParticipant)
+                        xmpp_receiver ! (chat.getParticipant.substring(0, chat.getParticipant.indexOf("/")), message.getBody)
+                    }
+                })
+            }
+        })
     }
 
-    def broadcastXmppMsg(encode : AnyRef => String)(item : AnyRef) = {
-        val cm= conn.getChatManager
-
+    def broadcastXmppMsg(reJson : String) = {
         xmpp_report.foreach { userJID =>
-            cm.createChat(userJID, null).sendMessage(encode(item))
+            cm.createChat(userJID, null).sendMessage(reJson)
         }
     }
 
     def stopXmpp = {
         conn.disconnect()
+    }
+
+    override def receive: Receive = {
+        case "start" => startXmpp
+        case _ => ???
     }
 }

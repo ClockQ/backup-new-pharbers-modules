@@ -12,6 +12,7 @@ class xmppReceiver(handler : xmppTrait) extends Actor with ActorLogging {
             println(s"$who post a message")
             println(s"message content is $body")
             handler.consumeHandler(body.toString)
+//            parent.broadcastXmppMsg(result)
         }
         case _ => ???
     }
