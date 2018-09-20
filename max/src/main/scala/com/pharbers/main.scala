@@ -4,13 +4,16 @@ import akka.actor.ActorSystem
 import com.pharbers.baseModules.PharbersInjectModule
 import com.pharbers.calc.phMaxScheduleJob
 import com.pharbers.channel.chanelImpl.{callJobConsumer, callJobXmppConsumer}
+//import com.pharbers.channel.doJobActor2
 import com.pharbers.common.algorithm.alTempLog
+import com.pharbers.pattern2.detail.PhMaxJob
 import com.pharbers.timer.TimerJob
 import com.pharbers.xmpp.xmppClient
 
 /**
   * Created by spark on 18-4-24.
   */
+
 object main extends App with PharbersInjectModule {
     val system = ActorSystem("maxActor")
 

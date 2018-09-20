@@ -13,7 +13,7 @@
                 <activeByDefault>true</activeByDefault>
             </activation>
             <properties>
-                <hadooop.version>2.5.1</hadooop.version>
+                <hadoop.version>3.0.3</hadoop.version>
                 <scalaVersion>2.11.8</scalaVersion>
                 <scalaBinaryVersion>2.11</scalaBinaryVersion>
             </properties>
@@ -46,7 +46,7 @@
                 <dependency>
                     <groupId>org.apache.spark</groupId>
                     <artifactId>spark-sql_2.11</artifactId>
-                    <version>2.0.0</version>
+                    <version>2.3.0</version>
                 </dependency>
                 <dependency>
                     <groupId>com.pharbers</groupId>

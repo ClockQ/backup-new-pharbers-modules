@@ -12,7 +12,7 @@ import com.pharbers.pactions.generalactions.memory.phMemoryArgs
 import com.pharbers.panel.common.{phPanelInfo2Redis, phSavePanelJob}
 import org.apache.spark.listener.{MaxSparkListener, addListenerAction}
 import com.pharbers.pactions.actionbase.{MapArgs, StringArgs, pActionTrait}
-import com.pharbers.pactions.jobs.{choiceJob, sequenceJob, sequenceJobWithMap}
+import com.pharbers.pactions.jobs.{sequenceJob, sequenceJobWithMap}
 import com.pharbers.panel.pfizer.format.{phPfizerCpaFormat, phPfizerGycxFormat}
 import com.pharbers.pactions.excel.input.{PhExcelXLSXCommonFormat, PhXlsxSecondSheetFormat}
 
@@ -55,84 +55,59 @@ case class phPfizerPanelJob(args: Map[String, String])(implicit _actor: Actor) e
     
     
     //1. read hosp_ID file
-    val load_hosp_ID_file: choiceJob = new choiceJob {
+    val load_hosp_ID_file: sequenceJob = new sequenceJob {
         override val name: String = "hosp_ID_file"
-        override val actions: List[pActionTrait] = existenceRdd("hosp_ID") ::
-                csv2DFAction(temp_dir + "hosp_ID") ::
-                new sequenceJob {
-                    override val name: String = "read_hosp_ID_file_job"
-                    override val actions: List[pActionTrait] =
-                        readCsvAction(hosp_ID_file, ",") :: Nil
-                } :: Nil
+        override val actions: List[pActionTrait] =
+            readCsvAction(hosp_ID_file, applicationName = job_id) :: Nil
     }
     
     //2. read product_match_file
-    val load_product_match_file: choiceJob = new choiceJob {
+    val load_product_match_file: sequenceJob = new sequenceJob {
         override val name = "product_match_file"
-        val actions: List[pActionTrait] = existenceRdd("product_match_file") ::
-                csv2DFAction(temp_dir + "product_match_file") ::
-                new sequenceJob {
-                    override val name: String = "read_product_match_file_job"
-                    override val actions: List[pActionTrait] =
-                        readCsvAction(product_match_file) :: Nil
-                } :: Nil
+        override val actions: List[pActionTrait] =
+                        readCsvAction(product_match_file, applicationName = job_id) :: Nil
     }
     
     //3. read markets_match_file
-    val load_markets_match_file: choiceJob = new choiceJob {
+    val load_markets_match_file: sequenceJob = new sequenceJob {
         override val name = "markets_match_file"
-        val actions: List[pActionTrait] = existenceRdd("markets_match_file") ::
-                csv2DFAction(temp_dir + "markets_match_file") ::
-                new sequenceJob {
-                    override val name: String = "read_markets_match_file_job"
-                    override val actions: List[pActionTrait] =
-                        readCsvAction(markets_match_file) :: Nil
-                } :: Nil
+        override val actions: List[pActionTrait] =
+                        readCsvAction(markets_match_file, applicationName = job_id) :: Nil
     }
     
     //4. read full_hosp_file
-    val load_full_hosp_file: choiceJob = new choiceJob {
+    val load_full_hosp_file: sequenceJob = new sequenceJob {
         override val name = "full_hosp_file"
-        val actions: List[pActionTrait] = existenceRdd("full_hosp_file") ::
-                phPfizerFillHospitalRdd2DfAction(temp_dir + "full_hosp_file") ::
-                new sequenceJob {
-                    override val name: String = "read_full_hosp_file_job"
-                    override val actions: List[pActionTrait] =
-                        readCsvAction(fill_hos_data_file, 31.toChar.toString) :: Nil
-                } :: Nil
+        override val actions: List[pActionTrait] =
+                        readCsvAction(fill_hos_data_file, 31.toChar.toString, applicationName = job_id) :: Nil
     }
     
     //5. read pfc_match_file
-    val load_pfc_match_file: choiceJob = new choiceJob {
+    val load_pfc_match_file: sequenceJob = new sequenceJob {
         override val name = "pfc_match_file"
-        val actions: List[pActionTrait] = existenceRdd("pfc_match_file") ::
-                csv2DFAction(temp_dir + "pfc_match_file") ::
-                new sequenceJob {
-                    override val name: String = "read_pfc_match_file_job"
-                    override val actions: List[pActionTrait] =
-                        readCsvAction(pfc_match_file) :: Nil
-                } :: Nil
+        override val actions: List[pActionTrait] =
+                        readCsvAction(pfc_match_file, applicationName = job_id) :: Nil
     }
     
     //6. read CPA文件第一页
     val readCpa: sequenceJob = new sequenceJob {
         override val name = "cpa"
         override val actions: List[pActionTrait] =
-            readCsvAction(cpa_file) :: Nil
+            readCsvAction(cpa_file, applicationName = job_id) :: Nil
     }
     
     //7. read CPA文件第二页
     val readNotArrivalHosp: sequenceJob = new sequenceJob {
         override val name = "not_arrival_hosp_file"
         override val actions: List[pActionTrait] =
-            readCsvAction(not_arrival_hosp_file) :: Nil
+            readCsvAction(not_arrival_hosp_file, applicationName = job_id) :: Nil
     }
     
     //8. read GYCX文件
     val readGyc: sequenceJob = new sequenceJob {
         override val name = "gyc"
         override val actions: List[pActionTrait] =
-            readCsvAction(gyc_file) :: Nil
+            readCsvAction(gyc_file, applicationName = job_id) :: Nil
     }
     
     val df = MapArgs(
@@ -176,8 +151,7 @@ case class phPfizerPanelJob(args: Map[String, String])(implicit _actor: Actor) e
     )
     
     override val actions: List[pActionTrait] = {
-        jarPreloadAction() ::
-                setLogLevelAction("ERROR") ::
+        setLogLevelAction("ERROR") ::
                 addListenerAction(MaxSparkListener(0, 10)) ::
                 load_hosp_ID_file ::
                 addListenerAction(MaxSparkListener(11, 20)) ::

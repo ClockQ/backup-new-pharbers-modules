@@ -30,6 +30,11 @@ class phPfizerPanelCommonAction(override val defaultArgs: pActionArgs) extends p
                 .withColumn("MONTH", 'MONTH.cast(IntegerType))
                 .withColumn("MONTH", when(col("MONTH").>=(10), col("MONTH"))
                         .otherwise(concat(col("MONTH").*(0).cast("int"), col("MONTH"))))
+                .withColumn("PRODUCT_NAME", trim(col("PRODUCT_NAME")))
+                .withColumn("DOSAGE", trim(col("DOSAGE")))
+                .withColumn("PACK_DES", trim(col("PACK_DES")))
+                .withColumn("PACK_NUMBER", trim(col("PACK_NUMBER")))
+                .withColumn("CORP_NAME", trim(col("CORP_NAME")))
                 .withColumn("min1", concat(col("PRODUCT_NAME"), col("DOSAGE"), col("PACK_DES"), col("PACK_NUMBER"), col("CORP_NAME")))
                 .withColumn("ym", concat(col("YEAR"), col("MONTH")))
         
@@ -40,6 +45,11 @@ class phPfizerPanelCommonAction(override val defaultArgs: pActionArgs) extends p
                 .withColumn("MONTH", 'MONTH.cast(IntegerType))
                 .withColumn("MONTH", when(col("MONTH").>=(10), col("MONTH"))
                         .otherwise(concat(col("MONTH").*(0).cast("int"), col("MONTH"))))
+                .withColumn("PRODUCT_NAME", trim(col("PRODUCT_NAME")))
+                .withColumn("DOSAGE", trim(col("DOSAGE")))
+                .withColumn("PACK_DES", trim(col("PACK_DES")))
+                .withColumn("PACK_NUMBER", trim(col("PACK_NUMBER")))
+                .withColumn("CORP_NAME", trim(col("CORP_NAME")))
                 .withColumn("min1", concat(col("PRODUCT_NAME"), col("DOSAGE"), col("PACK_DES"), col("PACK_NUMBER"), col("CORP_NAME")))
                 .withColumn("ym", concat(col("YEAR"), col("MONTH")))
         
@@ -57,6 +67,11 @@ class phPfizerPanelCommonAction(override val defaultArgs: pActionArgs) extends p
                 .withColumn("MONTH", when(col("MONTH").>=(10), col("MONTH"))
                 .otherwise(concat(col("MONTH").*(0).cast("int"), col("MONTH"))))
                 .withColumn("YM", concat(col("YEAR"), col("MONTH")))
+                .withColumn("PRODUCT_NAME", trim(col("PRODUCT_NAME")))
+                .withColumn("DOSAGE", trim(col("DOSAGE")))
+                .withColumn("PACK_DES", trim(col("PACK_DES")))
+                .withColumn("PACK_NUMBER", trim(col("PACK_NUMBER")))
+                .withColumn("CORP_NAME", trim(col("CORP_NAME")))
                 .withColumn("min1", concat(col("PRODUCT_NAME"), col("DOSAGE"), col("PACK_DES"), col("PACK_NUMBER"), col("CORP_NAME")))
         
         def getPanelFile: pActionArgs = {

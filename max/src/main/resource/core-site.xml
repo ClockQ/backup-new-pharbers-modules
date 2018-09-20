@@ -24,5 +24,5 @@
     <property>  
         <name>hadoop.tmp.dir</name>  
         <value>/home/spark/data/tmp</value>
-    </property>  
+    </property>
 </configuration>

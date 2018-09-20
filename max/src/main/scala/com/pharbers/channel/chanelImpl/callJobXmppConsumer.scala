@@ -25,10 +25,7 @@ class callJobXmppConsumer(context : ActorSystem) extends xmppTrait with CirceJso
     override val decodeHandler: String => commonresult = str =>
         formJsonapi[PhMaxJob](decodeJson[RootObject](parseJson(str)))
 
-    override val consumeHandler: String => String = { input =>
-        val obj = decodeHandler(input)
-        val reVal = entry.commonExcution(
-            SequenceSteps(executeJob(obj)(context) :: Nil, None))
-        encodeHandler(reVal)
-    }
+    override val consumeHandler: String => Unit = input =>
+        entry.commonExcution(
+            SequenceSteps(executeJob(decodeHandler(input))(context) :: Nil, None))
 }

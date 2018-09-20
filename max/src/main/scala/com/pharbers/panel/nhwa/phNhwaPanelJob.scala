@@ -34,13 +34,12 @@ case class phNhwaPanelJob(args: Map[String, String])(implicit _actor: Actor) ext
     val source_dir: String = max_path_obj.p_clientPath
     
     val not_published_hosp_file: String = match_dir + args("not_published_hosp_file")
-    val universe_file: String = match_dir + args("universe_file")
     val product_match_file: String = match_dir + args("product_match_file")
     val fill_hos_data_file: String = match_dir + args("fill_hos_data_file")
     val markets_match_file: String = match_dir + args("markets_match_file")
     val cpa_file: String = source_dir + args("cpa")
-    val hosp_ID_file: String = match_dir + args("hosp_ID")
-    val not_arrival_hosp_file: String = match_dir + args("not_arrival_hosp_file")
+    val hosp_ID_file: String = match_dir + args("hosp_ID_file")
+    val not_arrival_hosp_file: String = source_dir + args("not_arrival_hosp_file")
     
     lazy val ym: String = args("ym")
     lazy val mkt: String = args("mkt")
@@ -58,7 +57,7 @@ case class phNhwaPanelJob(args: Map[String, String])(implicit _actor: Actor) ext
       */
     val loadNotPublishedHosp: sequenceJob = new sequenceJob {
         override val name = "not_published_hosp_file"
-        override val actions: List[pActionTrait] = readCsvAction(not_published_hosp_file) :: Nil
+        override val actions: List[pActionTrait] = readCsvAction(not_published_hosp_file, applicationName = job_id) :: Nil
     }
     
     /**
@@ -66,7 +65,7 @@ case class phNhwaPanelJob(args: Map[String, String])(implicit _actor: Actor) ext
       */
     val load_hosp_ID_file: sequenceJob = new sequenceJob {
         override val name: String = "hosp_ID_file"
-        override val actions: List[pActionTrait] = readCsvAction(hosp_ID_file) :: Nil
+        override val actions: List[pActionTrait] = readCsvAction(hosp_ID_file, applicationName = job_id) :: Nil
     }
     
     /**
@@ -74,7 +73,7 @@ case class phNhwaPanelJob(args: Map[String, String])(implicit _actor: Actor) ext
       */
     val loadProductMatchFile: sequenceJob = new sequenceJob {
         override val name = "product_match_file"
-        val actions: List[pActionTrait] = readCsvAction(product_match_file) :: Nil
+        val actions: List[pActionTrait] = readCsvAction(product_match_file, applicationName = job_id) :: Nil
     }
     
     /**
@@ -82,7 +81,7 @@ case class phNhwaPanelJob(args: Map[String, String])(implicit _actor: Actor) ext
       */
     val loadFullHospFile: sequenceJob = new sequenceJob {
         override val name = "full_hosp_file"
-        val actions: List[pActionTrait] = readCsvAction(fill_hos_data_file) ::Nil
+        val actions: List[pActionTrait] = readCsvAction(fill_hos_data_file, applicationName = job_id) ::Nil
     }
     
     /**
@@ -90,7 +89,7 @@ case class phNhwaPanelJob(args: Map[String, String])(implicit _actor: Actor) ext
       */
     val loadMarketMatchFile: sequenceJob = new sequenceJob {
         override val name = "markets_match_file"
-        val actions: List[pActionTrait] = readCsvAction(markets_match_file) :: Nil
+        val actions: List[pActionTrait] = readCsvAction(markets_match_file, applicationName = job_id) :: Nil
     }
     
     /**
@@ -98,7 +97,7 @@ case class phNhwaPanelJob(args: Map[String, String])(implicit _actor: Actor) ext
       */
     val readCpa: sequenceJob = new sequenceJob {
         override val name = "cpa"
-        override val actions: List[pActionTrait] = readCsvAction(cpa_file) :: Nil
+        override val actions: List[pActionTrait] = readCsvAction(cpa_file, applicationName = job_id) :: Nil
     }
     
     /**
@@ -106,7 +105,7 @@ case class phNhwaPanelJob(args: Map[String, String])(implicit _actor: Actor) ext
       */
     val readNotArrivalHosp: sequenceJob = new sequenceJob {
         override val name = "not_arrival_hosp_file"
-        override val actions: List[pActionTrait] = readCsvAction(not_arrival_hosp_file) :: Nil
+        override val actions: List[pActionTrait] = readCsvAction(not_arrival_hosp_file, applicationName = job_id) :: Nil
     }
     
     val df = MapArgs(
@@ -121,7 +120,6 @@ case class phNhwaPanelJob(args: Map[String, String])(implicit _actor: Actor) ext
     )
     
     override val actions: List[pActionTrait] = {
-        jarPreloadAction() ::
                 setLogLevelAction("ERROR") ::
                 addListenerAction(listener.MaxSparkListener(0, 10)) ::
                 loadNotPublishedHosp ::

@@ -9,7 +9,7 @@ import com.pharbers.pactions.jobs._
 import com.pharbers.pactions.generalactions._
 import com.pharbers.common.algorithm.max_path_obj
 import org.apache.spark.listener.progress.sendMultiProgress
-import com.pharbers.pactions.excel.input.PhExcelXLSXCommonFormat
+//import com.pharbers.pactions.excel.input.PhExcelXLSXCommonFormat
 import org.apache.spark.listener.{MaxSparkListener, addListenerAction}
 import com.pharbers.pactions.actionbase.{MapArgs, StringArgs, pActionTrait}
 
@@ -35,24 +35,23 @@ case class phMaxJob(args: Map[String, String])(implicit _actor: Actor) extends s
     // 1. load panel data
     val loadPanelData: sequenceJob = new sequenceJob {
         override val name: String = "panel_data"
-        override val actions: List[pActionTrait] = csv2DFAction(panel_file) :: Nil
+        override val actions: List[pActionTrait] = readCsvAction(panel_file, delimiter = 31.toChar.toString, applicationName = job_id) :: Nil
     }
     
     // 留做测试 1. load panel data of xlsx
-    val loadPanelDataOfExcel: sequenceJob = new sequenceJob {
-        val temp_panel_name: String = UUID.randomUUID().toString
-        override val name = "panel_data"
-        override val actions: List[pActionTrait] =
-            xlsxReadingAction[PhExcelXLSXCommonFormat](panel_file, temp_panel_name) ::
-                    saveCurrenResultAction(temp_dir + temp_panel_name) ::
-                    csv2DFAction(temp_dir + temp_panel_name) :: Nil
-    }
+    //    val loadPanelDataOfExcel: sequenceJob = new sequenceJob {
+    //        val temp_panel_name: String = UUID.randomUUID().toString
+    //        override val name = "panel_data"
+    //        override val actions: List[pActionTrait] =
+    //            xlsxReadingAction[PhExcelXLSXCommonFormat](panel_file, temp_panel_name) ::
+    //                    saveCurrenResultAction(temp_dir + temp_panel_name) ::
+    //                    csv2DFAction(temp_dir + temp_panel_name) :: Nil
+    //    }
     
     // 2. read universe file
-    val universe_cache: String = panel_name + UUID.randomUUID().toString
     val readUniverseFile: sequenceJob = new sequenceJob {
         override val name = "universe_data"
-        override val actions: List[pActionTrait] = readCsvAction(universe_file) :: Nil
+        override val actions: List[pActionTrait] = readCsvAction(universe_file, applicationName = job_id) :: Nil
     }
     
     val df = MapArgs(
@@ -67,8 +66,7 @@ case class phMaxJob(args: Map[String, String])(implicit _actor: Actor) extends s
     )
     
     override val actions: List[pActionTrait] = {
-        jarPreloadAction() ::
-                setLogLevelAction("ERROR") ::
+        setLogLevelAction("ERROR") ::
                 addListenerAction(MaxSparkListener(0, 5)) ::
                 loadPanelData ::
                 //                loadPanelDataOfExcel ::

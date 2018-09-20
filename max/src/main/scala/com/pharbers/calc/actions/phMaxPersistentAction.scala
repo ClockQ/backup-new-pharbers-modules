@@ -30,7 +30,7 @@ class phMaxPersistentAction[T](override val defaultArgs: pActionArgs) extends pA
                 .option("delimiter", 31.toChar.toString)
                 .option("codec", "org.apache.hadoop.io.compress.GzipCodec")
                 .save(resultLocation)
-
+        println(maxName)
         StringArgs(maxName)
     }
 }

@@ -6,7 +6,7 @@ import akka.actor.Actor
 import com.pharbers.channel.util.sendEmTrait
 import com.pharbers.pactions.generalactions._
 import com.pharbers.common.algorithm.max_path_obj
-import com.pharbers.pactions.actionbase.pActionTrait
+import com.pharbers.pactions.actionbase.{MapArgs, StringArgs, pActionTrait}
 import com.pharbers.pactions.jobs.sequenceJobWithMap
 import com.pharbers.panel.common.phCalcYM2JVJobWithCpaAndGyc
 import org.apache.spark.listener.progress.sendSingleProgress
@@ -21,13 +21,14 @@ case class phPfizerCalcYMJob(args: Map[String, String])(implicit _actor: Actor) 
     lazy val cpa_file: String = max_path_obj.p_clientPath + args("cpa")
     lazy val gyc_file: String = max_path_obj.p_clientPath + args("gycx")
     lazy val cache_location: String = max_path_obj.p_cachePath + UUID.randomUUID().toString
-
+    
     lazy val user_id: String = args("user_id")
     lazy val company_id: String = args("company_id")
+    lazy val job_id: String = args("job_id")
     implicit val sp: (sendEmTrait, Double, String) => Unit = sendSingleProgress(company_id, user_id).singleProgress
-
-    override val actions: List[pActionTrait] = { jarPreloadAction() ::
-            setLogLevelAction("ERROR") ::
+    
+    override val actions: List[pActionTrait] = {
+        setLogLevelAction("ERROR") ::
                 xlsxReadingAction[phPfizerCpaFormat](cpa_file, "cpa") ::
                 xlsxReadingAction[phPfizerGycxFormat](gyc_file, "gycx") ::
                 addListenerAction(MaxSparkListener(0, 50)) ::

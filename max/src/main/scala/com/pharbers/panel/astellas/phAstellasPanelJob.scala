@@ -47,37 +47,37 @@ case class phAstellasPanelJob(args: Map[String, String])(implicit _actor: Actor)
     //1. read 产品匹配表
     val load_product_match_file: sequenceJob = new sequenceJob {
         override val name = "product_match_file"
-        override val actions: List[pActionTrait] = readCsvAction(product_match_file) :: Nil
+        override val actions: List[pActionTrait] = readCsvAction(product_match_file, applicationName = job_id) :: Nil
     }
     
     //2. read 市场匹配表
     val load_markets_match_file: sequenceJob = new sequenceJob {
         override val name = "markets_match_file"
-        override val actions: List[pActionTrait] = readCsvAction(markets_match_file) :: Nil
+        override val actions: List[pActionTrait] = readCsvAction(markets_match_file, applicationName = job_id) :: Nil
     }
     
     //3. read If_panel_all文件
     val load_hosp_ID: sequenceJob = new sequenceJob {
         override val name: String = "hosp_ID_file"
-        override val actions: List[pActionTrait] = readCsvAction(hosp_ID_file) :: Nil
+        override val actions: List[pActionTrait] = readCsvAction(hosp_ID_file, applicationName = job_id) :: Nil
     }
     
     //4. read hospital_file文件
     val load_hospital_file: sequenceJob = new sequenceJob {
         override val name = "hospital_file"
-        override val actions: List[pActionTrait] = readCsvAction(hospital_file) :: Nil
+        override val actions: List[pActionTrait] = readCsvAction(hospital_file, applicationName = job_id) :: Nil
     }
     
     //5. read CPA源文件
     val load_cpa: sequenceJob = new sequenceJob {
         override val name = "cpa"
-        override val actions: List[pActionTrait] = readCsvAction(cpa_file) :: Nil
+        override val actions: List[pActionTrait] = readCsvAction(cpa_file, applicationName = job_id) :: Nil
     }
     
     //6. read GYC源文件
     val load_gycx: sequenceJob = new sequenceJob {
         override val name = "gycx"
-        override val actions: List[pActionTrait] = readCsvAction(gyc_file) :: Nil
+        override val actions: List[pActionTrait] = readCsvAction(gyc_file, applicationName = job_id) :: Nil
     }
     
     lazy val df = MapArgs(
@@ -107,8 +107,7 @@ case class phAstellasPanelJob(args: Map[String, String])(implicit _actor: Actor)
     }
     
     override val actions: List[pActionTrait] = {
-        jarPreloadAction() ::
-                setLogLevelAction("ERROR") ::
+        setLogLevelAction("ERROR") ::
                 addListenerAction(listener.MaxSparkListener(0, 10, "load_product_match_file")) ::
                 load_product_match_file ::
                 addListenerAction(listener.MaxSparkListener(11, 20, "load_markets_match_file")) ::

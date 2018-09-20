@@ -5,6 +5,7 @@ import com.pharbers.spark.phSparkDriver
 import org.apache.spark.sql.functions.{expr, lit, udf}
 import com.pharbers.pactions.actionbase.{pActionArgs, _}
 import com.pharbers.common.algorithm.max_path_obj
+import org.apache.spark.sql.types.DoubleType
 
 object resultCheckAction {
     def apply(args: MapArgs): pActionTrait = new resultCheckAction(args)
@@ -19,9 +20,9 @@ class resultCheckAction(override val defaultArgs: pActionArgs) extends pActionTr
     
     override def perform(prMap: pActionArgs): pActionArgs = {
         val maxResult = prMap.asInstanceOf[MapArgs].get("max_result").asInstanceOf[StringArgs].get
-        val maxDF = phSparkDriver().csv2RDD(max_path_obj.p_maxPath + maxResult, delimiter)
-        val date: String = maxDF.select("Date").distinct().collect().head.getInt(0).toString
-        val mkt: String = maxDF.select("MARKET").distinct().collect().head.getString(0).toString
+        val maxDF = phSparkDriver().readCsv(max_path_obj.p_maxPath + maxResult, delimiter)
+        val date: String = maxDF.select("Date").distinct().collect().head.getString(0)
+        val mkt: String = maxDF.select("MARKET").distinct().collect().head.getString(0)
         val market = mkt match {
             case "阿洛刻市场" => "Allelock"
             case "米开民市场" => "Mycamine"

@@ -85,6 +85,8 @@ class phMaxCalcAction(override val defaultArgs: pActionArgs) extends pActionTrai
                                 && joinData("min1") === segmentDF("s_min1")
                                 && joinData("YM") === segmentDF("s_YM"))
                     .drop("s_SEGMENT", "s_min1", "s_YM")
+                    .withColumn("Factor", 'Factor.cast(DoubleType))
+                    .filter("Factor > 0")
                     .withColumn("f_sales",
                         when($"IS_PANEL_HOSP" === 1, $"sumSales").otherwise(
                             when($"avg_Sales" <= 0.0 or $"avg_Units" <= 0.0, 0.0)

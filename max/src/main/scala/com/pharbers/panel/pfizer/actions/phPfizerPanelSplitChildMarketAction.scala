@@ -20,7 +20,7 @@ class phPfizerPanelSplitChildMarketAction (override val defaultArgs : pActionArg
         val product_match_file = args.asInstanceOf[MapArgs].get("product_match_file").asInstanceOf[DFArgs].get
         //PACKID生成panel
         val pfc_match_file = args.asInstanceOf[MapArgs].get("pfc_match_file").asInstanceOf[DFArgs].get
-        val pfc_filtered = pfc_match_file.filter(s"MARKET like '${childMarkets}'").distinct()
+        val pfc_filtered = pfc_match_file.filter(s"MARKET like '$childMarkets'").distinct()
 
 
         //表m1

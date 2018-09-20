@@ -7,6 +7,7 @@ import org.jivesoftware.smack._
 import org.jivesoftware.smack.packet.Message
 import akka.actor.{Actor, ActorLogging, ActorRef, ActorSystem, Props}
 import akka.routing.RoundRobinPool
+import com.pharbers.pattern2.detail.{PhMaxJob, PhMaxJobResult}
 
 object xmppClient {
     def props(handler : xmppTrait) = Props(new xmppClient(handler))
@@ -40,7 +41,7 @@ class xmppClient(val handler : xmppTrait) extends PharbersInjectModule with Acto
 
     val xmpp_pool_num = config.mc.find(p => p._1 == "xmpp-pool-num").get._2.toString.toInt
 
-    val xmpp_receiver = context.actorOf(RoundRobinPool(xmpp_pool_num ).props(xmppReceiver.props(handler)), name = "xmpp-receiver")
+    val xmpp_pool = context.actorOf(RoundRobinPool(xmpp_pool_num).props(xmppMsgPool.props(handler)), name = "xmpp-receiver")
     lazy val xmpp_config : ConnectionConfiguration = new ConnectionConfiguration(xmpp_host, xmpp_port)
     lazy val (conn, cm) : (XMPPConnection, ChatManager) = {
         try {
@@ -63,7 +64,7 @@ class xmppClient(val handler : xmppTrait) extends PharbersInjectModule with Acto
                     override def processMessage(chat: Chat, message: Message): Unit = {
                         println("=======> receiving message:" + message.getBody)
                         println("=======> message from :" + chat.getParticipant)
-                        xmpp_receiver ! (chat.getParticipant.substring(0, chat.getParticipant.indexOf("/")), message.getBody)
+                        xmpp_pool ! (chat.getParticipant.substring(0, chat.getParticipant.indexOf("/")), message.getBody)
                     }
                 })
             }
@@ -82,6 +83,7 @@ class xmppClient(val handler : xmppTrait) extends PharbersInjectModule with Acto
 
     override def receive: Receive = {
         case "start" => startXmpp
+        case msg : PhMaxJob => xmpp_pool ! (msg, this)
         case _ => ???
     }
 }

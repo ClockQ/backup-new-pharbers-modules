@@ -13,7 +13,6 @@ object phNhwaPanelConcretJob {
 class phNhwaPanelConcretJob(override val defaultArgs: pActionArgs) extends pActionTrait {
     override val name: String = "panel"
     lazy val sparkDriver: phSparkDriver = phSparkDriver()
-    
     import sparkDriver.ss.implicits._
     
     override def perform(args: pActionArgs): pActionArgs = {
@@ -28,6 +27,11 @@ class phNhwaPanelConcretJob(override val defaultArgs: pActionArgs) extends pActi
                 .withColumn("MONTH", 'MONTH.cast(IntegerType))
                 .withColumn("MONTH", when(col("MONTH").>=(10), col("MONTH"))
                         .otherwise(concat(col("MONTH").*(0).cast("int"), col("MONTH"))))
+                .withColumn("PRODUCT_NAME", trim(col("PRODUCT_NAME")))
+                .withColumn("DOSAGE", trim(col("DOSAGE")))
+                .withColumn("PACK_DES", trim(col("PACK_DES")))
+                .withColumn("PACK_NUMBER", trim(col("PACK_NUMBER")))
+                .withColumn("CORP_NAME", trim(col("CORP_NAME")))
                 .withColumn("min1", concat(col("PRODUCT_NAME"), col("DOSAGE"), col("PACK_DES"), col("PACK_NUMBER"), col("CORP_NAME")))
                 .withColumn("ym", concat(col("YEAR"), col("MONTH")))
         val markets_match = args.asInstanceOf[MapArgs].get("markets_match_file").asInstanceOf[DFArgs].get
@@ -37,6 +41,11 @@ class phNhwaPanelConcretJob(override val defaultArgs: pActionArgs) extends pActi
                 .withColumn("MONTH", when(col("MONTH").>=(10), col("MONTH"))
                         .otherwise(concat(col("MONTH").*(0).cast("int"), col("MONTH"))))
                 .withColumn("YM", concat(col("YEAR"), col("MONTH")))
+                .withColumn("PRODUCT_NAME", trim(col("PRODUCT_NAME")))
+                .withColumn("DOSAGE", trim(col("DOSAGE")))
+                .withColumn("PACK_DES", trim(col("PACK_DES")))
+                .withColumn("PACK_NUMBER", trim(col("PACK_NUMBER")))
+                .withColumn("CORP_NAME", trim(col("CORP_NAME")))
                 .withColumn("min1", concat(col("PRODUCT_NAME"), col("DOSAGE"), col("PACK_DES"), col("PACK_NUMBER"), col("CORP_NAME")))
         val product_match_file = args.asInstanceOf[MapArgs].get("product_match_file").asInstanceOf[DFArgs].get
         val hosp_ID_file = args.asInstanceOf[MapArgs].get("hosp_ID_file").asInstanceOf[DFArgs].get

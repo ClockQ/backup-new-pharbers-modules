@@ -115,7 +115,7 @@ trait phBuilder {
                     .asInstanceOf[StringArgs].get
             phSparkDriver().sc.stop()
             result
-        }
+        }.mkString("#")
 
         toJson(maxResult)
     }

@@ -11,5 +11,5 @@ import com.pharbers.pattern2.detail.commonresult
 trait xmppTrait {
     val encodeHandler: commonresult => String
     val decodeHandler: String => commonresult
-    val consumeHandler: String => String
+    val consumeHandler: String => Unit
 }
