@@ -40,9 +40,9 @@ case class phMaxJobForPfizerCNS_R(args: Map[String, String])(implicit _actor: Ac
     val temp_panel_name: String = UUID.randomUUID().toString
     
     // 1. load panel data
-    val loadPanelData = new sequenceJob {
+    val loadPanelData: sequenceJob = new sequenceJob {
         override val name: String = "panel_data"
-        override val actions: List[pActionTrait] = csv2DFAction(panel_file) :: Nil
+        override val actions: List[pActionTrait] = readCsvAction(panel_file,delimiter = 31.toChar.toString, applicationName = job_id) :: Nil
     }
     
     /// 留做测试
@@ -59,10 +59,7 @@ case class phMaxJobForPfizerCNS_R(args: Map[String, String])(implicit _actor: Ac
     // 2. read universe file
     val readUniverseFile = new sequenceJob {
         override val name = "universe_data"
-        override val actions: List[pActionTrait] =
-            xlsxReadingAction[PhExcelXLSXCommonFormat](universe_file, temp_universe_name) ::
-                    saveCurrenResultAction(temp_dir + temp_universe_name) ::
-                    csv2DFAction(temp_dir + temp_universe_name) :: Nil
+        override val actions: List[pActionTrait] = readCsvAction(universe_file, applicationName = job_id) :: Nil
     }
     
     val df = MapArgs(

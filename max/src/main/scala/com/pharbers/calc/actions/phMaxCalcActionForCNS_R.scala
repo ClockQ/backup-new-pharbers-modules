@@ -26,16 +26,19 @@ class phMaxCalcActionForCNS_R(override val defaultArgs: pActionArgs) extends pAc
                     .withColumnRenamed("Date", "YM")
                     .withColumnRenamed("Strength", "min1")
                     .withColumnRenamed("DOI", "MARKET")
-                    .selectExpr("YM", "min1", "HOSP_ID", "Sales", "Units")
+                    .selectExpr("YM", "min1", "HOSP_ID", "Sales", "Units", "MARKET")
         }
         
         val universeDF = {
             pr.asInstanceOf[MapArgs].get("universe_data").asInstanceOf[DFArgs].get
-                    .withColumnRenamed("PHA ID", "PHA_ID")
-                    .withColumnRenamed("If Panel_All", "IS_PANEL_HOSP")
-                    .withColumnRenamed("If Panel_To Use", "NEED_MAX_HOSP")
-                    .withColumnRenamed("Segment", "SEGMENT")
+                    .withColumnRenamed("PHA_HOSP_ID", "PHA_ID")
+                    .withColumnRenamed("IF_PANEL_ALL", "IS_PANEL_HOSP")
+                    .withColumnRenamed("IF_PANEL_TO_USE", "NEED_MAX_HOSP")
                     .withColumnRenamed("WEST_MEDICINE_INCOME", "westMedicineIncome")
+                    .withColumnRenamed("FACTOR1", "Factor1")
+                    .withColumnRenamed("FACTOR2", "Factor2")
+                    .withColumnRenamed("PROVINCE", "Province")
+                    .withColumnRenamed("PREFECTURE", "Prefecture")
                     .selectExpr("PHA_ID", "Factor1", "Factor2", "IS_PANEL_HOSP", "NEED_MAX_HOSP", "SEGMENT", "Province", "Prefecture", "westMedicineIncome")
         }
         
@@ -49,7 +52,7 @@ class phMaxCalcActionForCNS_R(override val defaultArgs: pActionArgs) extends pAc
                     .withColumnRenamed("sum(Units)", "sumUnits")
         }
         
-        val joinDataWithEmptyValue = panelDF.select("YM", "min1").distinct() join universeDF
+        val joinDataWithEmptyValue = panelDF.select("YM", "min1", "MARKET").distinct() join universeDF
         
         val joinData = {
             joinDataWithEmptyValue
@@ -118,12 +121,12 @@ class phMaxCalcActionForCNS_R(override val defaultArgs: pActionArgs) extends pAc
                     .withColumn("Date", 'YM.cast(IntegerType))
                     .withColumnRenamed("Prefecture", "City")
                     .withColumnRenamed("PHA_ID", "Panel_ID")
-                    .withColumnRenamed("min1", "Product")
                     .withColumnRenamed("Sales", "f_sales")
                     .withColumnRenamed("Units", "f_units")
                     .withColumn("Factor", when($"min1" like "%粉针剂%", $"Factor1")
                             .otherwise(when($"min1" like "%注射剂%", $"Factor1")
                                     .otherwise($"Factor2")))
+                    .withColumnRenamed("min1", "Product")
                     .selectExpr("Date", "Province", "City", "Panel_ID", "Product", "Factor", "f_sales", "f_units", "MARKET")
         }
         

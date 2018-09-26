@@ -1,17 +1,17 @@
 [
   {
-    "company": "5b023787810c6e0268fe6ff6",
-    "market": "阿洛刻市场",
-    "universe_file": "astellas/pha_config_repository1804/Astellas_Universe_Allelock_20180709.csv",
-    "product_match_file": "astellas/pha_config_repository1804/Astellas_ProductMatchTable_20180703.csv",
-    "fill_hos_data_file": "astellas/pha_config_repository1804/Astellas_2018_FullHosp_20180629.csv",
-    "markets_match_file": "astellas/pha_config_repository1804/Astellas_MarketMatchTable_Allelock_20180702.csv",
-    "hospital_file": "astellas/pha_config_repository1804/Astellas_ThreeSourceTable_20180629.csv",
-    "not_published_hosp_file": "astellas/pha_config_repository1804/Astellas_2018_NotPublishedHosp_20180629.csv",
-    "cpa_file": "astellas/pha_config_repository1804/Astellas_201804_CPA.csv",
-    "gycx_file": "astellas/pha_config_repository1804/Astellas_201804_Gycx_20180703.csv",
-    "hosp_ID_file": "astellas/pha_config_repository1804/Astellas_2018_If_panel_all_Allelock_20180703.csv",
+    "company": "5b028f95ed925c2c705b85ba",
+    "market": "CNS_R",
+    "universe_file": "pfizer/pha_config_repository1804/Pfizer_Universe_CNS_R.csv",
+    "product_match_file": "pfizer/pha_config_repository1804/Pfizer_ProductMatchTable.csv",
+    "fill_hos_data_file": "pfizer/pha_config_repository1804/Pfizer_2018_FullHosp.txt",
+    "markets_match_file": "pfizer/pha_config_repository1804/Pfizer_MarketMatchTable.csv",
+    "not_arrival_hosp_file": "pfizer/pha_config_repository1804/missingHospital.csv",
+    "hosp_ID": "pfizer/pha_config_repository1804/Pfizer_2018_If_panel_all_CNS_R.csv",
+    "cpa_file": "pfizer/pha_config_repository1804/Pfizer_201804_CPA.csv",
+    "gycx_file": "pfizer/pha_config_repository1804/Pfizer_201804_Gycx.csv",
+    "pfc_match_file": "pfizer/pha_config_repository1804/Pfizer_PackidMatch.csv",
     "ym": "201804",
-    "offlineResult": "astellas/pha_config_repository1804/Astellas_201804_Offline_MaxResult_20180710.csv"
+    "offlineResult": "pfizer/pha_config_repository1804/Pfizer_201804_Offline_MaxResult.csv"
   }
 ]
