@@ -74,10 +74,10 @@ case class phPanelResultInfo(user: String, company: String, ym:String, mkt: Stri
     def getCurrCompanySales: Double = rd.getMapValue(singleJobKey, "panel_company_sales").toDouble
     def getCurrCompanyShare: Double = getCurrCompanySales/getPanelSales
 
-    def setValue2Array(index: Int, value: String): Array[String] = {
+    def setValue2Array(index: Int, value: String): List[String] = {
         val a = Array.fill(12)("0")
         a(index) = value
         a
-    }
+    }.toList
 
 }

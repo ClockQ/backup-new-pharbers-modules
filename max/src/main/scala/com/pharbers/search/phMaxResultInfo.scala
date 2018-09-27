@@ -4,8 +4,6 @@ import java.util.Base64
 
 import com.pharbers.driver.PhRedisDriver
 import com.pharbers.sercuity.Sercurity
-import play.api.libs.json.JsValue
-import play.api.libs.json.Json.toJson
 
 /**
   * Created by jeorch on 18-5-14.
@@ -38,7 +36,7 @@ case class phMaxResultInfo(company: String, ym:String, mkt: String) extends phMa
             case _ => (getCurrCompanySales - getLastYearCurrCompanySales)/getLastYearCurrCompanySales
         }
 
-    def getLastSeveralMonthResultSalesLst(severalCount: Int): List[Map[String, JsValue]] = {
+    def getLastSeveralMonthResultSalesLst(severalCount: Int): List[Map[String, Any]] = {
         val tmpLst = getLastSeveralMonthYM(severalCount, ym).map(singleYM => {
             val tempSingleJobKey = Base64.getEncoder.encodeToString((company + "#" + singleYM + "#" + mkt).getBytes())
             val tempMaxSales = getHistorySalesByRange("NATION_SALES", tempSingleJobKey)
@@ -47,12 +45,12 @@ case class phMaxResultInfo(company: String, ym:String, mkt: String) extends phMa
                 case 0.0 => 0.0
                 case _ => tempCompanySales / tempMaxSales
             }
-            Map("date" -> toJson(singleYM), "percentage" -> toJson(getFormatShare(tempPercentage)), "marketSales" -> toJson(getFormatSales(tempMaxSales)))
+            Map("date" -> singleYM, "percentage" -> getFormatShare(tempPercentage), "marketSales" -> getFormatSales(tempMaxSales))
         })
-        Map("date" -> toJson(ym), "percentage" -> toJson(getFormatShare(getCurrCompanySales/getMaxResultSales)), "marketSales" -> toJson(getFormatSales(getMaxResultSales)))::tmpLst
+        Map("date" -> ym, "percentage" -> getFormatShare(getCurrCompanySales/getMaxResultSales), "marketSales" -> getFormatSales(getMaxResultSales))::tmpLst
     }.reverse
 
-    def getCityLstMap: List[Map[String, JsValue]] = {
+    def getCityLstMap: List[Map[String, Any]] = {
         val currCompanyCityLst = rd.getListAllValue(company_sales_city_lst_key).map({x =>
             val temp = x.replace("[","").replace("]","").split(",")
             Map("City" -> temp(0), "Sales" -> temp(1))
@@ -77,18 +75,18 @@ case class phMaxResultInfo(company: String, ym:String, mkt: String) extends phMa
             val tempLastYearCompanySalesMap = lastYearCompanyCityLst.find(x => x("City") == temp(0)).getOrElse(Map("Sales" -> "0"))
             val tempLastYearShare: Double = if (tempLastYearMaxSalesMap("Sales").toDouble == 0.0) 0.0 else tempLastYearCompanySalesMap("Sales").toDouble / tempLastYearMaxSalesMap("Sales").toDouble
             Map(
-                "City" -> toJson(temp(0)),
-                "CompanySales" -> toJson(getFormatSales(companyCityMap("Sales").toDouble)),
-                "TotalSales" -> toJson(getFormatSales(temp(1).toDouble)),
-                "Share" -> toJson(getFormatShare(tempShare)),
-                "lastYearYMCompanySales" -> toJson(getFormatSales(tempLastYearCompanySalesMap("Sales").toDouble)),
-                "lastYearYMTotalSales" -> toJson(getFormatSales(tempLastYearMaxSalesMap("Sales").toDouble)),
-                "lastYearYMShare" -> toJson(getFormatShare(tempLastYearShare))
+                "City" -> temp(0),
+                "CompanySales" -> getFormatSales(companyCityMap("Sales").toDouble),
+                "TotalSales" -> getFormatSales(temp(1).toDouble),
+                "Share" -> getFormatShare(tempShare),
+                "lastYearYMCompanySales" -> getFormatSales(tempLastYearCompanySalesMap("Sales").toDouble),
+                "lastYearYMTotalSales" -> getFormatSales(tempLastYearMaxSalesMap("Sales").toDouble),
+                "lastYearYMShare" -> getFormatShare(tempLastYearShare)
             )
         })
     }
 
-    def getProvLstMap: List[Map[String, JsValue]] = {
+    def getProvLstMap: List[Map[String, Any]] = {
         val currCompanyProvLst = rd.getListAllValue(company_sales_prov_lst_key).map({x =>
             val temp = x.replace("[","").replace("]","").split(",")
             Map("Province" -> temp(0), "Sales" -> temp(1))
@@ -116,13 +114,13 @@ case class phMaxResultInfo(company: String, ym:String, mkt: String) extends phMa
                 else tempLastYearCompanySalesMap("Sales").toDouble / tempLastYearMaxSalesMap("Sales").toDouble
 
             Map(
-                "Province" -> toJson(temp(0)),
-                "CompanySales" -> toJson(getFormatSales(companyProvMap("Sales").toDouble)),
-                "TotalSales" -> toJson(getFormatSales(temp(1).toDouble)),
-                "Share" -> toJson(getFormatShare(tempShare)),
-                "lastYearYMCompanySales" -> toJson(getFormatSales(tempLastYearCompanySalesMap("Sales").toDouble)),
-                "lastYearYMTotalSales" -> toJson(getFormatSales(tempLastYearMaxSalesMap("Sales").toDouble)),
-                "lastYearYMShare" -> toJson(getFormatShare(tempLastYearShare))
+                "Province" -> temp(0),
+                "CompanySales" -> getFormatSales(companyProvMap("Sales").toDouble),
+                "TotalSales" -> getFormatSales(temp(1).toDouble),
+                "Share" -> getFormatShare(tempShare),
+                "lastYearYMCompanySales" -> getFormatSales(tempLastYearCompanySalesMap("Sales").toDouble),
+                "lastYearYMTotalSales" -> getFormatSales(tempLastYearMaxSalesMap("Sales").toDouble),
+                "lastYearYMShare" -> getFormatShare(tempLastYearShare)
             )
         }
     }
