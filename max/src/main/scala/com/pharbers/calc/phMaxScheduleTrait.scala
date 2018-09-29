@@ -41,7 +41,7 @@ trait phMaxScheduleTrait {
         db.getOneDBAllCollectionNames.foreach(singleJobKey => {
             val maxNameForSearch = UUID.randomUUID().toString
             val resultLocation = max_path_obj.p_maxPath + maxNameForSearch
-            delTempFile(new File(resultLocation))
+//            delTempFile(new File(resultLocation))
             val singleJobDF = sd.mongo2RDD(max_data_sync_mongo_obj.mongodbHost, max_data_sync_mongo_obj.mongodbPort, max_data_sync_mongo_obj.databaseName, singleJobKey).toDF()
             singleJobDF.groupBy("Date", "Province", "City", "MARKET", "Product")
                     .agg(Map("f_sales" -> "sum", "f_units" -> "sum", "Panel_ID" -> "first"))
@@ -59,15 +59,15 @@ trait phMaxScheduleTrait {
         mongo2rddJobsCount
     }
     
-    def delTempFile(fileName: File): Unit = {
-        if (fileName.isDirectory) {
-            fileName.listFiles().toList match {
-                case Nil => fileName.delete()
-                case lstFile => lstFile.foreach(delTempFile); fileName.delete()
-            }
-        } else {
-            fileName.delete()
-        }
-    }
+//    def delTempFile(fileName: File): Unit = {
+//        if (fileName.isDirectory) {
+//            fileName.listFiles().toList match {
+//                case Nil => fileName.delete()
+//                case lstFile => lstFile.foreach(delTempFile); fileName.delete()
+//            }
+//        } else {
+//            fileName.delete()
+//        }
+//    }
     
 }
