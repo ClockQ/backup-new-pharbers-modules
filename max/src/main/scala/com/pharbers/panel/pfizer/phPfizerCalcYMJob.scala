@@ -28,7 +28,7 @@ case class phPfizerCalcYMJob(args: Map[String, String])(implicit _actor: Actor) 
     implicit val sp: (sendEmTrait, Double, String) => Unit = sendSingleProgress(company_id, user_id).singleProgress
     
     override val actions: List[pActionTrait] = {
-        setLogLevelAction("ERROR") ::
+        setLogLevelAction("ERROR", job_id) ::
                 xlsxReadingAction[phPfizerCpaFormat](cpa_file, "cpa") ::
                 xlsxReadingAction[phPfizerGycxFormat](gyc_file, "gycx") ::
                 addListenerAction(MaxSparkListener(0, 50)) ::

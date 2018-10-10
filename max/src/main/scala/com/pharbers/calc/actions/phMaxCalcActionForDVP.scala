@@ -26,19 +26,18 @@ class phMaxCalcActionForDVP(override val defaultArgs: pActionArgs) extends pActi
 
         val universeDF = {
             pr.asInstanceOf[MapArgs].get("universe_data").asInstanceOf[DFArgs].get
-                .withColumnRenamed("Prefecture", "City")
-                .withColumnRenamed("PHA ID", "HOSP_ID")
-                .selectExpr("Province", "City", "HOSP_ID")
+                .withColumnRenamed("PREFECTURE", "City")
+                .withColumnRenamed("HOSP_ID", "HOSP_ID_universe")
+                .selectExpr("Province", "City", "PHA_HOSP_ID", "MARKET")
         }
 
         val coefDF = {
             pr.asInstanceOf[MapArgs].get("coef_data").asInstanceOf[DFArgs].get
-                .withColumnRenamed("City", "City2")
+                .withColumnRenamed("CITY", "City2")
         }
 
         val panelMergeUniverse = {
-            panelDF.join(universeDF, panelDF("HOSP_ID") === universeDF("HOSP_ID"))
-                .drop(universeDF("HOSP_ID"))
+            panelDF.join(universeDF, panelDF("HOSP_ID") === universeDF("PHA_HOSP_ID"))
                 .withColumn("City2",when(col("City") === "福州市"||col("City") === "厦门市"||col("City") === "泉州市", "福厦泉市")
                     .otherwise(when(col("City") === "珠海市"||col("City") === "东莞市"||col("City") === "中山市"||col("City") === "佛山市", "珠三角市")
                         .otherwise(col("City"))))
@@ -54,7 +53,7 @@ class phMaxCalcActionForDVP(override val defaultArgs: pActionArgs) extends pActi
         }
 
         val max_result = {
-            panelMergeUniverseMergeCoef.groupBy("Province", "City","Date","Prod_Name","coef")
+            panelMergeUniverseMergeCoef.groupBy("Province", "City","Date","Prod_Name","coef", "MARKET")
                 .agg(Map("Sales" -> "sum", "Units" -> "sum", "f_sales" -> "sum", "f_units" -> "sum"))
                 .withColumnRenamed("sum(Sales)", "Sales")
                 .withColumnRenamed("sum(Units)", "Units")

@@ -46,38 +46,35 @@ case class phMaxJobForPfizerDVP(args: Map[String, String])(implicit _actor: Acto
     val temp_panel_name: String = UUID.randomUUID().toString
     
     // 1. load panel data
-    val loadPanelData = new sequenceJob {
+    val loadPanelData: sequenceJob = new sequenceJob {
         override val name: String = "panel_data"
-        override val actions: List[pActionTrait] = csv2DFAction(panel_file) :: Nil
+        override val actions: List[pActionTrait] =
+            readCsvAction(panel_file, delimiter = 31.toChar.toString, applicationName = job_id) :: Nil
     }
     
     /// 留做测试
     // 1. load panel data of xlsx
-    val loadPanelDataOfExcel = new sequenceJob {
-        override val name = "panel_data"
-        override val actions: List[pActionTrait] =
-            xlsxReadingAction[PhExcelXLSXCommonFormat](panel_file, temp_panel_name) ::
-                    saveCurrenResultAction(temp_dir + temp_panel_name) ::
-                    csv2DFAction(temp_dir + temp_panel_name) :: Nil
-    }
+//    val loadPanelDataOfExcel = new sequenceJob {
+//        override val name = "panel_data"
+//        override val actions: List[pActionTrait] =
+//            xlsxReadingAction[PhExcelXLSXCommonFormat](panel_file, temp_panel_name) ::
+//                    saveCurrenResultAction(temp_dir + temp_panel_name) ::
+//                    csv2DFAction(temp_dir + temp_panel_name) :: Nil
+//    }
     
     
     // 2. read universe file
-    val readUniverseFile = new sequenceJob {
+    val readUniverseFile: sequenceJob = new sequenceJob {
         override val name = "universe_data"
         override val actions: List[pActionTrait] =
-            xlsxReadingAction[PhExcelXLSXCommonFormat](universe_file, temp_universe_name) ::
-                    saveCurrenResultAction(temp_dir + temp_universe_name) ::
-                    csv2DFAction(temp_dir + temp_universe_name) :: Nil
+            readCsvAction(universe_file, applicationName = job_id) :: Nil
     }
     
     // 3. read coef file
-    val readCoefFile = new sequenceJob {
+    val readCoefFile: sequenceJob = new sequenceJob {
         override val name = "coef_data"
         override val actions: List[pActionTrait] =
-            xlsxReadingAction[PhExcelXLSXCommonFormat](coef_file, temp_coef_name) ::
-                    saveCurrenResultAction(temp_dir + temp_coef_name) ::
-                    csv2DFAction(temp_dir + temp_coef_name) :: Nil
+                    readCsvAction(coef_file, applicationName = job_id) :: Nil
     }
     
     val df = MapArgs(

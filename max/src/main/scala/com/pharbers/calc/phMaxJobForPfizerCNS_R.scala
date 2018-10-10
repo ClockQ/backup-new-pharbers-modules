@@ -48,17 +48,17 @@ case class phMaxJobForPfizerCNS_R(args: Map[String, String])(implicit _actor: Ac
     
     /// 留做测试
     // 1. load panel data of xlsx
-    val loadPanelDataOfExcel = new sequenceJob {
-        override val name = "panel_data"
-        override val actions: List[pActionTrait] =
-            xlsxReadingAction[PhExcelXLSXCommonFormat](panel_file, temp_panel_name) ::
-                    saveCurrenResultAction(temp_dir + temp_panel_name) ::
-                    csv2DFAction(temp_dir + temp_panel_name) :: Nil
-    }
+//    val loadPanelDataOfExcel = new sequenceJob {
+//        override val name = "panel_data"
+//        override val actions: List[pActionTrait] =
+//            xlsxReadingAction[PhExcelXLSXCommonFormat](panel_file, temp_panel_name) ::
+//                    saveCurrenResultAction(temp_dir + temp_panel_name) ::
+//                    csv2DFAction(temp_dir + temp_panel_name) :: Nil
+//    }
     
     
     // 2. read universe file
-    val readUniverseFile = new sequenceJob {
+    val readUniverseFile: sequenceJob = new sequenceJob {
         override val name = "universe_data"
         override val actions: List[pActionTrait] = readCsvAction(universe_file, applicationName = job_id) :: Nil
     }

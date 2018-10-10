@@ -17,7 +17,7 @@ case class phNhwaCalcYMJob(args: Map[String, String])(implicit _actor: Actor) ex
     override val name: String = "phNhwaCalcYMJob"
     lazy val cache_location: String = max_path_obj.p_cachePath + UUID.randomUUID().toString
     lazy val cpa_file: String = max_path_obj.p_clientPath + args("cpa")
-    
+
     lazy val user_id: String = args("user_id")
     lazy val company_id: String = args("company_id")
     lazy val job_id: String = args("job_id")
@@ -27,16 +27,16 @@ case class phNhwaCalcYMJob(args: Map[String, String])(implicit _actor: Actor) ex
         override val name = "cpa"
         override val actions: List[pActionTrait] = readCsvAction(cpa_file, applicationName = job_id) :: Nil
     }
-    
+
     override val actions: List[pActionTrait] = {
+        setLogLevelAction("ERROR", job_id) ::
             addListenerAction(listener.MaxSparkListener(0, 99)) ::
-            setLogLevelAction("ERROR") ::
-//            addListenerAction(listener.MaxSparkListener(0, 35)) ::
+            //            addListenerAction(listener.MaxSparkListener(0, 35)) ::
             readCpa ::
-//            addListenerAction(listener.MaxSparkListener(36, 65)) ::
+            //            addListenerAction(listener.MaxSparkListener(36, 65)) ::
             phNhwaCalcYMConcretJob() ::
-//            addListenerAction(listener.MaxSparkListener(66, 95)) ::
+            //            addListenerAction(listener.MaxSparkListener(66, 95)) ::
             phCalcYM2JVJob() ::
-                Nil
+            Nil
     }
 }

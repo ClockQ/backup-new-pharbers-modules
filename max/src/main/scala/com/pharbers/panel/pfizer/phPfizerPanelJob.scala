@@ -151,7 +151,7 @@ case class phPfizerPanelJob(args: Map[String, String])(implicit _actor: Actor) e
     )
     
     override val actions: List[pActionTrait] = {
-        setLogLevelAction("ERROR") ::
+        setLogLevelAction("ERROR", job_id) ::
                 addListenerAction(MaxSparkListener(0, 10)) ::
                 load_hosp_ID_file ::
                 addListenerAction(MaxSparkListener(11, 20)) ::

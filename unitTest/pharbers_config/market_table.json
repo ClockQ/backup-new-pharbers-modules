@@ -1,13 +1,13 @@
 [
   {
     "company": "5b028f95ed925c2c705b85ba",
-    "market": "CNS_R",
-    "universe_file": "pfizer/pha_config_repository1804/Pfizer_Universe_CNS_R.csv",
+    "market": "AI_R_other",
+    "universe_file": "pfizer/pha_config_repository1804/Pfizer_Universe_AI_R_other.csv",
     "product_match_file": "pfizer/pha_config_repository1804/Pfizer_ProductMatchTable.csv",
     "fill_hos_data_file": "pfizer/pha_config_repository1804/Pfizer_2018_FullHosp.txt",
     "markets_match_file": "pfizer/pha_config_repository1804/Pfizer_MarketMatchTable.csv",
     "not_arrival_hosp_file": "pfizer/pha_config_repository1804/missingHospital.csv",
-    "hosp_ID": "pfizer/pha_config_repository1804/Pfizer_2018_If_panel_all_CNS_R.csv",
+    "hosp_ID": "pfizer/pha_config_repository1804/Pfizer_2018_If_panel_all_AI_R_other.csv",
     "cpa_file": "pfizer/pha_config_repository1804/Pfizer_201804_CPA.csv",
     "gycx_file": "pfizer/pha_config_repository1804/Pfizer_201804_Gycx.csv",
     "pfc_match_file": "pfizer/pha_config_repository1804/Pfizer_PackidMatch.csv",
