@@ -5,7 +5,8 @@
         <xmpp-user value="cui" />
         <xmpp-pwd value="cui" />
         <xmpp-listens value="alfred@localhost#" />
-        <xmpp-report value="lu@localhost#" />
+        <!--<xmpp-report value="lu@localhost#" />-->
+        <xmpp-report value="lu@localhost#admin@localhost" />
         <xmpp-pool-num value="2" />
     </xmpp-module>
 </pharbers-modules>

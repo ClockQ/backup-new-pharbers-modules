@@ -9,7 +9,7 @@ import play.api.libs.json.Json.toJson
 /**
   * Created by spark on 18-4-27.
   */
-trait sendEmTrait {
+trait sendEmTrait extends sendTrait {
     val ed: emDriver = emDriver()
 
     def sendMessage(targetGroup: String, targetUser: String, callJob: String,

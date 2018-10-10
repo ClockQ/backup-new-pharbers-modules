@@ -19,7 +19,7 @@ case class executeJob(override val args: commonresult)(implicit context: ActorSy
         println(s"module $module")
         println(s"method $methed")
         println(s"args $args")
-        implicit val t: Timeout = 10 minutes
+        implicit val t: Timeout = 30 minutes
         
         val exec = context.actorOf(doJobActor2.props)
         

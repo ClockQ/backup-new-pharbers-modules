@@ -11,6 +11,7 @@ object addListenerAction {
 
 class addListenerAction(listener: SparkListener,
                         override val name: String) extends pActionTrait {
+
     override val defaultArgs: pActionArgs = NULLArgs
 
     override def perform(args: pActionArgs): pActionArgs = {

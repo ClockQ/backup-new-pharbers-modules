@@ -8,7 +8,7 @@ import com.pharbers.channel.util.sendEmTrait
 import com.pharbers.pactions.jobs._
 import com.pharbers.pactions.generalactions._
 import com.pharbers.common.algorithm.max_path_obj
-import org.apache.spark.listener.progress.sendMultiProgress
+import org.apache.spark.listener.progress.sendXmppMultiProgress
 //import com.pharbers.pactions.excel.input.PhExcelXLSXCommonFormat
 import org.apache.spark.listener.{MaxSparkListener, addListenerAction}
 import com.pharbers.pactions.actionbase.{MapArgs, StringArgs, pActionTrait}
@@ -30,7 +30,8 @@ case class phMaxJob(args: Map[String, String])(implicit _actor: Actor) extends s
     lazy val p_total: Double = args("p_total").toDouble
     lazy val p_current: Double = args("p_current").toDouble
     
-    implicit val mp: (sendEmTrait, Double, String) => Unit = sendMultiProgress(company, user, "calc")(p_current, p_total).multiProgress
+//    implicit val mp: (sendEmTrait, Double, String) => Unit = sendMultiProgress(company, user, "calc")(p_current, p_total).multiProgress
+    implicit val xp: (sendEmTrait, Double, String) => Unit = sendXmppMultiProgress(company, user, "calc", job_id)(p_current, p_total).multiProgress
     
     // 1. load panel data
     val loadPanelData: sequenceJob = new sequenceJob {

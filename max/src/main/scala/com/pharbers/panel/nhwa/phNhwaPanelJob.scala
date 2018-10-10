@@ -3,7 +3,7 @@ package com.pharbers.panel.nhwa
 import java.util.UUID
 
 import akka.actor.Actor
-import com.pharbers.channel.util.sendEmTrait
+import com.pharbers.channel.util.{sendEmTrait, sendTrait}
 import com.pharbers.common.algorithm.max_path_obj
 import com.pharbers.pactions.excel.input.{PhExcelXLSXCommonFormat, PhXlsxThirdSheetFormat}
 import com.pharbers.pactions.actionbase._
@@ -14,7 +14,7 @@ import com.pharbers.panel.common.{phPanelInfo2Redis, phSavePanelJob}
 import com.pharbers.panel.nhwa.format._
 import org.apache.spark.listener
 import org.apache.spark.listener.addListenerAction
-import org.apache.spark.listener.progress.sendMultiProgress
+import org.apache.spark.listener.progress.{sendMultiProgress, sendXmppMultiProgress}
 
 /**
   * 1. read 2017年未出版医院名单.xlsx
@@ -50,8 +50,8 @@ case class phNhwaPanelJob(args: Map[String, String])(implicit _actor: Actor) ext
     lazy val p_current: Double = args("p_current").toDouble
     
     implicit val companyArgs: phMemoryArgs = phMemoryArgs(company)
-    implicit val mp: (sendEmTrait, Double, String) => Unit = sendMultiProgress(company, user, "panel")(p_current, p_total).multiProgress
-    
+    implicit val xp: (sendEmTrait, Double, String) => Unit = sendXmppMultiProgress(company, user, "panel", job_id)(p_current, p_total).multiProgress
+
     /**
       * 1. read 未出版医院文件
       */

@@ -9,9 +9,9 @@ import com.pharbers.panel.common.phCalcYM2JVJob
 import com.pharbers.common.algorithm.max_path_obj
 import com.pharbers.pactions.jobs.{sequenceJob, sequenceJobWithMap}
 import com.pharbers.pactions.actionbase.{StringArgs, pActionArgs, pActionTrait}
-import com.pharbers.panel.nhwa.format.phNhwaCpaFormat
-import org.apache.spark.listener.progress.sendSingleProgress
-import org.apache.spark.listener.{MaxSparkListener, addListenerAction}
+import org.apache.spark.listener
+import org.apache.spark.listener.addListenerAction
+import org.apache.spark.listener.progress.sendXmppSingleProgress
 
 case class phNhwaCalcYMJob(args: Map[String, String])(implicit _actor: Actor) extends sequenceJobWithMap {
     override val name: String = "phNhwaCalcYMJob"
@@ -21,19 +21,22 @@ case class phNhwaCalcYMJob(args: Map[String, String])(implicit _actor: Actor) ex
     lazy val user_id: String = args("user_id")
     lazy val company_id: String = args("company_id")
     lazy val job_id: String = args("job_id")
-    implicit val sp: (sendEmTrait, Double, String) => Unit = { (a, b, c) => Unit } //sendSingleProgress(company_id, user_id).singleProgress
-    
+    implicit val xp: (sendEmTrait, Double, String) => Unit = sendXmppSingleProgress(company_id, user_id, "ymCalc", job_id).singleProgress
+
     val readCpa: sequenceJob = new sequenceJob {
         override val name = "cpa"
         override val actions: List[pActionTrait] = readCsvAction(cpa_file, applicationName = job_id) :: Nil
     }
     
     override val actions: List[pActionTrait] = {
-        //                setLogLevelAction("ERROR") ::
-        //                addListenerAction(MaxSparkListener(0, 90)) ::
-        readCpa ::
-                phNhwaCalcYMConcretJob() ::
-                phCalcYM2JVJob() ::
+            addListenerAction(listener.MaxSparkListener(0, 99)) ::
+            setLogLevelAction("ERROR") ::
+//            addListenerAction(listener.MaxSparkListener(0, 35)) ::
+            readCpa ::
+//            addListenerAction(listener.MaxSparkListener(36, 65)) ::
+            phNhwaCalcYMConcretJob() ::
+//            addListenerAction(listener.MaxSparkListener(66, 95)) ::
+            phCalcYM2JVJob() ::
                 Nil
     }
 }

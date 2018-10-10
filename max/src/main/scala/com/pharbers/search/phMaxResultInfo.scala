@@ -20,8 +20,14 @@ case class phMaxResultInfo(company: String, ym:String, mkt: String) extends phMa
     val lastYearYM: String = getLastYearYM(ym)
     val lastYearSingleJobKey: String = Base64.getEncoder.encodeToString((company +"#"+ lastYearYM +"#"+ mkt).getBytes())
 
-    def getMaxResultSales: Double = rd.getMapValue(singleJobKey, "max_sales").toDouble
-    def getCurrCompanySales: Double = rd.getMapValue(singleJobKey, "max_company_sales").toDouble
+    def getMaxResultSales: Double = rd.getMapValue(singleJobKey, "max_sales") match {
+        case null => 0.0
+        case x => x.toDouble
+    }
+    def getCurrCompanySales: Double = rd.getMapValue(singleJobKey, "max_company_sales") match {
+        case null => 0.0
+        case x => x.toDouble
+    }
 
     val getLastYearResultSales : Double = getHistorySalesByRange("NATION_SALES", lastYearSingleJobKey)
     val getLastYearCurrCompanySales : Double = getHistorySalesByRange("NATION_COMPANY_SALES", lastYearSingleJobKey)

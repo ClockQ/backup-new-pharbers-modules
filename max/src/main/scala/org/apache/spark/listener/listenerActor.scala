@@ -1,11 +1,12 @@
 package org.apache.spark.listener
 
 import akka.actor.{Actor, ActorLogging, Props}
-import com.pharbers.channel.util.sendEmTrait
+import com.pharbers.channel.util.{sendEmTrait, sendTrait}
 import com.pharbers.common.algorithm.alTempLog
 import org.apache.spark.listener.listenerActor._
 import org.apache.spark.scheduler.SparkListener
 import com.pharbers.pactions.actionbase.NULLArgs
+import com.pharbers.pattern2.detail.PhMaxJob
 
 object listenerActor {
     def name = "listenerActor"
@@ -45,6 +46,7 @@ class listenerActor(start_progress: Int, end_progress: Int, tag: String)
 
             if(progress < current.toInt){
                 progress = current.toInt
+
                 send(this, progress, tag)
             }
         }
@@ -57,4 +59,5 @@ class listenerActor(start_progress: Int, end_progress: Int, tag: String)
 
         case _ => ???
     }
+
 }

@@ -7,7 +7,7 @@ class PhMaxJob extends commonresult {
     var call: String = ""
     var job_id: String = ""
     var message: String = ""
-    var percentage: String = ""
+    var percentage: Int = 0
     var cpa: String = ""
     var gycx: String = ""
     var not_arrival_hosp_file: String = ""

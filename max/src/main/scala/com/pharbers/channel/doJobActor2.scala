@@ -46,7 +46,7 @@ class doJobActor2 extends Actor with ActorLogging {
         result.company_id = company
         result.call = call
         result.job_id = job_id
-        result.percentage = "1.0"
+        result.percentage = 100
         result.message = message
         
         a ! result
@@ -67,8 +67,7 @@ class doJobActor2 extends Actor with ActorLogging {
         )
         try{
             alTempLog(s"doYmCalc, company is = $company, user is = $user")
-//            sendMessage(company, user, "ymCalc", "start", toJson(Map("progress" -> toJson("0"))))
-            
+
             val ymLst = phBuilder(company, user, job_id).set(args).doCalcYM()
             alTempLog("计算月份完成, result = " + ymLst)
             sendMessage(company, user, "ymCalc", job_id, ymLst.toString())

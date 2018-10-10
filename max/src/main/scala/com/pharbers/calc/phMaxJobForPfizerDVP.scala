@@ -10,7 +10,7 @@ import com.pharbers.pactions.generalactions._
 import com.pharbers.pactions.actionbase.{MapArgs, StringArgs, pActionTrait}
 import com.pharbers.pactions.excel.input.PhExcelXLSXCommonFormat
 import com.pharbers.pactions.jobs.{sequenceJob, sequenceJobWithMap}
-import org.apache.spark.listener.progress.sendMultiProgress
+import org.apache.spark.listener.progress.{sendMultiProgress, sendXmppMultiProgress}
 import org.apache.spark.listener.{MaxSparkListener, addListenerAction}
 
 /**
@@ -33,7 +33,8 @@ case class phMaxJobForPfizerDVP(args: Map[String, String])(implicit _actor: Acto
     lazy val company: String = args("company_id")
     lazy val p_total: Double = args("p_total").toDouble
     lazy val p_current: Double = args("p_current").toDouble
-    implicit val mp: (sendEmTrait, Double, String) => Unit = sendMultiProgress(company, user, "calc")(p_current, p_total).multiProgress
+//    implicit val mp: (sendEmTrait, Double, String) => Unit = sendMultiProgress(company, user, "calc")(p_current, p_total).multiProgress
+    implicit val xp: (sendEmTrait, Double, String) => Unit = sendXmppMultiProgress(company, user, "calc", job_id)(p_current, p_total).multiProgress
     
     
     val temp_universe_name: String = UUID.randomUUID().toString
