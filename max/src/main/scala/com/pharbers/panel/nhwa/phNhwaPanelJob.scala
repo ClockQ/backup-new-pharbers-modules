@@ -120,7 +120,7 @@ case class phNhwaPanelJob(args: Map[String, String])(implicit _actor: Actor) ext
     )
     
     override val actions: List[pActionTrait] = {
-                setLogLevelAction("ERROR") ::
+                setLogLevelAction("ERROR", job_id) ::
                 addListenerAction(listener.MaxSparkListener(0, 10)) ::
                 loadNotPublishedHosp ::
                 addListenerAction(listener.MaxSparkListener(11, 20)) ::

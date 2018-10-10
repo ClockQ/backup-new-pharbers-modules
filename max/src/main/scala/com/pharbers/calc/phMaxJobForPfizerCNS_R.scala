@@ -74,7 +74,7 @@ case class phMaxJobForPfizerCNS_R(args: Map[String, String])(implicit _actor: Ac
         )
     )
     
-    override val actions: List[pActionTrait] = setLogLevelAction("ERROR") ::
+    override val actions: List[pActionTrait] = setLogLevelAction("ERROR", job_id) ::
             addListenerAction(MaxSparkListener(0, 5)) ::
             loadPanelData ::
             //            loadPanelDataOfExcel ::

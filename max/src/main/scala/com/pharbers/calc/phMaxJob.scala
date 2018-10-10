@@ -67,7 +67,7 @@ case class phMaxJob(args: Map[String, String])(implicit _actor: Actor) extends s
     )
     
     override val actions: List[pActionTrait] = {
-        setLogLevelAction("ERROR") ::
+        setLogLevelAction("ERROR", job_id) ::
                 addListenerAction(MaxSparkListener(0, 5)) ::
                 loadPanelData ::
                 //                loadPanelDataOfExcel ::

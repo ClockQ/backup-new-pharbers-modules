@@ -25,7 +25,7 @@ case class phAstellasCalcYMJob(args: Map[String, String])(implicit _actor: Actor
     implicit val sp: (sendEmTrait, Double, String) => Unit = sendSingleProgress(company_id, user_id).singleProgress
     private val df = MapArgs(Map("job_id" -> StringArgs(job_id)))
     
-    override val actions: List[pActionTrait] = setLogLevelAction("ERROR") ::
+    override val actions: List[pActionTrait] = setLogLevelAction("ERROR", job_id) ::
             xlsxReadingAction[phAstellasCpaFormat](cpa_file, "cpa") ::
             xlsxReadingAction[phAstellasGycxFormat](gyc_file, "gycx") ::
             addListenerAction(MaxSparkListener(0, 50, "phAstellasCalcYMCpaConcretJob")) ::

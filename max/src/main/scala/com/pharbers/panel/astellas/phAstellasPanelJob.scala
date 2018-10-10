@@ -107,7 +107,7 @@ case class phAstellasPanelJob(args: Map[String, String])(implicit _actor: Actor)
     }
     
     override val actions: List[pActionTrait] = {
-        setLogLevelAction("ERROR") ::
+        setLogLevelAction("ERROR", job_id) ::
                 addListenerAction(listener.MaxSparkListener(0, 10, "load_product_match_file")) ::
                 load_product_match_file ::
                 addListenerAction(listener.MaxSparkListener(11, 20, "load_markets_match_file")) ::
