@@ -17,7 +17,7 @@ object DispatchEntry {
 }
 
 class DispatchEntry (implicit akkasys : ActorSystem) {
-    implicit val t = Timeout(10 minutes)
+    implicit val t = Timeout(30 minutes)
 
     def commonExcution(msr : SequenceSteps) : commonresult = {
         val act = akkasys.actorOf(Props[Gateway])
