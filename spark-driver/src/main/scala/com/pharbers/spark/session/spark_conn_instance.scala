@@ -26,6 +26,7 @@ trait spark_conn_instance {
             .setAppName(applicationName)
             .setMaster("yarn")
             .setJars(jarslst)
+            .set("spark.scheduler.mode", "FAIR")
             .set("spark.sql.crossJoin.enabled", "true")
             .set("yarn.resourcemanager.hostname", "spark.master")
             .set("spark.yarn.dist.files", "hdfs://spark.master:9000/config")

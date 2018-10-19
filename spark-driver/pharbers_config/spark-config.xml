@@ -3,5 +3,7 @@
         <host value="192.168.100.137" />
         <port value="9999" />
         <name value="test-dirver" />
+        <parallel-number value="1" />
+        <wait-seconds value="30" />
     </spark-config>
 </pharbers-modules>
