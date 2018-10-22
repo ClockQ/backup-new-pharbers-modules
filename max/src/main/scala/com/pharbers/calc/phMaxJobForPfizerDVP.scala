@@ -89,15 +89,15 @@ case class phMaxJobForPfizerDVP(args: Map[String, String])(implicit _actor: Acto
     )
     
     override val actions: List[pActionTrait] = setLogLevelAction("ERROR", job_id) ::
-            addListenerAction(MaxSparkListener(0, 5)) ::
+            addListenerAction(MaxSparkListener(0, 5, job_id), job_id) ::
             loadPanelData ::
             //        loadPanelDataOfExcel ::
             readUniverseFile ::
             readCoefFile ::
-            phMaxCalcActionForDVP() ::
-            addListenerAction(MaxSparkListener(6, 40)) ::
+            phMaxCalcActionForDVP(df) ::
+            addListenerAction(MaxSparkListener(6, 40, job_id), job_id) ::
             phMaxPersistentAction(df) ::
-            addListenerAction(MaxSparkListener(41, 90)) ::
+            addListenerAction(MaxSparkListener(41, 90, job_id), job_id) ::
             phMaxInfo2RedisAction(df) ::
             Nil
 }

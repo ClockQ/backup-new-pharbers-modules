@@ -15,21 +15,29 @@ object phSparkDriver  extends PharbersInjectModule {
     protected val sparkParallelNum: Int = config.mc.find(p => p._1 == "parallel-number").get._2.toString.toInt
     protected val waitSeconds: Int = config.mc.find(p => p._1 == "wait-seconds").get._2.toString.toInt
 
-    var curr_conn_num: Int = 0
+//    var curr_conn_num: Int = 0
+    var curr_conn_set: Set[String] = Set.empty
 
-    def apply(_applicationName: String = "test-dirver"): phSparkDriver = {
+    def apply(applicationName: String = "test-dirver"): phSparkDriver = {
+
+        if (curr_conn_set.contains(applicationName)) return new phSparkDriver(applicationName)
+
         var wait_count: Int = 0
         while (currConnNum >= sparkParallelNum) {
             println("Please waiting for spark instance")
             Thread.sleep(1000)
+            println(s"Wait ${wait_count} seconds!")
             wait_count += 1
             if (wait_count >= waitSeconds) throw new Exception("Error! Wait for spark instance time out!")
         }
-        curr_conn_num += 1
-        new phSparkDriver(_applicationName)
+//        curr_conn_num += 1
+        curr_conn_set += applicationName
+        new phSparkDriver(applicationName)
     }
 
-    def currConnNum: Int = curr_conn_num
+    //TODO：暂时指定以applicationName的Set的size做为当前"job数"的依据.
+//    def currConnNum: Int = curr_conn_num
+    def currConnNum: Int = curr_conn_set.size
 
 }
 
@@ -37,9 +45,10 @@ class phSparkDriver(override val applicationName: String) extends spark_conn_tra
 
     import phSparkDriver._
 
-    //TODO:调用spark后需手动释放实例!
+    //TODO:调用spark结束任务后需手动释放实例!
     def stopCurrConn: Unit ={
-        curr_conn_num -= 1
+//        curr_conn_num -= 1
+        curr_conn_set -= applicationName
     }
 
 }

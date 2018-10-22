@@ -54,7 +54,7 @@ class listenerActor(start_progress: Int, end_progress: Int, tag: String)
         case jobEnd(listener) =>
             if(remainTask < 1)
                 alTempLog("remainTask = " + remainTask)
-                removeListenerAction(listener).perform(NULLArgs)
+                removeListenerAction(listener, tag).perform(NULLArgs)
 //            alTempLog("Job Over")
 
         case _ => ???

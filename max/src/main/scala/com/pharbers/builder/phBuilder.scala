@@ -55,7 +55,8 @@ trait phBuilder {
         val clazz: String = ymInstMap("instance")
         val result = impl(clazz, mapping).perform(MapArgs(Map().empty))
                 .asInstanceOf[MapArgs].get("result").asInstanceOf[JVArgs].get
-        phSparkDriver(job_id).sc.stop()
+//        phSparkDriver(job_id).sc.stop()
+        phSparkDriver(job_id).stopCurrConn
 
         result
     }
@@ -81,7 +82,8 @@ trait phBuilder {
                     .asInstanceOf[MapArgs]
                     .get("phSavePanelJob")
                     .asInstanceOf[StringArgs].get
-            phSparkDriver(job_id).sc.stop()
+//            phSparkDriver(job_id).sc.stop()
+            phSparkDriver(job_id).stopCurrConn
             result
         }
 
@@ -113,7 +115,8 @@ trait phBuilder {
                     .asInstanceOf[MapArgs]
                     .get("max_persistent_action")
                     .asInstanceOf[StringArgs].get
-            phSparkDriver(job_id).sc.stop()
+//            phSparkDriver(job_id).sc.stop()
+            phSparkDriver(job_id).stopCurrConn
             result
         }.mkString("#")
 

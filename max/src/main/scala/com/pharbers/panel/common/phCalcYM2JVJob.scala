@@ -18,7 +18,8 @@ class phCalcYM2JVJob[T: ClassTag](override val defaultArgs: pActionArgs) extends
     override val name: String = "result"
     
     override def perform(pr: pActionArgs): pActionArgs = {
-        lazy val sparkDriver: phSparkDriver = phSparkDriver()
+        val job_id = defaultArgs.asInstanceOf[StringArgs].get
+        lazy val sparkDriver: phSparkDriver = phSparkDriver(job_id)
         import sparkDriver.ss.implicits._
         val calcYM = pr.asInstanceOf[MapArgs].get("calcYM").asInstanceOf[DFArgs].get
         val maxYm = calcYM.agg(Map("count" -> "max")).collect().head.getLong(0)

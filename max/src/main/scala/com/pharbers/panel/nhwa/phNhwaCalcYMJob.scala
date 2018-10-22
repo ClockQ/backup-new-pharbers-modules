@@ -28,15 +28,17 @@ case class phNhwaCalcYMJob(args: Map[String, String])(implicit _actor: Actor) ex
         override val actions: List[pActionTrait] = readCsvAction(cpa_file, applicationName = job_id) :: Nil
     }
 
+    val jobArgs: StringArgs = StringArgs(job_id)
+
     override val actions: List[pActionTrait] = {
         setLogLevelAction("ERROR", job_id) ::
-            addListenerAction(listener.MaxSparkListener(0, 99)) ::
-            //            addListenerAction(listener.MaxSparkListener(0, 35)) ::
+            addListenerAction(listener.MaxSparkListener(0, 99, job_id), job_id) ::
+            //            addListenerAction(listener.MaxSparkListener(0, 35, job_id), job_id) ::
             readCpa ::
-            //            addListenerAction(listener.MaxSparkListener(36, 65)) ::
-            phNhwaCalcYMConcretJob() ::
-            //            addListenerAction(listener.MaxSparkListener(66, 95)) ::
-            phCalcYM2JVJob() ::
+            //            addListenerAction(listener.MaxSparkListener(36, 65, job_id), job_id) ::
+            phNhwaCalcYMConcretJob(jobArgs) ::
+            //            addListenerAction(listener.MaxSparkListener(66, 95, job_id), job_id) ::
+            phCalcYM2JVJob(jobArgs) ::
             Nil
     }
 }

@@ -2,6 +2,8 @@
     <spark-config>
         <host value="192.168.100.137" />
         <port value="9999" />
-        <name value="Cui-job" />
+        <name value="test-dirver" />
+        <parallel-number value="2" />
+        <wait-seconds value="600" />
     </spark-config>
 </pharbers-modules>

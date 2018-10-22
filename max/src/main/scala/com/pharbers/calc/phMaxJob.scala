@@ -68,14 +68,14 @@ case class phMaxJob(args: Map[String, String])(implicit _actor: Actor) extends s
     
     override val actions: List[pActionTrait] = {
         setLogLevelAction("ERROR", job_id) ::
-                addListenerAction(MaxSparkListener(0, 5)) ::
+                addListenerAction(MaxSparkListener(0, 5, job_id), job_id) ::
                 loadPanelData ::
                 //                loadPanelDataOfExcel ::
                 readUniverseFile ::
-                phMaxCalcAction() ::
-                addListenerAction(MaxSparkListener(6, 40)) ::
+                phMaxCalcAction(df) ::
+                addListenerAction(MaxSparkListener(6, 40, job_id), job_id) ::
                 phMaxPersistentAction(df) ::
-                addListenerAction(MaxSparkListener(41, 90)) ::
+                addListenerAction(MaxSparkListener(41, 90, job_id), job_id) ::
                 phMaxInfo2RedisAction(df) ::
                 Nil
     }

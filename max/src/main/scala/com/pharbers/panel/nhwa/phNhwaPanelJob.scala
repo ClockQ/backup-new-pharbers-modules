@@ -121,23 +121,23 @@ case class phNhwaPanelJob(args: Map[String, String])(implicit _actor: Actor) ext
     
     override val actions: List[pActionTrait] = {
                 setLogLevelAction("ERROR", job_id) ::
-                addListenerAction(listener.MaxSparkListener(0, 10)) ::
+                addListenerAction(listener.MaxSparkListener(0, 10, job_id), job_id) ::
                 loadNotPublishedHosp ::
-                addListenerAction(listener.MaxSparkListener(11, 20)) ::
+                addListenerAction(listener.MaxSparkListener(11, 20, job_id), job_id) ::
                 load_hosp_ID_file ::
-                addListenerAction(listener.MaxSparkListener(21, 30)) ::
+                addListenerAction(listener.MaxSparkListener(21, 30, job_id), job_id) ::
                 loadProductMatchFile ::
-                addListenerAction(listener.MaxSparkListener(31, 40)) ::
+                addListenerAction(listener.MaxSparkListener(31, 40, job_id), job_id) ::
                 loadFullHospFile ::
-                addListenerAction(listener.MaxSparkListener(41, 50)) ::
+                addListenerAction(listener.MaxSparkListener(41, 50, job_id), job_id) ::
                 loadMarketMatchFile ::
-                addListenerAction(listener.MaxSparkListener(51, 60)) ::
+                addListenerAction(listener.MaxSparkListener(51, 60, job_id), job_id) ::
                 readCpa ::
                 readNotArrivalHosp ::
-                addListenerAction(listener.MaxSparkListener(61, 90)) ::
+                addListenerAction(listener.MaxSparkListener(61, 90, job_id), job_id) ::
                 phNhwaPanelConcretJob(df) ::
                 phSavePanelJob(df) ::
-                addListenerAction(listener.MaxSparkListener(91, 99)) ::
+                addListenerAction(listener.MaxSparkListener(91, 99, job_id), job_id) ::
                 phPanelInfo2Redis(df) ::
                 Nil
     }

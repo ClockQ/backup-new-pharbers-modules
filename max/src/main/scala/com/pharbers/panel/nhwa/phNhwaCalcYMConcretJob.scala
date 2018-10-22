@@ -16,7 +16,8 @@ object phNhwaCalcYMConcretJob {
 class phNhwaCalcYMConcretJob[T : ClassTag](override val defaultArgs: pActionArgs) extends pActionTrait {
     override val name: String = "calcYM"
     override def perform(pr : pActionArgs): pActionArgs = {
-        lazy val sparkDriver: phSparkDriver = phSparkDriver()
+        val job_id = defaultArgs.asInstanceOf[StringArgs].get
+        lazy val sparkDriver: phSparkDriver = phSparkDriver(job_id)
         import sparkDriver.ss.implicits._
         val cpaDF = pr.asInstanceOf[MapArgs].get("cpa").asInstanceOf[DFArgs].get
                 .na.fill(value = "0", cols = Array("VALUE", "STANDARD_UNIT"))

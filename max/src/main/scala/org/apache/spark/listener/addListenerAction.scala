@@ -15,7 +15,7 @@ class addListenerAction(listener: SparkListener,
     override val defaultArgs: pActionArgs = NULLArgs
 
     override def perform(args: pActionArgs): pActionArgs = {
-        phSparkDriver().sc.addSparkListener(listener)
+        phSparkDriver(name).sc.addSparkListener(listener)
         args
     }
 }

@@ -13,7 +13,7 @@ class removeListenerAction(listener: SparkListener, override val name: String) e
     override val defaultArgs: pActionArgs = NULLArgs
 
     override def perform(args: pActionArgs): pActionArgs = {
-        phSparkDriver().sc.listenerBus.removeListener(listener)
+        phSparkDriver(name).sc.listenerBus.removeListener(listener)
         args
     }
 }
