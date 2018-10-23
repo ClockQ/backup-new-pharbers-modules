@@ -15,13 +15,16 @@ object phPfizerPanelCommonAction {
 
 class phPfizerPanelCommonAction(override val defaultArgs: pActionArgs) extends pActionTrait {
     override val name: String = "panel"
-    lazy val sparkDriver: phSparkDriver = phSparkDriver()
-    import sparkDriver.ss.implicits._
+
     
     override def perform(args: pActionArgs): pActionArgs = {
         
         val ym = defaultArgs.asInstanceOf[MapArgs].get("ym").asInstanceOf[StringArgs].get
         val mkt = defaultArgs.asInstanceOf[MapArgs].get("mkt").asInstanceOf[StringArgs].get
+        val job_id = defaultArgs.asInstanceOf[MapArgs].get("job_id").asInstanceOf[StringArgs].get
+
+        lazy val sparkDriver: phSparkDriver = phSparkDriver(job_id)
+        import sparkDriver.ss.implicits._
         
         val cpa = args.asInstanceOf[MapArgs].get("cpa").asInstanceOf[DFArgs].get
                 .na.fill(value = "0", cols = Array("VALUE", "STANDARD_UNIT"))

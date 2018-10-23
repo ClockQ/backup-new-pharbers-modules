@@ -12,13 +12,14 @@ object phPfizerPanelNoSplitAction {
 
 class phPfizerPanelNoSplitAction(override val defaultArgs: pActionArgs) extends pActionTrait {
     override val name: String = "SplitMarketAction"
-    lazy val sparkDriver: phSparkDriver = phSparkDriver()
-    
-    import sparkDriver.ss.implicits._
-    
+
     override def perform(args: pActionArgs): pActionArgs = {
         
         val mkt = defaultArgs.asInstanceOf[MapArgs].get("mkt").asInstanceOf[StringArgs].get
+        val job_id = defaultArgs.asInstanceOf[MapArgs].get("job_id").asInstanceOf[StringArgs].get
+
+        lazy val sparkDriver: phSparkDriver = phSparkDriver(job_id)
+        import sparkDriver.ss.implicits._
         
         //通用名市场定义 =>表b0
         val markets_match = args.asInstanceOf[MapArgs].get("markets_match_file").asInstanceOf[DFArgs].get

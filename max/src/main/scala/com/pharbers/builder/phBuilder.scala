@@ -1,7 +1,7 @@
 package com.pharbers.builder
 
 import akka.actor.Actor
-import com.pharbers.builder.phMarketTable.Builderimpl
+import com.pharbers.builder.phMarketTable.{Builderimpl, readJsonTrait}
 import play.api.libs.json.JsValue
 import play.api.libs.json.Json.toJson
 import com.pharbers.driver.PhRedisDriver
@@ -20,7 +20,7 @@ object phBuilder {
     }
 }
 
-trait phBuilder {
+trait phBuilder extends readJsonTrait {
     val user: String
     val job_id: String
     val company: String
@@ -56,6 +56,7 @@ trait phBuilder {
         val result = impl(clazz, mapping).perform(MapArgs(Map().empty))
                 .asInstanceOf[MapArgs].get("result").asInstanceOf[JVArgs].get
 //        phSparkDriver(job_id).sc.stop()
+        //TODO:手动释放本次算能
         phSparkDriver(job_id).stopCurrConn
 
         result
@@ -74,6 +75,9 @@ trait phBuilder {
             mapping ++= panelInstMap
             mapping += "p_current" -> (mapping.getOrElse("p_current", "0").toInt + 1).toString
 
+            //TODO:目前数据库中的配置不是最新的,使用本地配置文件进行替换,json数据中有重复的,文件最下面是最新更新的,所以取last
+            mapping ++= testData.filter(x => company == x("company") && mkt == x("market")).last
+
             if(!parametCheck(ckArgLst, mapping)(m => ck_base(m) && ck_panel(m)))
                 throw new Exception("input wrong")
 
@@ -83,6 +87,7 @@ trait phBuilder {
                     .get("phSavePanelJob")
                     .asInstanceOf[StringArgs].get
 //            phSparkDriver(job_id).sc.stop()
+            //TODO:手动释放本次算能
             phSparkDriver(job_id).stopCurrConn
             result
         }
@@ -107,6 +112,9 @@ trait phBuilder {
 
             val ckArgLst = maxInstMap("args").split("#").toList ::: Nil
 
+            //TODO:目前数据库中的配置不是最新的,使用本地配置文件进行替换,json数据中有重复的,文件最下面是最新更新的,所以取last
+            mapping ++= testData.filter(x => company == x("company") && mkt == x("market")).last
+
             if(!parametCheck(ckArgLst, mapping)(m => ck_base(m) && ck_panel(m) && ck_max(m)))
                 throw new Exception("input wrong")
 
@@ -116,6 +124,7 @@ trait phBuilder {
                     .get("max_persistent_action")
                     .asInstanceOf[StringArgs].get
 //            phSparkDriver(job_id).sc.stop()
+            //TODO:手动释放本次算能
             phSparkDriver(job_id).stopCurrConn
             result
         }.mkString("#")

@@ -32,7 +32,7 @@ case class phPfizerPanelJob(args: Map[String, String])(implicit _actor: Actor) e
     val product_match_file: String = match_dir + args("product_match_file")
     val markets_match_file: String = match_dir + args("markets_match_file")
     val hosp_ID_file: String = match_dir + args("hosp_ID")
-    val not_arrival_hosp_file: String = match_dir + args("not_arrival_hosp_file")
+    val not_arrival_hosp_file: String = source_dir + args("not_arrival_hosp_file")
     /**
       * 不同年份有不同的补充文件,是否需要进行历史补充医院的合并?
       * ToDo:为了满足用户不仅仅可以计算当月,还可以计算历史月份
@@ -152,27 +152,27 @@ case class phPfizerPanelJob(args: Map[String, String])(implicit _actor: Actor) e
     
     override val actions: List[pActionTrait] = {
         setLogLevelAction("ERROR", job_id) ::
-                addListenerAction(MaxSparkListener(0, 10)) ::
+                addListenerAction(MaxSparkListener(0, 10, job_id), job_id) ::
                 load_hosp_ID_file ::
-                addListenerAction(MaxSparkListener(11, 20)) ::
+                addListenerAction(MaxSparkListener(11, 20, job_id), job_id) ::
                 load_product_match_file ::
-                addListenerAction(MaxSparkListener(21, 30)) ::
+                addListenerAction(MaxSparkListener(21, 30, job_id), job_id) ::
                 load_markets_match_file ::
-                addListenerAction(MaxSparkListener(31, 40)) ::
+                addListenerAction(MaxSparkListener(31, 40, job_id), job_id) ::
                 load_full_hosp_file ::
-                addListenerAction(MaxSparkListener(41, 50)) ::
+                addListenerAction(MaxSparkListener(41, 50, job_id), job_id) ::
                 load_pfc_match_file ::
-                addListenerAction(MaxSparkListener(51, 60)) ::
+                addListenerAction(MaxSparkListener(51, 60, job_id), job_id) ::
                 readCpa ::
-                addListenerAction(MaxSparkListener(61, 70)) ::
+                addListenerAction(MaxSparkListener(61, 70, job_id), job_id) ::
                 readNotArrivalHosp ::
-                addListenerAction(MaxSparkListener(71, 80)) ::
+                addListenerAction(MaxSparkListener(71, 80, job_id), job_id) ::
                 readGyc ::
                 splitMktJobsMap.getOrElse(mkt, throw new Exception(s"undefined market=$mkt")) ::
-                addListenerAction(MaxSparkListener(81, 90)) ::
+                addListenerAction(MaxSparkListener(81, 90, job_id), job_id) ::
                 phPfizerPanelCommonAction(df) ::
                 phSavePanelJob(df) ::
-                addListenerAction(MaxSparkListener(91, 99)) ::
+                addListenerAction(MaxSparkListener(91, 99, job_id), job_id) ::
                 phPanelInfo2Redis(df) ::
                 Nil
     }

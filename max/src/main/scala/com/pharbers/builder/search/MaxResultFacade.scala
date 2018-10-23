@@ -20,7 +20,8 @@ class MaxResultFacade {
             "job_id" -> job_id
         )
         val exportResult =  phExportMaxResultJob(args).perform().asInstanceOf[MapArgs].get("export_max_result_action").asInstanceOf[StringArgs].get
-        phSparkDriver(job_id).sc.stop
+//        phSparkDriver(job_id).sc.stop
+        phSparkDriver(job_id).stopCurrConn
         exportResult
     }
 

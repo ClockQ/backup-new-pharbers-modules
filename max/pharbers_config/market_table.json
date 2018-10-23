@@ -1,0 +1,14 @@
+[
+  {
+      "company": "5b028f95ed925c2c705b85ba",
+      "market": "INF",
+      "universe_file": "pfizer/pha_config_repository1804/Pfizer_Universe_INF.csv",
+      "product_match_file": "pfizer/pha_config_repository1804/Pfizer_ProductMatchTable.csv",
+      "fill_hos_data_file": "pfizer/pha_config_repository1804/Pfizer_2018_FullHosp.txt",
+      "markets_match_file": "pfizer/pha_config_repository1804/Pfizer_MarketMatchTable.csv",
+      "hosp_ID": "pfizer/pha_config_repository1804/Pfizer_2018_If_panel_all_INF.csv",
+      "pfc_match_file": "pfizer/pha_config_repository1804/Pfizer_PackidMatch.csv",
+      "ym": "201804",
+      "offlineResult": "pfizer/pha_config_repository1804/Pfizer_201804_Offline_MaxResult.csv"
+   }
+]
