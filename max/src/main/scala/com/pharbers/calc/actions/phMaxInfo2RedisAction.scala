@@ -3,7 +3,7 @@ package com.pharbers.calc.actions
 import java.util.{Base64, UUID}
 
 import com.pharbers.builder.phMarketTable.{Builderimpl, phMarketManager}
-import com.pharbers.common.algorithm.max_path_obj
+import com.pharbers.common.algorithm.{alTempLog, max_path_obj}
 import com.pharbers.driver.PhRedisDriver
 import com.pharbers.pactions.actionbase._
 import com.pharbers.sercuity.Sercurity
@@ -45,6 +45,8 @@ class phMaxInfo2RedisAction(override val defaultArgs: pActionArgs) extends pActi
         rd.addSet(maxSingleDayJobsKey, singleJobKey)
         rd.expire(maxSingleDayJobsKey, 60*60*24)
 
+        alTempLog(s"准备 -- 存储${mkt}市场的max聚合数据到Redis中")
+
         val max_sales = maxDF.agg(Map("f_sales" -> "sum")).take(1)(0).toString().split('[').last.split(']').head.toDouble
         val max_sales_city_lst = maxDF.groupBy("City").agg(Map("f_sales" -> "sum")).sort("sum(f_sales)")
             .collect().map(x => x.toString())
@@ -59,14 +61,17 @@ class phMaxInfo2RedisAction(override val defaultArgs: pActionArgs) extends pActi
         val company_sales_prov_lst = maxDF_filter_company.groupBy("Province").agg(Map("f_sales" -> "sum")).sort("sum(f_sales)")
             .collect().map(x => x.toString())
 
-        maxDF.groupBy("Date", "Province", "City", "MARKET", "Product")
-            .agg(Map("f_sales"->"sum", "f_units"->"sum", "Panel_ID"->"first"))
-            .write
-            .format("csv")
-            .option("header", value = true)
-            .option("delimiter", 31.toChar.toString)
-            .option("codec", "org.apache.hadoop.io.compress.GzipCodec")
-            .save(max_path_obj.p_maxPath + maxNameForSearch)
+//        maxDF.groupBy("Date", "Province", "City", "MARKET", "Product")
+////            .agg(Map("f_sales"->"sum", "f_units"->"sum", "Panel_ID"->"first"))
+//            .agg(Map("f_sales"->"sum", "f_units"->"sum"))
+//            .write
+//            .format("csv")
+//            .option("header", value = true)
+//            .option("delimiter", 31.toChar.toString)
+//            .option("codec", "org.apache.hadoop.io.compress.GzipCodec")
+//            .save(max_path_obj.p_maxPath + maxNameForSearch)
+
+        alTempLog(s"开始 -- 存储${mkt}市场的max聚合数据到Redis中")
 
         rd.addMap(singleJobKey, "max_result_name", maxName)
         rd.addMap(singleJobKey, "max_result_name_for_search", maxNameForSearch)
@@ -81,6 +86,8 @@ class phMaxInfo2RedisAction(override val defaultArgs: pActionArgs) extends pActi
         rd.expire(max_sales_prov_lst_key, 60*60*24)
         rd.expire(company_sales_city_lst_key, 60*60*24)
         rd.expire(company_sales_prov_lst_key, 60*60*24)
+
+        alTempLog(s"完成 -- 存储${mkt}市场的max聚合数据到Redis中")
 
         StringArgs(singleJobKey)
     }

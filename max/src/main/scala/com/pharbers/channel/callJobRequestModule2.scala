@@ -14,12 +14,10 @@ case class executeJob(override val args: commonresult)(implicit context: ActorSy
     
     override val module: String = "max calc"
     override val methed: String = "call max job"
-    
+
     override def processes(pr: Option[commonresult]): (Option[commonresult], Option[commonerror]) = {
-        println(s"module $module")
-        println(s"method $methed")
         println(s"args $args")
-        implicit val t: Timeout = 30 minutes
+        implicit val t: Timeout = 5 hours
         
         val exec = context.actorOf(doJobActor2.props)
         
@@ -29,26 +27,10 @@ case class executeJob(override val args: commonresult)(implicit context: ActorSy
                 case "ymCalc" => exec ? doJobActor2.msg_doYmCalc2(max_job)
                 case "panel" => exec ? doJobActor2.msg_doPanel2(max_job)
                 case "max" => exec ? doJobActor2.msg_doCalc2(max_job)
-                //            case "panel" => jobActor ! msg_doPanel(jv)
-                //            case "calc" => jobActor ! msg_doCalc(jv)
-                //            case "kill" => jobActor ! msg_doKill(jv)
-                //            case _ => "not implement"
             }
         
         val result = Await.result(job_instance.mapTo[Any], t.duration)
         println(result)
-        (Some(args), None)
-    }
-}
-
-case class responseJob(override val args: commonresult) extends commonstep {
-    override val module: String = "max response"
-    override val methed: String = "call max response"
-    
-    override def processes(pr: Option[commonresult]): (Option[commonresult], Option[commonerror]) = {
-        println(s"module $module")
-        println(s"method $methed")
-        println(s"args $args")
         (Some(args), None)
     }
 }

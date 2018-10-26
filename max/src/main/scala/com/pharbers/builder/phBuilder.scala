@@ -64,10 +64,12 @@ trait phBuilder extends readJsonTrait {
 
     def doPanel(): JsValue = {
         val ymLst = mapping("yms").split("#")
+        if (ymLst.isEmpty) return toJson(Map("job_id" -> mapping("job_id"), "error" -> "no yms"))
         val jobSum = ymLst.length * mktLst.length
         mapping += "p_total" -> jobSum.toString
 
         for (ym <- ymLst; mkt <- mktLst) {
+            if (ym == "") return toJson(Map("job_id" -> mapping("job_id"), "error" -> "ym error"))
             mapping += "ym" -> ym
             mapping += "mkt" -> mkt
             val panelInstMap = getPanelInst(mkt)
@@ -76,20 +78,24 @@ trait phBuilder extends readJsonTrait {
             mapping += "p_current" -> (mapping.getOrElse("p_current", "0").toInt + 1).toString
 
             //TODO:目前数据库中的配置不是最新的,使用本地配置文件进行替换,json数据中有重复的,文件最下面是最新更新的,所以取last
-            mapping ++= testData.filter(x => company == x("company") && mkt == x("market")).last
+            testData.filter(x => company == x("company") && mkt == x("market")) match{
+                case Nil => println(s"未用json文件更新${company}-${mkt}的配置")
+                case lst => mapping ++= lst.last
+            }
+//            mapping ++= testData.filter(x => company == x("company") && mkt == x("market")).last
 
             if(!parametCheck(ckArgLst, mapping)(m => ck_base(m) && ck_panel(m)))
                 throw new Exception("input wrong")
 
             val clazz: String = panelInstMap("instance")
             val result = impl(clazz, mapping).perform(MapArgs(Map().empty))
-                    .asInstanceOf[MapArgs]
-                    .get("phSavePanelJob")
-                    .asInstanceOf[StringArgs].get
+//                    .asInstanceOf[MapArgs]
+//                    .get("phSavePanelJob")
+//                    .asInstanceOf[StringArgs].get
 //            phSparkDriver(job_id).sc.stop()
             //TODO:手动释放本次算能
             phSparkDriver(job_id).stopCurrConn
-            result
+//            result
         }
 
         toJson(mapping("job_id"))
@@ -113,7 +119,11 @@ trait phBuilder extends readJsonTrait {
             val ckArgLst = maxInstMap("args").split("#").toList ::: Nil
 
             //TODO:目前数据库中的配置不是最新的,使用本地配置文件进行替换,json数据中有重复的,文件最下面是最新更新的,所以取last
-            mapping ++= testData.filter(x => company == x("company") && mkt == x("market")).last
+            testData.filter(x => company == x("company") && mkt == x("market")) match{
+                case Nil => println(s"未用json文件更新${company}-${mkt}的配置")
+                case lst => mapping ++= lst.last
+            }
+//            mapping ++= testData.filter(x => company == x("company") && mkt == x("market")).last
 
             if(!parametCheck(ckArgLst, mapping)(m => ck_base(m) && ck_panel(m) && ck_max(m)))
                 throw new Exception("input wrong")

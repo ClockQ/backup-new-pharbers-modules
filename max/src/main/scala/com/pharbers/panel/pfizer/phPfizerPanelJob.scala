@@ -7,7 +7,7 @@ import com.pharbers.channel.util.sendEmTrait
 import com.pharbers.panel.pfizer.actions._
 import com.pharbers.pactions.generalactions._
 import com.pharbers.common.algorithm.max_path_obj
-import org.apache.spark.listener.progress.sendMultiProgress
+import org.apache.spark.listener.progress.{sendMultiProgress, sendXmppMultiProgress, sendXmppSingleProgress}
 import com.pharbers.pactions.generalactions.memory.phMemoryArgs
 import com.pharbers.panel.common.{phPanelInfo2Redis, phSavePanelJob}
 import org.apache.spark.listener.{MaxSparkListener, addListenerAction}
@@ -51,7 +51,7 @@ case class phPfizerPanelJob(args: Map[String, String])(implicit _actor: Actor) e
     lazy val p_current: Double = args("p_current").toDouble
     
     implicit val companyArgs: phMemoryArgs = phMemoryArgs(company)
-    implicit val mp: (sendEmTrait, Double, String) => Unit = sendMultiProgress(company, user, "panel")(p_current, p_total).multiProgress
+    implicit val xp: (sendEmTrait, Double, String) => Unit = sendXmppMultiProgress(company, user, "panel", job_id)(p_current, p_total).multiProgress
     
     
     //1. read hosp_ID file

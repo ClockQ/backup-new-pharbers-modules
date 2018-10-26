@@ -50,13 +50,13 @@ case class phPfizerCalcYMJob(args: Map[String, String])(implicit _actor: Actor) 
         setLogLevelAction("ERROR", job_id) ::
                 readCpa ::
                 readGyc ::
-                addListenerAction(MaxSparkListener(0, 99, job_id), job_id) ::
-//                addListenerAction(MaxSparkListener(0, 50, job_id), job_id) ::
+//                addListenerAction(MaxSparkListener(0, 99, job_id), job_id) ::
+                addListenerAction(MaxSparkListener(0, 50, job_id), job_id) ::
                 phPfizerCalcYMCpaConcretJob(df) ::
                 phPfizerCalcYMGycxConcretJob(df) ::
 //                saveMapResultAction("calcYMWithCpa", cache_location + "cpa") ::
 //                saveMapResultAction("calcYMWithGycx", cache_location + "gycx") ::
-//                addListenerAction(MaxSparkListener(51, 99, job_id), job_id) ::
+                addListenerAction(MaxSparkListener(51, 99, job_id), job_id) ::
                 phCalcYM2JVJobWithCpaAndGyc(df) ::
                 Nil
     }

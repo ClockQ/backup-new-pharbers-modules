@@ -16,7 +16,7 @@ import com.pharbers.jsonapi.json.circe.CirceJsonapiSupport
 import scala.concurrent.duration._
 
 class callJobXmppConsumer(context : ActorSystem) extends xmppTrait with CirceJsonapiSupport {
-    implicit val t: Timeout = 30 minutes
+    implicit val t: Timeout = 5 hours
     val entry = DispatchEntry()(context)
 
     override val encodeHandler: commonresult => String = obj =>

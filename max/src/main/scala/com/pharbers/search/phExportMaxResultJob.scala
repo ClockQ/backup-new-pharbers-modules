@@ -27,7 +27,7 @@ trait phExportMaxResultJob extends sequenceJobWithMap {
 
     lazy val searchArgs = MapArgs(
         Map(
-            "job_id" -> StringArgs(company),
+            "job_id" -> StringArgs(job_id),
             "company" -> StringArgs(company),
             "ym" -> StringArgs(ym),
             "mkt" -> StringArgs(mkt)
