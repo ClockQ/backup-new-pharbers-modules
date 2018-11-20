@@ -1,8 +1,8 @@
 [
   {
     "company": "5b028f95ed925c2c705b85ba",
-    "market": "AI_R_other",
-    "universe_file": "pfizer/pha_config_repository1804/Pfizer_Universe_AI_R_other.csv",
+    "market": "RAASI PLAIN",
+    "universe_file": "servier/Servier_Universe_RAASI PLAIN_20181119.csv",
     "product_match_file": "pfizer/pha_config_repository1804/Pfizer_ProductMatchTable.csv",
     "fill_hos_data_file": "pfizer/pha_config_repository1804/Pfizer_2018_FullHosp.txt",
     "markets_match_file": "pfizer/pha_config_repository1804/Pfizer_MarketMatchTable.csv",
@@ -11,7 +11,9 @@
     "cpa_file": "pfizer/pha_config_repository1804/Pfizer_201804_CPA.csv",
     "gycx_file": "pfizer/pha_config_repository1804/Pfizer_201804_Gycx.csv",
     "pfc_match_file": "pfizer/pha_config_repository1804/Pfizer_PackidMatch.csv",
-    "ym": "201804",
-    "offlineResult": "pfizer/pha_config_repository1804/Pfizer_201804_Offline_MaxResult.csv"
+    "ym": "201806",
+    "offlineResult": "servier/Servier_201806_Offline_MaxResult_20181119.csv",
+    "maxInstance": "com.pharbers.calc.phMaxJobForServier",
+    "panel_file": "servier/RAASI PLAIN_Panel 201806.csv"
   }
 ]

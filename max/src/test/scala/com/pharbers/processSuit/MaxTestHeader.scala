@@ -9,6 +9,7 @@ object MaxTestHeader {
 
     case class calcYm(cpa: String, gycx: String)
     case class panel(cpa: String, gycx: String, yms: String)
+    case class panelBayer(panel: String, yms: String)
     case class max()
 }
 
@@ -27,6 +28,11 @@ class MaxTestHeader(company: String, user: String, jobId: String) extends Actor 
                     .set("cpa", cpa).set("gycx", gycx)
                     .set("yms", yms)
                     .doPanel
+
+        case panelBayer(panel, yms) =>
+            sender ! phBuilder(company, user, jobId)
+                            .set("panel", panel).set("yms", yms)
+                            .doPanel()
 
         case max() =>
             sender ! phBuilder(company, user, jobId).doMax

@@ -17,6 +17,13 @@
                 <scalaVersion>2.11.8</scalaVersion>
                 <scalaBinaryVersion>2.11</scalaBinaryVersion>
             </properties>
+            <repositories>
+                <repository>
+                    <id>spark</id>
+                    <name>spark</name>
+                    <url>https://dl.bintray.com/spark-packages/maven/</url>
+                </repository>
+            </repositories>
             <dependencies>
                 <!-- scala lib -->
                 <dependency>
