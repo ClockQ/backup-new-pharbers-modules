@@ -1,7 +1,7 @@
 package com.pharbers.max
 
 import com.pharbers.builder.SearchFacade
-import com.pharbers.builder.search.SearchSimpleCheck
+import com.pharbers.builder.search.{SearchSimpleCheck, ShowResultCheck}
 import com.pharbers.pactions.actionbase._
 import com.pharbers.search.{phHistorySearchJob, phMaxResultInfo, phPanelResultInfo}
 import org.scalatest.FunSuite
@@ -94,13 +94,13 @@ class MaxSearchSuite extends FunSuite {
         val condition = toJson {
             Map(
                 "condition" -> toJson(Map(
-                    "years" -> toJson("201712"),
-                    "market" -> toJson("痛风市场")
+                    "years" -> toJson("201804"),
+                    "market" -> toJson("麻醉市场")
                 )),
                 "user" -> toJson(
                     Map(
-                        "user_id" -> toJson("5b0237b7810c6e0268fe6ff7"),
-                        "company" -> toJson(Map("company_id" -> toJson("5b023787810c6e0268fe6ff6")))
+                        "user_id" -> toJson("nhwa"),
+                        "company" -> toJson(Map("company_id" -> toJson("5afa53bded925c05c6f69c54")))
                     )
                 )
             )
@@ -108,7 +108,19 @@ class MaxSearchSuite extends FunSuite {
 
         val search = new SearchFacade
         val result = search.searchSimpleCheck(condition)
-        println(result._1.get.get("data").get.as[List[JsValue]].length)
+        println(result._1.get)
+    }
+
+    test("ResultCheck of Facade") {
+
+        val companyId = "5afa53bded925c05c6f69c54"
+        val ym = "201804"
+        val mkt = "麻醉市场"
+
+        val r = new ShowResultCheck
+        val result = r.searchResultCheck(companyId, ym, mkt)
+
+        println(result._4)
     }
 
     test("export data of Facade") {

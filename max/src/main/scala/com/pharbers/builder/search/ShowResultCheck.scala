@@ -46,6 +46,7 @@ class ShowResultCheck extends phMaxSearchTrait {
                             max.getProvLstMap.take(10).map(item => Map(
                                 "area" -> item("Province"),
                                 "marketSales" -> item("TotalSales"),
+                                "lastYearRank" -> item("lastYearYMRank").toString.toInt,
                                 "productSales" -> item("CompanySales"),
                                 "percentage" -> item("Share")
                             )),
@@ -63,6 +64,7 @@ class ShowResultCheck extends phMaxSearchTrait {
                             max.getCityLstMap.take(10).map(item => Map(
                                 "area" -> item("City"),
                                 "marketSales" -> item("TotalSales"),
+                                "lastYearRank" -> item("lastYearYMRank").toString.toInt,
                                 "productSales" -> item("CompanySales"),
                                 "percentage" -> item("Share")
                             )),

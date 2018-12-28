@@ -67,17 +67,20 @@ case class phMaxResultInfo(company: String, ym:String, mkt: String) extends phMa
                 Map("City" -> x("Area"), "Sales" -> x("Sales"))
             })
         }
-        val lastYearMaxCityLst = getAreaSalesByRange("CITY_SALES", lastYearSingleJobKey) match {
+        val lastYearMaxCityLstTmp = getAreaSalesByRange("CITY_SALES", lastYearSingleJobKey) match {
             case Nil => Nil
             case lst => lst.map({x =>
                 Map("City" -> x("Area"), "Sales" -> x("Sales"))
             })
         }
+        val tmp = lastYearMaxCityLstTmp.zipWithIndex
+        val lastYearMaxCityLst = tmp.map(x => x._1 + ("Rank" -> x._2.toString))
+
         rd.getListAllValue(max_sales_city_lst_key).map({x =>
             val temp = x.replace("[","").replace("]","").split(",")
             val companyCityMap: Map[String, String] = currCompanyCityLst.find(x => x("City") == temp(0)).getOrElse(Map("Sales" -> "0"))
             val tempShare = companyCityMap("Sales").toString.toDouble/temp(1).toDouble
-            val tempLastYearMaxSalesMap = lastYearMaxCityLst.find(x => x("City") == temp(0)).getOrElse(Map("Sales" -> "0"))
+            val tempLastYearMaxSalesMap = lastYearMaxCityLst.find(x => x("City") == temp(0)).getOrElse(Map("Sales" -> "0", "Rank" -> "-1"))
             val tempLastYearCompanySalesMap = lastYearCompanyCityLst.find(x => x("City") == temp(0)).getOrElse(Map("Sales" -> "0"))
             val tempLastYearShare: Double = if (tempLastYearMaxSalesMap("Sales").toDouble == 0.0) 0.0 else tempLastYearCompanySalesMap("Sales").toDouble / tempLastYearMaxSalesMap("Sales").toDouble
             Map(
@@ -87,6 +90,7 @@ case class phMaxResultInfo(company: String, ym:String, mkt: String) extends phMa
                 "Share" -> getFormatShare(tempShare),
                 "lastYearYMCompanySales" -> getFormatSales(tempLastYearCompanySalesMap("Sales").toDouble),
                 "lastYearYMTotalSales" -> getFormatSales(tempLastYearMaxSalesMap("Sales").toDouble),
+                "lastYearYMRank" -> tempLastYearMaxSalesMap("Rank"),
                 "lastYearYMShare" -> getFormatShare(tempLastYearShare)
             )
         })
@@ -103,18 +107,21 @@ case class phMaxResultInfo(company: String, ym:String, mkt: String) extends phMa
                 Map("Province" -> x("Area"), "Sales" -> x("Sales"))
             })
         }
-        val lastYearMaxProvLst = getAreaSalesByRange("PROVINCE_SALES", lastYearSingleJobKey) match {
+        val lastYearMaxProvLstTmp = getAreaSalesByRange("PROVINCE_SALES", lastYearSingleJobKey) match {
             case Nil => Nil
             case lst => lst.map({x =>
                 Map("Province" -> x("Area"), "Sales" -> x("Sales"))
             })
         }
+        val tmp = lastYearMaxProvLstTmp.zipWithIndex
+        val lastYearMaxProvLst = tmp.map(x => x._1 + ("Rank" -> x._2.toString))
 
         rd.getListAllValue(max_sales_prov_lst_key).map{ x =>
             val temp = x.replace("[","").replace("]","").split(",")
             val companyProvMap = currCompanyProvLst.find(x => x("Province") == temp(0)).getOrElse(Map("Sales" -> "0"))
             val tempShare: Double = companyProvMap("Sales").toDouble/temp(1).toDouble
-            val tempLastYearMaxSalesMap = lastYearMaxProvLst.find(x => x("Province") == temp(0)).getOrElse(Map("Sales" -> "0"))
+
+            val tempLastYearMaxSalesMap = lastYearMaxProvLst.find(x => x("Province") == temp(0)).getOrElse(Map("Sales" -> "0", "Rank" -> "-1"))
             val tempLastYearCompanySalesMap = lastYearCompanyProvLst.find(x => x("Province") == temp(0)).getOrElse(Map("Sales" -> "0"))
             val tempLastYearShare = if (tempLastYearMaxSalesMap("Sales").toDouble == 0.0) 0.0
                 else tempLastYearCompanySalesMap("Sales").toDouble / tempLastYearMaxSalesMap("Sales").toDouble
@@ -126,6 +133,7 @@ case class phMaxResultInfo(company: String, ym:String, mkt: String) extends phMa
                 "Share" -> getFormatShare(tempShare),
                 "lastYearYMCompanySales" -> getFormatSales(tempLastYearCompanySalesMap("Sales").toDouble),
                 "lastYearYMTotalSales" -> getFormatSales(tempLastYearMaxSalesMap("Sales").toDouble),
+                "lastYearYMRank" -> tempLastYearMaxSalesMap("Rank"),
                 "lastYearYMShare" -> getFormatShare(tempLastYearShare)
             )
         }
